@@ -342,7 +342,7 @@ client.on('message', (channel, tags, message, self) => {
 
   if (command === 'code') {
     if(`${args[0]}` === 'undefined') {
-      client.say(channel, `${tags.username}, Please input a command name to view the code for a command.`);
+      client.say(channel, `${tags.username}, The code for the whole bot can be found at: https://github.com/DarkVypr/VyprBot | Input a command name to view the code for a command. Example: "!code loyalty".`);
     }
     else {
       client.say(channel, `${tags.username}, The ${args[0]} command's code can be found at: https://code.darkvypr.com/${args[0]}.txt`);
