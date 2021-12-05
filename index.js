@@ -1170,7 +1170,7 @@ client.on('message', (channel, tags, message, self) => {
   if(command === 'kill') {
 		db.get(`${tags.username}nammers`).then(function(value) {
 			let nammers = `${value}`
-        if(nammers === 'null' || nammers === 0) {
+        if(nammers === 'null' || +nammers === 0) {
           client.say(channel, (`${tags.username} --> GearScare ⛔ You don't have any nammers to kill! Use "!hunt" to get more.`))
 		    }
         else {
@@ -1240,7 +1240,7 @@ client.on('message', (channel, tags, message, self) => {
     else if(`${testForNumber}` === 'true') {
       db.get(`${tags.username}nammers`).then(function(value) {
         let nammers = `${value}`
-        if(nammers === 'null' || nammers === 0) {
+        if(nammers === 'null' || +nammers === 0) {
           client.say(channel, (`${tags.username} --> GearScare ⛔ It looks like you dont have any nammers to give away! Use "!hunt" to get more. ppOverheat`))
         }
         else if(+`${giveamount}` > +`${nammers}`) {
