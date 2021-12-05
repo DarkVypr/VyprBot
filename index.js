@@ -1264,6 +1264,33 @@ client.on('message', (channel, tags, message, self) => {
         }
       })
     }
+    else if(giveamount === 'all') {
+      db.get(`${tags.username}nammers`).then(function(value) {
+        let nammers = `${value}`
+        if(nammers === 'null' || +nammers === 0) {
+          client.say(channel, (`${tags.username} --> GearScare ⛔ It looks like you dont have any nammers to give away! Use "!hunt" to get more. ppOverheat`))
+        }
+        else if(+`${giveamount}` > +`${nammers}`) {
+          client.say(channel, (`${tags.username} --> GearScare ⛔ You tried to give away ${giveamount} nammers, but you only have ${nammers} nammers. You keep all of your nammers for a rainy day.`))
+        }
+        else {
+          db.get(`${recipient}nammers`).then(function(valuerecipient) {
+            let recipientnammers = `${valuerecipient}`
+            if(`${recipientnammers}` === 'null') {
+              client.say(channel, `${tags.username} --> That user dosen't exist in the database!`)
+            }
+            else {
+              let giveamount = nammers
+              db.set(`${tags.username}nammers`, 0)
+              let recipientaddednammers = +recipientnammers + +giveamount
+
+              db.set(`${recipient}nammers`, recipientaddednammers)
+              client.say(channel, `${tags.username} --> GearSmile 👉 🚢 Successfully shipped all of your nammers (${giveamount}) to ${recipient}! ${recipient}'s new balance is: ${recipientaddednammers} nammers!`)
+            }
+          })
+        }
+      })
+    }
     else {
       client.say(channel, (`${tags.username} --> Please enter a valid amount of nammers to give away!`))
     }
