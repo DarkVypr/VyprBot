@@ -16,7 +16,7 @@ const client = new tmi.Client({
     password: process.env['TWITCH_PASSWORD'], // OAuth key for the bot
   },
 
-  channels: ['darkvypr', 'vyprbot', 'visioisiv', 'imz_loading', 'VexNade']
+  channels: ['darkvypr', 'vyprbot', 'visioisiv', 'imz_loading', 'VexNade', 'gotiand']
 
 });
 
@@ -318,7 +318,7 @@ client.on('message', (channel, tags, message, self) => {
   }
 
   if (command === 'channels') {
-    client.say(channel, `${tags.username}, VyprBot is currently available in: #DarkVypr, #VisioisiV, #VexNade and #Imz_Loading. Ask @DarkVypr if you would like this bot in your channel!`);
+    client.say(channel, `${tags.username}, VyprBot is currently available in: #DarkVypr, #VisioisiV, #VexNade, #Gotiand and #Imz_Loading. Ask @DarkVypr if you would like this bot in your channel!`);
   }
 
   if (command === 'chatterino') {
@@ -637,7 +637,7 @@ client.on('message', (channel, tags, message, self) => {
     client.say(channel, `${tags.username} https://i.imgur.com/3djjWjE.mp4 Whos my good wittwe~ kitten? I~ I am~ *shits* Uh oh~ ^w^ Kitten did you just make a poopy~ woopy~ iny youw panytsy~ wanytsys~? ^w^ I... I did daddy~ Im sowwy~ ^w^ ^w^ ^w^ Its ok kitten, i wike my kitten a wittwe *shits* *whispews* stinyky~ winyky~`);
   }
 
-  if (command === 'list') {
+  if (command === 'list' || command === 'cutelist') {
     client.say(channel, `${tags.username} https://cutelist.github.io/#/ SoCute`);
   }
 
