@@ -16,7 +16,7 @@ const client = new tmi.Client({
     password: process.env['TWITCH_PASSWORD'], // OAuth key for the bot
   },
 
-  channels: ['darkvypr', 'vyprbot', 'visioisiv', 'imz_loading', 'vexnade', 'gotiand', 'boronics']
+  channels: ['darkvypr', 'vyprbot', 'visioisiv', 'imz_loading', 'vexnade', 'gotiand', 'boronics', 'arkadlus']
 
 });
 
@@ -318,7 +318,7 @@ client.on('message', (channel, tags, message, self) => {
   }
 
   if (command === 'channels') {
-    client.say(channel, `${tags.username}, VyprBot is currently available in: #DarkVypr, #VisioisiV, #VexNade, #Gotiand, #Boronics and #Imz_Loading. Ask @DarkVypr if you would like this bot in your channel!`);
+    client.say(channel, `${tags.username}, VyprBot is currently available in: #DarkVypr, #VisioisiV, #VexNade, #Gotiand, #Boronics, #arkadlus and #Imz_Loading. Ask @DarkVypr if you would like this bot in your channel!`);
   }
 
   if (command === 'chatterino') {
