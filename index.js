@@ -813,7 +813,27 @@ client.on('message', (channel, tags, message, self) => {
           axios.get(`https://timezone.abstractapi.com/v1/current_time/?api_key=${process.env['TIME_KEY']}&location=${senderttime}`)
           .then((response) => {
             let timeresults = response.data
-            client.say(channel, (`${tags.username}, The time in ${senderttime} (${timeresults.timezone_abbreviation}) is: ${timeresults.datetime} ⌚`))
+            let datetime = timeresults.datetime
+            let date = datetime[5] + datetime[6] + '/' + datetime[8] + datetime[9] + '/' + datetime[0] + datetime[1] + datetime[2] + datetime[3]
+            let hourfromdatetime = datetime[11] + datetime[12]
+            let restofdatetime = datetime[13] + datetime[14] + datetime[15] + datetime[16] + datetime[17] + datetime[18]
+            if(+hourfromdatetime > 12) {
+              let toampm = (+hourfromdatetime - 12) + restofdatetime + ' pm'
+              client.say(channel, (`${tags.username}, The time in your location, ${senderttime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
+            }
+            else if(+hourfromdatetime === 12) {
+              let toampm = 12 + restofdatetime + ' pm'
+              client.say(channel, (`${tags.username}, The time in your location, ${senderttime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`)) 
+            }
+            else if(+hourfromdatetime === 00) {
+              let toampm = 12 + restofdatetime + ' am'
+              client.say(channel, (`${tags.username}, The time in your location, ${senderttime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`)) 
+            } 
+            else {
+              let hourfromdatetime = datetime[12]
+              let toampm = hourfromdatetime + restofdatetime + ' am'
+              client.say(channel, (`${tags.username}, The time in your location, ${senderttime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
+            }
           });
         }
       })
@@ -833,7 +853,26 @@ client.on('message', (channel, tags, message, self) => {
             axios.get(`https://timezone.abstractapi.com/v1/current_time/?api_key=${process.env['TIME_KEY']}&location=${lookuptime}`)
             .then((response) => {
               let timeresults = response.data
-              client.say(channel, (`${tags.username}, ${specificlocation}'s local time: ${lookuptime} (${timeresults.timezone_abbreviation}) is: ${timeresults.datetime} ⌚`))
+              let datetime = timeresults.datetime
+              let date = datetime[5] + datetime[6] + '/' + datetime[8] + datetime[9] + '/' + datetime[0] + datetime[1] + datetime[2] + datetime[3]
+              let hourfromdatetime = datetime[11] + datetime[12]
+              let restofdatetime = datetime[13] + datetime[14] + datetime[15] + datetime[16] + datetime[17] + datetime[18]
+              if(+hourfromdatetime > 12) {
+                let toampm = (+hourfromdatetime - 12) + restofdatetime + ' pm'
+                client.say(channel, (`${tags.username}, @${removedatsign}'s local time, ${lookuptime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
+              }
+              else if(+hourfromdatetime === 12) {
+                let toampm = 12 + restofdatetime + ' pm'
+                client.say(channel, (`${tags.username}, @${removedatsign}'s local time, ${lookuptime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
+              }
+              else if(+hourfromdatetime === 00) {
+                let toampm = 12 + restofdatetime + ' am'
+                client.say(channel, (`${tags.username}, @${removedatsign}'s local time, ${lookuptime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))              } 
+              else {
+                let hourfromdatetime = datetime[12]
+                let toampm = hourfromdatetime + restofdatetime + ' am'
+                client.say(channel, (`${tags.username}, @${removedatsign}'s local time, ${lookuptime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
+              }
             });
           }
         })
@@ -842,7 +881,27 @@ client.on('message', (channel, tags, message, self) => {
         axios.get(`https://timezone.abstractapi.com/v1/current_time/?api_key=${process.env['TIME_KEY']}&location=${args.join(' ')}`)
           .then((response) => {
             let timeresults = response.data
-            client.say(channel, (`${tags.username}, The time in ${args.join(' ')} (${timeresults.timezone_abbreviation}) is: ${timeresults.datetime} ⌚`))
+            let datetime = timeresults.datetime
+            let date = datetime[5] + datetime[6] + '/' + datetime[8] + datetime[9] + '/' + datetime[0] + datetime[1] + datetime[2] + datetime[3]
+            let hourfromdatetime = datetime[11] + datetime[12]
+            let restofdatetime = datetime[13] + datetime[14] + datetime[15] + datetime[16] + datetime[17] + datetime[18]
+            if(+hourfromdatetime > 12) {
+              let toampm = (+hourfromdatetime - 12) + restofdatetime + ' pm'
+              client.say(channel, (`${tags.username}, The time in ${args.join(' ')} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
+            }
+            else if(+hourfromdatetime === 12) {
+              let toampm = 12 + restofdatetime + ' pm'
+              client.say(channel, (`${tags.username}, The time in ${args.join(' ')} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`)) 
+            }
+            else if(+hourfromdatetime === 00) {
+              let toampm = 12 + restofdatetime + ' am'
+              client.say(channel, (`${tags.username}, The time in ${args.join(' ')} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
+            } 
+            else {
+              let hourfromdatetime = datetime[12]
+              let toampm = hourfromdatetime + restofdatetime + ' am'
+              client.say(channel, (`${tags.username}, The time in ${args.join(' ')} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
+            }
           });
       }
     }
