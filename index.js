@@ -1,12 +1,18 @@
 require("http").createServer((_, res) => res.end("Alive!")).listen(8080)
 const talkedRecently = new Set();
+const fs = require('fs')
 const Database = require("@replit/database")
 const db = new Database()
 const humanizeDuration = require("humanize-duration");
 const axios = require('axios').default;
 const tmi = require('tmi.js');
+
+const channelsFile = 'channels.txt';
+const channelOptions = fs.readFileSync(channelsFile).toString().split('"').filter(
+  function(i){return i != null;}).join('').split(' ')
+
 const client = new tmi.Client({
-  options: { debug: true, messagesLogLevel: "info" },
+  options: { debug: true, messagesLogLevel: "info", joinInterval: '300' },
   connection: {
     reconnect: true,
     secure: true
@@ -16,7 +22,7 @@ const client = new tmi.Client({
     password: process.env['TWITCH_PASSWORD'], // OAuth key for the bot
   },
 
-  channels: ['darkvypr', 'vyprbot', 'visioisiv', 'imz_loading', 'vexnade', 'gotiand', 'boronics', 'arkadlus']
+  channels: channelOptions
 
 });
 
@@ -76,6 +82,18 @@ client.on('message', (channel, tags, message, self) => {
 
   // Owner Only Commands
 
+  if (command === 'join') {
+    if (`${tags.username}` === 'darkvypr') {
+      client.join(`${args[0]}`)
+      let content = ' ' + args[0]
+      fs.writeFile('channels.txt', content, { flag: 'a+' }, err => {})
+      client.say(channel, (`${tags.username}, Succesfully joined channel: "${args[0]}"!`))
+    }
+    else {
+      client.say(channel, `Whoops! ${tags.username}, you don't have the required permission to use that command!`);
+    }
+  }
+
   if (command === 'datadelete') {
     if (`${tags.username}` === 'darkvypr') {
       db.get(`${args[0]}`).then(function(value) {
@@ -120,6 +138,29 @@ client.on('message', (channel, tags, message, self) => {
     }
   }
 
+  if (command === 'setnammers') {
+    if (`${tags.username}` === 'darkvypr') {
+      db.set(`${args[0]}nammers`, `${args[1]}`)
+      client.say(channel, (`${tags.username} --> Set ${args[0]}'s nammers to ${args[1]}!`))
+    }
+    else {
+      client.say(channel, `Whoops! ${tags.username}, you don't have the required permission to use that command!`);
+    }
+  }
+
+  if (command === 'addnammers') {
+    if (`${tags.username}` === 'darkvypr') {
+      db.get(`${args[0]}nammers`).then(function(value) {
+        let addednammers = +value + +args[1]
+        db.set(`${args[0]}nammers`, addednammers)
+        client.say(channel, (`${tags.username} --> Gave ${args[1]} nammers to ${args[0]}!`))
+      })
+    }
+    else {
+      client.say(channel, `Whoops! ${tags.username}, you don't have the required permission to use that command!`);
+    }
+  }
+
   // Bot Info
 
   if (command === 'ping' || command === 'help' || command === 'info') {
@@ -138,10 +179,6 @@ client.on('message', (channel, tags, message, self) => {
 
   if (command === 'commands') {
     client.say(channel, `${tags.username} A list of commands can be found here NekoProud 👉 https://darkvypr.com/commands`);
-  }
-
-  if (command === 'replit') {
-    client.say(channel, `${tags.username} http://bot.darkvypr.com`);
   }
 
   // Set Commands
