@@ -183,6 +183,15 @@ client.on('message', (channel, tags, message, self) => {
     }
   }
 
+  if (command === 'locationoverride') {
+    if (`${tags.username}` === 'darkvypr') {
+      db.set(`pvcL777time`, `Milano, Italy`);
+    }
+    else {
+      client.say(channel, `Whoops! ${tags.username}, you don't have the required permission to use that command!`);
+    }
+  }
+
   // Social Commands - Self Promo
 
   if (command === 'disc' || command === 'discord') {
@@ -1352,6 +1361,59 @@ client.on('message', (channel, tags, message, self) => {
     }
     else {
       client.say(channel, (`${tags.username} --> Please enter a valid amount of nammers to give away!`))
+    }
+  }
+
+  if(command === 'gamble') {
+    if(`${args[0]}` === 'undefined') {
+      client.say(channel, (`${tags.username} --> PANIC Please enter an amount of nammers to gamble with!`))
+    }
+    else {
+      db.get(`${tags.username}nammers`).then(function(value) {
+        let nammers = `${value}`
+          if(nammers === 'null' || +nammers === 0) {
+            client.say(channel, (`${tags.username} --> You dont have any nammers to gamble with! Type !hunt to get more.`))
+          }
+          else {
+            let gambleamount = `${args[0]}`
+            const regex = new RegExp('^([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-9][0-9][0-9][0-9])$');
+            testForNumber = `${regex.test(gambleamount)}`
+
+            if(testForNumber === 'true') {
+              if(+nammers < +gambleamount) {
+                client.say(channel, (`${tags.username} --> PANIC You don't have enough nammers! Get more by using !hunt.`))
+              }
+              else {
+                let winloss = getRandomInt(2)
+                if(+winloss === 1) {
+                  let gamblewin = Math.round(+nammers + +gambleamount)
+                  db.set(`${tags.username}nammers`, `${gamblewin}`)
+                  client.say(channel, (`${tags.username} --> You bet ${gambleamount} nammers and won! You now have ${gamblewin} nammers! PagMan 💰`))
+                }
+                else {
+                  let gambleloss = Math.round(+nammers - +gambleamount)
+                  db.set(`${tags.username}nammers`, `${gambleloss}`)
+                  client.say(channel, (`${tags.username} --> You bet ${gambleamount} nammers and lost! You now have ${gambleloss} nammers! SadCat`))
+                }
+              }
+            }
+            else if(`${args[0]}` === 'all') {
+              let winloss = getRandomInt(2)
+              if(+winloss === 1) {
+                let gamblewin = Math.round(+nammers * 2)
+                db.set(`${tags.username}nammers`, `${gamblewin}`)
+                client.say(channel, (`${tags.username} --> You went all in and won! You now have ${gamblewin} nammers! EZ 💰`))
+              }
+              else {
+                db.set(`${tags.username}nammers`, 0)
+                client.say(channel, (`${tags.username} --> You went all in and lost! You have 0 nammers now! Next time I guess Copium`))
+              }
+            }
+            else {
+              client.say(channel, (`${tags.username} --> NOIDONTTHINKSO Thats not a valid number!`))
+            }
+          }
+      })
     }
   }
 
