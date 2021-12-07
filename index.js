@@ -1038,6 +1038,7 @@ client.on('message', (channel, tags, message, self) => {
           axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${parsedcoordslat}&lon=${parsedcoordslong}&units=metric&appid=${process.env['WEATHER_KEY']}`)
           .then((response) => {
             let weatherresults = response.data
+
             let checkcondition = `${weatherresults.weather[0].main}`
             let checkicon = `${weatherresults.weather[0].icon}`
             let weatherdescription = `${weatherresults.weather[0].description}`
@@ -1103,12 +1104,14 @@ client.on('message', (channel, tags, message, self) => {
               let parsedcoordslong = `${unparsedcoords.items[0].position.lng}`
               let namefromapi = `${unparsedcoords.items[0].title}`
 
-           axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${parsedcoordslat}&lon=${parsedcoordslong}&units=metric&appid=${process.env['WEATHER_KEY']}`)
+            axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${parsedcoordslat}&lon=${parsedcoordslong}&units=metric&appid=${process.env['WEATHER_KEY']}`)
             .then((response) => {
              let weatherresults = response.data
              let checkcondition = `${weatherresults.weather[0].main}`
              let checkicon = `${weatherresults.weather[0].icon}`
              let weatherdescription = `${weatherresults.weather[0].description}`
+             let speedkmh = +`${weatherresults.wind.speed}` * 3.6
+             let speedmph = speedkmh / 1.609
 
              if(checkcondition === 'Clear') {
                 let checkedcondition = 'with clear skies ☀️🌇'
@@ -1165,6 +1168,8 @@ client.on('message', (channel, tags, message, self) => {
           let checkcondition = `${weatherresults.weather[0].main}`
           let checkicon = `${weatherresults.weather[0].icon}`
           let weatherdescription = `${weatherresults.weather[0].description}`
+          let speedkmh = +`${weatherresults.wind.speed}` * 3.6
+          let speedmph = speedkmh / 1.609
 
           if(checkcondition === 'Clear') {
             let checkedcondition = 'with clear skies ☀️🌇'
