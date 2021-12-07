@@ -1301,7 +1301,7 @@ client.on('message', (channel, tags, message, self) => {
               console.log(nammeramount)
               let totalnammers = Math.round(+nammers + nammeramount * 1.3)
               db.set(`${tags.username}nammers`, totalnammers)
-              client.say(channel, (`${tags.username} --> GearSmile ⛓ You caught ${Math.round(nammeramount * 1.3)} (+${Math.round((nammeramount * 1.3) - nammeramount)} Owner Bonus EleGiggle ) nammers, and have a total of ${totalnammers} nammers! (30 min cooldown)`))
+              client.say(channel, (`${tags.username} --> GearSmile ⛓ You caught ${Math.round(nammeramount * 1.3)} (+${Math.round((nammeramount * 1.3) - nammeramount)} EleGiggle ) nammers, and have a total of ${totalnammers} nammers! (30 min cooldown)`))
               
               talkedRecently.add(`${tags.username}`);
               setTimeout(() => {
