@@ -874,7 +874,7 @@ client.on('message', (channel, tags, message, self) => {
   }
 
   if (command === 'request') {
-    client.say(channel, `${tags.username}, I don't have a fancy request system or anything so to have the bot added to your chat, ask @DarkVypr :) Before asking, make sure to read the bots panels and commands YESIDOTHINKSO`);
+    client.say(channel, `${tags.username}, If you would like the bot in your chat, you can use the !suggest command. Example: "!suggest i would like the bot added to my channel."`);
   }
 
   if (command === 'say' || command === 'echo') {
