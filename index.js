@@ -1116,37 +1116,37 @@ client.on('message', (channel, tags, message, self) => {
              if(checkcondition === 'Clear') {
                 let checkedcondition = 'with clear skies ☀️🌇'
                 let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-                client.say(channel, `${tags.username}, The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round  (toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
+                client.say(channel, `${tags.username}, The temperature in ${args[0]}'s location (${namefromapi}) is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round  (toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
              }
              else if(checkcondition === 'Thunderstorm') {
                 let checkedcondition = `with a ${weatherdescription} ⛈️☔`
                 let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-                client.say(channel, `${tags.username}, The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
+                client.say(channel, `${tags.username}, The temperature in ${args[0]}'s location (${namefromapi}) is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
               }
               else if(checkcondition === 'Drizzle') {
                 let checkedcondition = 'with slight rain 🌦️🌧️'
                 let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-                client.say(channel, `${tags.username}, The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
+                client.say(channel, `${tags.username}, The temperature in ${args[0]}'s location (${namefromapi}) is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
               }
               else if(checkcondition === 'Rain') {
                 let checkedcondition = `with ${weatherdescription} 🌧️☔`
                 let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-                client.say(channel, `${tags.username}, The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
+                client.say(channel, `${tags.username}, The temperature in ${args[0]}'s location (${namefromapi}) is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
               }
               else if(checkcondition === 'Snow') {
                 let checkedcondition = `with ${weatherdescription} 🌨️❄️`
                 let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-                client.say(channel, `${tags.username}, The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
+                client.say(channel, `${tags.username}, The temperature in ${args[0]}'s location (${namefromapi}) is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
               }
               else if(checkcondition === 'Clouds') {
                 let checkedcondition = `with ${weatherdescription} ☁️🌥️`
                 let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-                client.say(channel, `${tags.username}, The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
+                client.say(channel, `${tags.username}, The temperature in ${args[0]}'s location (${namefromapi}) is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
               }
               else if(checkicon === '50d' || checkicon === '50n') {
                 let checkedcondition = `with a special weather event: ${checkcondition} 🔍`
                 let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-                client.say(channel, `${tags.username}, The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
+                client.say(channel, `${tags.username}, The temperature in ${args[0]}'s location (${namefromapi}) is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
               }
             });
             });
