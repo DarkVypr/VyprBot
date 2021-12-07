@@ -176,6 +176,16 @@ client.on('message', (channel, tags, message, self) => {
     }
   }
 
+  if (command === 'cooldownoverride') {
+    if (`${tags.username}` === 'darkvypr') {
+      talkedRecently.delete(`${args[0]}`)
+      client.say(channel, `${tags.username} --> Reset the cooldown of user: "${args[0]}"!`);
+    }
+    else {
+      client.say(channel, `Whoops! ${tags.username}, you don't have the required permission to use that command!`);
+    }
+  }
+
   // Bot Info
 
   if (command === 'ping' || command === 'help' || command === 'info') {
@@ -1243,7 +1253,7 @@ client.on('message', (channel, tags, message, self) => {
 
   if(command === 'hunt') {
     if(talkedRecently.has(`${tags.username}`)) {
-      client.say(channel, (`${tags.username}, You must wait 1 hour in between hunting! GearScare ⛔`))
+      client.say(channel, (`${tags.username}, Wait 1 hour in between hunting! GearScare ⛔`))
     }
 
     else {
