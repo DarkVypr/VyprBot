@@ -87,7 +87,7 @@ client.on('message', (channel, tags, message, self) => {
       client.join(`${args[0]}`)
       let content = ' ' + args[0]
       fs.writeFile('channels.txt', content, { flag: 'a+' }, err => {})
-      client.say(channel, (`${tags.username}, Succesfully joined channel: "${args[0]}"!`))
+      client.say(channel, (`${tags.username}, Succesfully joined channel: "${args[0]}"! MrDestructoid 👍`))
     }
     else {
       client.say(channel, `Whoops! ${tags.username}, you don't have the required permission to use that command!`);
@@ -101,8 +101,8 @@ client.on('message', (channel, tags, message, self) => {
       let removedchannelandspaces = removedchannel.replace(/\s\s+/g, ' ').trim()
       
       fs.writeFile('channels.txt', removedchannelandspaces, err => {})
+      client.say(channel, (`${tags.username}, Succesfully left channel: "${args[0]}"! SadCat`))
       client.part(`${args[0]}`)
-      client.say(channel, (`${tags.username}, Succesfully left channel: "${args[0]}"!`))
     }
     else {
       client.say(channel, `Whoops! ${tags.username}, you don't have the required permission to use that command!`);
@@ -379,7 +379,7 @@ client.on('message', (channel, tags, message, self) => {
   }
 
   if (command === 'channels') {
-    client.say(channel, `${tags.username}, VyprBot is currently available in: #DarkVypr, #VisioisiV, #VexNade, #Gotiand, #Boronics, #arkadlus and #Imz_Loading. Ask @DarkVypr if you would like this bot in your channel!`);
+    client.say(channel, `${tags.username}, A list of the channels I am in are available here: http://channels.darkvypr.com/ | Use !request for info on how to get the bot in your chat!`);
   }
 
   if (command === 'chatterino') {
@@ -403,7 +403,7 @@ client.on('message', (channel, tags, message, self) => {
 
   if (command === 'code') {
     if(`${args[0]}` === 'undefined') {
-      client.say(channel, `${tags.username}, The code for the whole bot can be found at: https://github.com/DarkVypr/VyprBot | Input a command name to view the code for a command. Example: "!code loyalty".`);
+      client.say(channel, `${tags.username}, The code for the whole bot can be found at: http://bot.darkvypr.com/ | Input a command name to view the code for a command. Example: "!code loyalty".`);
     }
     else {
       client.say(channel, `${tags.username}, The ${args[0]} command's code can be found at: https://code.darkvypr.com/${args[0]}.txt`);
@@ -1260,12 +1260,12 @@ client.on('message', (channel, tags, message, self) => {
             }, 3600000);
 		      }
           else { 
-            let nammeramount = getRandomInt(30)
+            let nammeramount = getRandomInt(60)
             if(`${tags.username}` === 'darkvypr') {
               console.log(nammeramount)
               let totalnammers = Math.round(+nammers + nammeramount * 1.3)
               db.set(`${tags.username}nammers`, totalnammers)
-              client.say(channel, (`${tags.username} --> GearSmile ⛓ You caught ${Math.round(nammeramount * 1.3)} (+${Math.round((nammeramount * 1.3) - nammeramount)} Owner Bonus EleGiggle ) nammers, and have a total of ${totalnammers} nammers! (1 hr cooldown)`))
+              client.say(channel, (`${tags.username} --> GearSmile ⛓ You caught ${Math.round(nammeramount * 1.3)} (+${Math.round((nammeramount * 1.3) - nammeramount)} Owner Bonus EleGiggle ) nammers, and have a total of ${totalnammers} nammers! (30 min cooldown)`))
               
               talkedRecently.add(`${tags.username}`);
               setTimeout(() => {
