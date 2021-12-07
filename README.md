@@ -16,6 +16,4 @@ I originally made this bot to replace some of the Fossabot commands that I had, 
 
 # How can I get the bot in my chat?
 
-Well it's mainly meant for my chat but I'm also accepting requests for the bot to be added to others.
-
-Just send me a asking for the bot to be added. Make sure to read [the commands page](https://darkvypr.com/commands) before asking. I won't be removing any of them for you. Also the prefix is "!", at the moment, it cannot be changed.
+If you would like this bot to be added to your chat, make sure to read [the commands page](https://darkvypr.com/commands) before asking. After reading, you can use the !suggest command in the bot's chat. Go to [its chat](https://twitch.tv/vyprbot) and use the !suggest command. Example "`!suggest I would like the bot to be added to my chat!`". I will DM you/Visit your chat when I get the chance to read it.
