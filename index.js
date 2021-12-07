@@ -302,17 +302,22 @@ client.on('message', (channel, tags, message, self) => {
   // Suggestions
 
   if (command === 'suggest') {
-	  db.get('suggestion').then(function(value) {
-		  let plusone = +value + 1
-      db.set("suggestion", plusone);
+    if(`${args[0]}` === 'undefined') {
+      client.say(channel, `${tags.username} --> You must provide a suggestion when using this command. Example: "!suggest I would like the bot to be added to my channel."`)
+    }
+    else {
+      db.get('suggestion').then(function(value) {
+        let plusone = +value + 1
+        db.set("suggestion", plusone);
 
-      let content = `${args.join(' ')}`
-      let today = new Date().toISOString().slice(0, 10)
-      let state = 'ACTIVE'
+        let content = `${args.join(' ')}`
+        let today = new Date().toISOString().slice(0, 10)
+        let state = 'ACTIVE'
 
-      fs.writeFile(`suggestions/${tags.username}_ID:${plusone}.txt`, `User: ${tags.username} | State: ${state} | Date: ${today} | Suggestion: ${content}`, err => {})
-      client.say(channel, `${tags.username} --> Your suggestion has been saved and will be read shortly. (ID: ${plusone})`)
-    })
+        fs.writeFile(`suggestions/${tags.username}_ID:${plusone}.txt`, `User: ${tags.username} | State: ${state} | Date: ${today} | Suggestion: ${content}`, err => {})
+        client.say(channel, `${tags.username} --> Your suggestion has been saved and will be read shortly. (ID: ${plusone})`)
+      })
+    }
   }
 
   // General Commands - Not Self Promo or attached to me
@@ -874,7 +879,7 @@ client.on('message', (channel, tags, message, self) => {
   }
 
   if (command === 'request') {
-    client.say(channel, `${tags.username}, If you would like the bot in your chat, you can use the !suggest command. Example: "!suggest i would like the bot added to my channel."`);
+    client.say(channel, `${tags.username}, If you would like the bot in your chat, you can use the !suggest command. Example: "!suggest I would like the bot added to my channel."`);
   }
 
   if (command === 'say' || command === 'echo') {
