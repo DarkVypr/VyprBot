@@ -347,11 +347,7 @@ client.on('message', (channel, tags, message, self) => {
     client.say(channel, `${tags.username} https://logs.apulxd.ga/?channel=${defaultname2}&username=${defaultname}`)
   }
 
-  if (command === 'anatole') {
-    client.say(channel, `${tags.username} give 7tv personals MenheraSlam`);
-  }
-
-  if(command === 'birthday') {
+  /*if(command === 'birthday') {
     if(`${args[0]}` === 'undefined') {
       db.get(`${tags.username}bday`).then(function(value) {
         let bdayvalue = `${value}`
@@ -369,7 +365,7 @@ client.on('message', (channel, tags, message, self) => {
         client.say(channel, `${tags.username}, ${args[0]}'s birthday is on ${bdayvalue}!`)
       }) 
     }
-  }
+  }*/
 
   if (command === 'bm') {
     db.get("bisiomoments").then(function(value) {
