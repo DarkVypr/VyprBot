@@ -94,6 +94,21 @@ client.on('message', (channel, tags, message, self) => {
     }
   }
 
+  if (command === 'part') {
+    if (`${tags.username}` === 'darkvypr') {
+      const channellist = fs.readFileSync(channelsFile).toString()
+      let removedchannel = channellist.replace(`${args[0]}`, '')
+      let removedchannelandspaces = removedchannel.replace(/\s\s+/g, ' ').trim()
+      
+      fs.writeFile('channels.txt', removedchannelandspaces, err => {})
+      client.part(`${args[0]}`)
+      client.say(channel, (`${tags.username}, Succesfully left channel: "${args[0]}"!`))
+    }
+    else {
+      client.say(channel, `Whoops! ${tags.username}, you don't have the required permission to use that command!`);
+    }
+  }
+
   if (command === 'datadelete') {
     if (`${tags.username}` === 'darkvypr') {
       db.get(`${args[0]}`).then(function(value) {
