@@ -299,6 +299,22 @@ client.on('message', (channel, tags, message, self) => {
     }
   }
 
+  // Suggestions
+
+  if (command === 'suggest') {
+	  db.get('suggestion').then(function(value) {
+		  let plusone = +value + 1
+      db.set("suggestion", plusone);
+
+      let content = `${args.join(' ')}`
+      let today = new Date().toISOString().slice(0, 10)
+      let state = 'ACTIVE'
+
+      fs.writeFile(`suggestions/${tags.username}_ID:${plusone}.txt`, `User: ${tags.username} | State: ${state} | Date: ${today} | Suggestion: ${content}`, err => {})
+      client.say(channel, `${tags.username} --> Your suggestion has been saved and will be read shortly. (ID: ${plusone})`)
+    })
+  }
+
   // General Commands - Not Self Promo or attached to me
 
   if (command === '7tvemote') {
