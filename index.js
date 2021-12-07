@@ -1,4 +1,3 @@
-require("http").createServer((_, res) => res.end("Alive!")).listen(8080)
 const talkedRecently = new Set();
 const fs = require('fs')
 const Database = require("@replit/database")
