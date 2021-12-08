@@ -1,5 +1,6 @@
 // require("http").createServer((_, res) => res.end("Alive!")).listen(8080)
 const talkedRecently = new Set();
+const cdrcooldown = new Set();
 const fs = require('fs')
 const Database = require("@replit/database")
 const db = new Database()
@@ -1271,6 +1272,21 @@ client.on('message', (channel, tags, message, self) => {
 
   function getRandomInt(max) {
     return Math.floor(Math.random() * max);
+  }
+
+  if (command === 'cdr') {
+    if(cdrcooldown.has(`${tags.username}`)) {
+      client.say(channel, (`${tags.username}, Your cdr is on cooldown. Wait 2 hours in between each cdr. GearScare ⛔`))
+    }
+    else {
+      talkedRecently.delete(`${tags.username}`)
+
+      cdrcooldown.add(`${tags.username}`);
+      setTimeout(() => {
+      cdrcooldown.delete(`${tags.username}`);
+      }, 7200000);
+      client.say(channel, (`${tags.username}, Your cooldown has been reset! Good luck! NekoPray (2 hr cooldown)`))
+    }
   }
 
   if(command === 'hunt') {
