@@ -59,11 +59,6 @@ client.on("PRIVMSG", (msg) => {
 
 
 
-
-
-
-
-
   // Variables
 
   var defaultname = `${args[0]}`
@@ -101,9 +96,9 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'join') {
     if(`${userlow}` === 'darkvypr') {
       client.join(`${args[0].toLowerCase()}`)
-      let content = ' ' + args[0]
+      let content = ' ' + args[0].toLowerCase()
       fs.writeFile('channels.txt', content, { flag: 'a+' }, err => {})
-      client.say(channel, (`${user} --> Succesfully joined channel: "${args[0]}"! MrDestructoid 👍`))
+      client.say(channel, (`${user} --> Succesfully joined channel: "${args[0].toLowerCase()}"! MrDestructoid 👍`))
     }
     else {
       client.say(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
@@ -113,11 +108,11 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'part') {
     if(`${userlow}` === 'darkvypr') {
       const channellist = fs.readFileSync(channelsFile).toString()
-      let removedchannel = channellist.replace(`${args[0]}`, '')
+      let removedchannel = channellist.replace(`${args[0].toLowerCase()}`, '')
       let removedchannelandspaces = removedchannel.replace(/\s\s+/g, ' ').trim()
       
       fs.writeFile('channels.txt', removedchannelandspaces, err => {})
-      client.say(channel, (`${user} --> Succesfully left channel: "${args[0]}"! SadCat`))
+      client.say(channel, (`${user} --> Succesfully left channel: "${args[0].toLowerCase()}"! SadCat`))
       client.part(`${args[0].toLowerCase()}`)
     }
     else {
@@ -203,11 +198,13 @@ client.on("PRIVMSG", (msg) => {
   }
 
   // Bot Info
-/*
-  if(command === 'ping' || command === 'help' || command === 'info') {
+
+  /*if(command === 'ping' || command === 'help' || command === 'info') {
     client.on('PING', (data) => {
       let ping = Math.floor(Math.round(data * 1000))
       let Sseconds = process.uptime()
+
+      console.log(data)
 
     db.get("commandusage").then(function(value) {
       let usage = `${value}`
@@ -224,7 +221,7 @@ client.on("PRIVMSG", (msg) => {
   // Set Commands
 
   if(command === 'settwitter') {
-    db.set(`${user}twitter`, `${args[0]}`)
+    db.set(`${userlow}twitter`, `${args[0]}`)
       .then(() => db.list())
       .then(keys => console.log(keys))
       .then(client.say(channel, `${user} --> Succesfully set your Twitter account to ${args[0]}!`))
@@ -233,7 +230,7 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'setbirthday') {
     let bdaymonthlow = `${args.join(' ')}`
     let bdaymonthup = bdaymonthlow[0].toUpperCase() + bdaymonthlow.substring(1)
-    db.set(`${user}bday`, `${bdaymonthup}`)
+    db.set(`${userlow}bday`, `${bdaymonthup}`)
       .then(client.say(channel, `${user} --> Succesfully set your birthday to ${bdaymonthup}!`))
   }
 
@@ -254,7 +251,7 @@ client.on("PRIVMSG", (msg) => {
 
         let finallocation = `${location1up}, ${location2up}`
 
-        db.set(`${user}time`, `${finallocation}`)
+        db.set(`${userlow}time`, `${finallocation}`)
         .then(client.say(channel, `${user} --> Succesfully set your location to ${finallocation}!`))
       }
     }
@@ -276,7 +273,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'youtube'|| command === 'yt') {
-    if(channel === '#darkvypr' || `${user}` === 'darkvypr') {
+    if(channel === '#darkvypr' || `${userlow}` === 'darkvypr') {
       client.say(channel, `${user} --> Sub pls AYAYAsmile http://yt.darkvypr.com`);
     }
     else {
@@ -297,7 +294,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'github' || command === 'git') {
-    if(channel === '#darkvypr' || `${user}` === 'darkvypr') {
+    if(channel === '#darkvypr' || `${userlow}` === 'darkvypr') {
       client.say(channel, `${user} --> peepoChat http://git.darkvypr.com`);
     }
     else {
@@ -306,7 +303,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'site' || command === 'website' || command === 'links') {
-    if(channel === '#darkvypr' || `${user}` === 'darkvypr') {
+    if(channel === '#darkvypr' || `${userlow}` === 'darkvypr') {
       client.say(channel, `${user} --> https://darkvypr.com NekoProud`);
     }
     else {
@@ -397,7 +394,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'breed') {
-    client.say(channel, `${user} --> breeds with ${args[0]} for hours LewdAhegao spilledGlue`);
+    client.say(channel, `${user} breeds with ${args[0]} for hours LewdAhegao spilledGlue`);
   }
 
   if(command === 'bttvemote') {
@@ -598,7 +595,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'elischat') {
-    if(channel === '#darkvypr' || `${user}` === 'darkvypr') {
+    if(channel === '#darkvypr' || `${userlow}` === 'darkvypr') {
       client.say(channel, `${user} --> https://i.imgur.com/J3qKoiZ.png`);
     }
     else {
@@ -663,11 +660,11 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'fuck') {
-    client.say(channel, `${user} --> fucks ${args[0]} LewdAhegao spilledGlue`);
+    client.say(channel, `${user} fucks ${args[0]} LewdAhegao spilledGlue`);
   }
 
   if(command === 'gnkiss') {
-    client.say(channel, `${user} --> tucks ${args[0]} to bed and gently kisses their cheek: ${gnkissmsg}`);
+    client.say(channel, `${user} tucks ${args[0]} to bed and gently kisses their cheek: ${gnkissmsg}`);
   }
 
   if(command === 'hare') {
@@ -733,7 +730,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'kiss') {
-    client.say(channel, `${user} --> pulls ${args[0]} close and kisses them on the lips. ${kissmsg} 💋💖`);
+    client.say(channel, `${user} pulls ${args[0]} close and kisses them on the lips. ${kissmsg} 💋💖`);
   }
 
   if(command === 'kitten') {
@@ -1289,7 +1286,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'cdreset') {
-    if(cdrcooldown.has(`${user}`)) {
+    if(cdrcooldown.has(`${userlow}`)) {
       client.say(channel, (`${user} --> Your cdr is on cooldown. Wait 2 hours in between each cdr. GearScare ⛔`))
     }
     else {
@@ -1306,7 +1303,7 @@ client.on("PRIVMSG", (msg) => {
           }, 7200000);
 
           let nammerscdr = +nammers - 20
-          db.set(`${user}nammers`, nammerscdr)
+          db.set(`${userlow}nammers`, nammerscdr)
 
           client.say(channel, (`${user} --> Your cooldown has been reset! (-20 nammers) Good luck! NekoPray (2 hr cooldown)`))
         }
@@ -1324,7 +1321,7 @@ client.on("PRIVMSG", (msg) => {
 			  let nammers = `${value}`
           if(nammers === 'null' || nammers === 'NaN') {
             let nammeramount = Math.round(getRandomInt(30) + 20)
-            db.set(`${user}nammers`, nammeramount)
+            db.set(`${userlow}nammers`, nammeramount)
             (client.say(channel, (`${user} --> KKona 👋 You caught ${nammeramount} nammers, and have a balance of: ${nammeramount} nammers. Since this is your first time hunting, you get 20 extra. GearSmile Stab`)))
 
             talkedRecently.add(`${user}`);
@@ -1337,7 +1334,7 @@ client.on("PRIVMSG", (msg) => {
             if(`${userlow}` === 'darkvypr') {
               console.log(nammeramount)
               let totalnammers = Math.round(+nammers + nammeramount * 1.3)
-              db.set(`${user}nammers`, totalnammers)
+              db.set(`${userlow}nammers`, totalnammers)
               client.say(channel, (`${user} --> GearSmile ⛓ You caught ${Math.round(nammeramount * 1.3)} (+${Math.round((nammeramount * 1.3) - nammeramount)} EleGiggle ) nammers, and have a total of ${totalnammers} nammers! (30 min cooldown)`))
               
               talkedRecently.add(`${user}`);
@@ -1347,7 +1344,7 @@ client.on("PRIVMSG", (msg) => {
             }
             else {
               let totalnammers = +nammers + nammeramount
-              db.set(`${user}nammers`, totalnammers)
+              db.set(`${userlow}nammers`, totalnammers)
               client.say(channel, (`${user} --> GearSmile ⛓ You caught ${nammeramount} nammers, and have a total of ${totalnammers} nammers! (1 hr cooldown)`))
               
               talkedRecently.add(`${user}`);
@@ -1377,11 +1374,11 @@ client.on("PRIVMSG", (msg) => {
 
             if(testForNumber === 'true') {
               let afterkill = +nammers - +killamount
-              db.set(`${user}nammers`, afterkill)
+              db.set(`${userlow}nammers`, afterkill)
               client.say(channel, (`${user} --> NekoProud 🔪 You brutally execute ${killamount} nammers, and are left with ${afterkill} nammers.`))
             }
             else if(`${args[0]}` === 'all') {
-              db.set(`${user}nammers`, 0)
+              db.set(`${userlow}nammers`, 0)
               client.say(channel, (`${user} --> GearScare 🔪 You graciously mutilate all of your nammers (${nammers}), and are left with nothing.`))
             }
             else {
@@ -1447,7 +1444,7 @@ client.on("PRIVMSG", (msg) => {
             }
             else {
               let aftergive = +nammers - +giveamount
-              db.set(`${user}nammers`, aftergive)
+              db.set(`${userlow}nammers`, aftergive)
               let recipientaddednammers = +recipientnammers + +giveamount
 
               db.set(`${recipient}nammers`, recipientaddednammers)
@@ -1474,7 +1471,7 @@ client.on("PRIVMSG", (msg) => {
             }
             else {
               let giveamount = nammers
-              db.set(`${user}nammers`, 0)
+              db.set(`${userlow}nammers`, 0)
               let recipientaddednammers = +recipientnammers + +giveamount
 
               db.set(`${recipient}nammers`, recipientaddednammers)
@@ -1510,27 +1507,27 @@ client.on("PRIVMSG", (msg) => {
               }
               else {
                 let winloss = getRandomInt(2)
-                if(+winloss === 1) {
+                if(winloss === 1) {
                   let gamblewin = Math.round(+nammers + +gambleamount)
-                  db.set(`${user}nammers`, `${gamblewin}`)
+                  db.set(`${userlow}nammers`, `${gamblewin}`)
                   client.say(channel, (`${user} --> You bet ${gambleamount} nammers and won! You now have ${gamblewin} nammers! PagMan 💰`))
                 }
                 else {
                   let gambleloss = Math.round(+nammers - +gambleamount)
-                  db.set(`${user}nammers`, `${gambleloss}`)
+                  db.set(`${userlow}nammers`, `${gambleloss}`)
                   client.say(channel, (`${user} --> You bet ${gambleamount} nammers and lost! You now have ${gambleloss} nammers! SadCat`))
                 }
               }
             }
             else if(`${args[0]}` === 'all') {
               let winloss = getRandomInt(2)
-              if(+winloss === 1) {
+              if(winloss === 1) {
                 let gamblewin = Math.round(+nammers * 2)
-                db.set(`${user}nammers`, `${gamblewin}`)
+                db.set(`${userlow}nammers`, `${gamblewin}`)
                 client.say(channel, (`${user} --> You went all in and won! You now have ${gamblewin} nammers! EZ 💰`))
               }
               else {
-                db.set(`${user}nammers`, 0)
+                db.set(`${userlow}nammers`, '0')
                 client.say(channel, (`${user} --> You went all in and lost! You have 0 nammers now! Next time I guess Copium`))
               }
             }
