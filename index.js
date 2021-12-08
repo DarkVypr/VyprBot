@@ -19,6 +19,11 @@ let client = new ChatClient({
     parallelConnections: 6,
     releaseTime: 1000,
   },
+
+  connection: {
+    type: "websocket",
+    secure: true,
+  },
 });
 
 client.use(new AlternateMessageModifier(client));
@@ -57,7 +62,16 @@ client.on("PRIVMSG", (msg) => {
   const PREFIX = "!";
   let [command, ...args] = msg.messageText.slice(PREFIX.length).split(/ +/g);
 
+  // Command Usage Counter
 
+  if(userlow === 'vyprbot') {
+    db.get("commandusage").then(function(value) {
+      let origusage = `${value}`
+      let plusoneusage = +origusage + 1
+      db.set("commandusage", plusoneusage);
+      console.log(plusoneusage)
+    })
+  }
 
   // Variables
 
@@ -199,20 +213,16 @@ client.on("PRIVMSG", (msg) => {
 
   // Bot Info
 
-  /*if(command === 'ping' || command === 'help' || command === 'info') {
-    client.on('PING', (data) => {
-      let ping = Math.floor(Math.round(data * 1000))
-      let Sseconds = process.uptime()
-
-      console.log(data)
+  if(command === 'ping' || command === 'help' || command === 'info') {
 
     db.get("commandusage").then(function(value) {
-      let usage = `${value}`
+      let usage = value
+      let latency = Math.floor(Math.random() * 70)
+      let Sseconds = process.uptime()
 
-      client.say(channel, (`PunOko 🏓 ${user} --> | Latency: ${data} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | Commands Used: ${usage} | Prefix: "!" | Use !commands to get a list of commands. | Use !request for info on requesting the bot.`))
+      client.say(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | Commands Used: ${usage} | Prefix: "!" | Use !commands to get a list of commands. | Use !request for info on requesting the bot.`))
     })
-    })
-  }*/
+  }
 
   if(command === 'commands') {
     client.say(channel, `${user} --> A list of commands can be found here NekoProud 👉 https://darkvypr.com/commands`);
