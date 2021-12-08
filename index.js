@@ -1,5 +1,6 @@
 // require("http").createServer((_, res) => res.end("Alive!")).listen(8080)
 const talkedRecently = new Set();
+const commandcooldown = new Set();
 const cdrcooldown = new Set();
 const fs = require('fs')
 const Database = require("@replit/database")
@@ -68,6 +69,18 @@ client.on("PRIVMSG", (msg) => {
 
   if(!message.startsWith('!') || userlow === 'vyprbot') {
     return
+  }
+
+  if(user !== 'VyprBot') {
+    if(commandcooldown.has(`${user}`)) {
+      return
+    }
+    else {
+      commandcooldown.add(`${user}`);
+      setTimeout(() => {
+        commandcooldown.delete(`${user}`);
+      }, 2000);
+    }
   }
 
   const PREFIX = "!";
@@ -1296,7 +1309,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'cdreset') {
-    if(cdrcooldown.has(`${userlow}`)) {
+    if(cdrcooldown.has(`${user}`)) {
       client.say(channel, (`${user} --> Your cdr is on cooldown. Wait 2 hours in between each cdr. GearScare ⛔`))
     }
     else {
