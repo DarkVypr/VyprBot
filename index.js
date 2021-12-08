@@ -16,8 +16,8 @@ let client = new ChatClient({
   maxChannelCountPerConnection: 100, // 90 by default
 
   connectionRateLimits: {
-    parallelConnections: 6,
-    releaseTime: 1000,
+    parallelConnections: 10,
+    releaseTime: 500,
   },
 
   connection: {
@@ -55,13 +55,6 @@ client.on("PRIVMSG", (msg) => {
   let channel = msg.channelName
   let message = msg.messageText
 
-  if(!message.startsWith('!') || userlow === 'vyprbottesting') {
-    return
-  }
-
-  const PREFIX = "!";
-  let [command, ...args] = msg.messageText.slice(PREFIX.length).split(/ +/g);
-
   // Command Usage Counter
 
   if(userlow === 'vyprbot') {
@@ -72,6 +65,13 @@ client.on("PRIVMSG", (msg) => {
       console.log(plusoneusage)
     })
   }
+
+  if(!message.startsWith('!') || userlow === 'vyprbot') {
+    return
+  }
+
+  const PREFIX = "!";
+  let [command, ...args] = msg.messageText.slice(PREFIX.length).split(/ +/g);
 
   // Variables
 
@@ -216,7 +216,7 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'ping' || command === 'help' || command === 'info') {
 
     db.get("commandusage").then(function(value) {
-      let usage = value
+      let usage = +value + 1
       let latency = Math.floor(Math.random() * 70)
       let Sseconds = process.uptime()
 
