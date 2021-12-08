@@ -47,6 +47,21 @@ const channelOptions = fs.readFileSync(channelsFile).toString().split('""').filt
 client.connect();
 client.joinAll(channelOptions)
 
+setInterval(function() {
+  axios.get(`https://supinic.com/api/test/auth?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}`)
+  .catch(err => { client.whisper(darkvypr, `There was an error pinging Supi's API!`)})
+  .then((response) => {
+    let supiresults = response.data
+    if(supiresults.statusCode === 200) {
+      console.log('✅SUCCESS Supinic API Ping✅')
+    }
+    else {
+      console.log('⛔UNSUCCESSFUL Supinic API Ping⛔')
+      client.whisper('darkvypr', `There was an error pinging Supi's API!`)
+    }
+  });
+}, 20 * 60000);
+
 client.on("PRIVMSG", (msg) => {
 
    // BASIC VARIABLES
@@ -233,7 +248,7 @@ client.on("PRIVMSG", (msg) => {
       let latency = Math.floor(Math.random() * 70)
       let Sseconds = process.uptime()
 
-      client.say(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | Commands Used: ${usage} | Prefix: "!" | Use !commands to get a list of commands. | Use !request for info on requesting the bot.`))
+      client.say(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | Commands Used: ${usage} | Prefix: "!" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
     })
   }
 
@@ -617,6 +632,15 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
+  if(command === 'echo') {
+    if(userlow === 'darkvypr') {
+      client.say(channel, `👥 ${args.join(' ')}`);
+    }
+    else {
+      client.say(channel, `${user} --> You dont have the required permission to use that command!`);
+    }
+  }
+
   if(command === 'elischat') {
     if(channel === '#darkvypr' || `${userlow}` === 'darkvypr') {
       client.say(channel, `${user} --> https://i.imgur.com/J3qKoiZ.png`);
@@ -913,7 +937,7 @@ client.on("PRIVMSG", (msg) => {
     client.say(channel, `${user} --> If you would like the bot in your chat, you can use the !vbsuggest command. Example: "!vbsuggest I would like the bot added to my channel."`);
   }
 
-  if(command === 'say' || command === 'echo') {
+  if(command === 'say') {
     client.say(channel, `👥 ${args.join(' ')}`);
   }
 
@@ -1443,8 +1467,7 @@ client.on("PRIVMSG", (msg) => {
     const regex = new RegExp('^([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-9][0-9][0-9][0-9])$');
     testForNumber = `${regex.test(giveamount)}`
 
-    let recipientup = `${args[0]}`
-    let recipient = recipientup.toLowerCase()
+    let recipient = args[0].toLowerCase()
 
     if(`${recipient}` === `${user}`) {
       client.say(channel, (`${user} --> Why are you trying to give nammers to urself NekoStare`))
