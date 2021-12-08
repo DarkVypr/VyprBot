@@ -1279,13 +1279,24 @@ client.on('message', (channel, tags, message, self) => {
       client.say(channel, (`${tags.username}, Your cdr is on cooldown. Wait 2 hours in between each cdr. GearScare ⛔`))
     }
     else {
-      talkedRecently.delete(`${tags.username}`)
+      db.get(`${tags.username}nammers`).then(function(value) {
+        let nammers = `${value}`
+        if(+nammers < 20) {
+          client.say(channel, (`${tags.username} --> GearScare ⛔ You don't have enough nammers for a reset! You have ${nammers} nammers, and need at least 20! Use "!hunt" to get more.`))
+        }
+        else {
+          talkedRecently.delete(`${tags.username}`)
+          cdrcooldown.add(`${tags.username}`);
+          setTimeout(() => {
+            cdrcooldown.delete(`${tags.username}`);
+          }, 7200000);
 
-      cdrcooldown.add(`${tags.username}`);
-      setTimeout(() => {
-      cdrcooldown.delete(`${tags.username}`);
-      }, 7200000);
-      client.say(channel, (`${tags.username}, Your cooldown has been reset! Good luck! NekoPray (2 hr cooldown)`))
+          let nammerscdr = +nammers - 20
+          db.set(`${tags.username}nammers`, nammerscdr)
+
+          client.say(channel, (`${tags.username}, Your cooldown has been reset! (-20 nammers) Good luck! NekoPray (2 hr cooldown)`))
+        }
+      })
     }
   }
 
