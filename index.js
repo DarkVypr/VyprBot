@@ -897,7 +897,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'request') {
-    client.say(channel, `${user} --> ifyou would like the bot in your chat, you can use the !suggest command. Example: "!suggest I would like the bot added to my channel."`);
+    client.say(channel, `${user} --> If you would like the bot in your chat, you can use the !vbsuggest command. Example: "!vbsuggest I would like the bot added to my channel."`);
   }
 
   if(command === 'say' || command === 'echo') {
