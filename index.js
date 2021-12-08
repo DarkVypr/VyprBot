@@ -1274,7 +1274,7 @@ client.on('message', (channel, tags, message, self) => {
     return Math.floor(Math.random() * max);
   }
 
-  if (command === 'cdr') {
+  if (command === 'cdreset') {
     if(cdrcooldown.has(`${tags.username}`)) {
       client.say(channel, (`${tags.username} --> Your cdr is on cooldown. Wait 2 hours in between each cdr. GearScare ⛔`))
     }
