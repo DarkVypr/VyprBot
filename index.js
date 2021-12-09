@@ -17,8 +17,8 @@ let client = new ChatClient({
   maxChannelCountPerConnection: 100,
 
   connectionRateLimits: {
-    parallelConnections: 50,
-    releaseTime: 500,
+    parallelConnections: 20,
+    releaseTime: 300,
   },
 
   connection: {
@@ -110,7 +110,7 @@ client.on("PRIVMSG", (msg) => {
 
   var defaultname2 = `${args[1]}`
   if(defaultname2 === 'undefined')
-    var defaultname2 = `${user}`
+    var defaultname2 = `${channel}`
 
   var gnkissmsg = `${args[1]}`
   if(gnkissmsg === 'undefined')
@@ -149,14 +149,19 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'part') {
-    if(`${userlow}` === 'darkvypr') {
-      const channellist = fs.readFileSync(channelsFile).toString()
-      let removedchannel = channellist.replace(`${args[0].toLowerCase()}`, '')
-      let removedchannelandspaces = removedchannel.replace(/\s\s+/g, ' ').trim()
-      
-      fs.writeFile('channels.txt', removedchannelandspaces, err => {})
-      client.say(channel, (`${user} --> Succesfully left channel: "${args[0].toLowerCase()}"! SadCat`))
-      client.part(`${args[0].toLowerCase()}`)
+    if(`${userlow}` === `${channel}`) {
+      if(`${userlow}` === 'darkvypr') {
+        const channellist = fs.readFileSync(channelsFile).toString()
+        let removedchannel = channellist.replace(`${args[0].toLowerCase()}`, '')
+        let removedchannelandspaces = removedchannel.replace(/\s\s+/g, ' ').trim()
+        
+        fs.writeFile('channels.txt', removedchannelandspaces, err => {})
+        client.say(channel, (`${user} --> Succesfully left channel: "${args[0].toLowerCase()}"! SadCat`))
+        client.part(`${args[0].toLowerCase()}`)
+      }
+      else {
+        client.say(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
+      }
     }
     else {
       client.say(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
@@ -479,6 +484,18 @@ client.on("PRIVMSG", (msg) => {
     client.say(channel, `${user} --> There is ${daysLeft} days, ${hrsLeft} hours and ${minsLeft} minutes left until christmas! peepoSnow 🎄`);
   }
 
+  if(command === 'clear') {
+    let clearamount = +`${args[0]}`
+    if(clearamount > 50) {
+      client.privmsg(channel, `${user} --> The max clear is 50 messages!`);
+    }
+    else {
+      let cleanedupresponse = args.join(' ').replace(/[1-9][0-9]?|50/, '')
+      for( let i=clearamount; i--; )
+        client.privmsg(channel, `/clear`);
+    }
+  }
+
   if(command === 'code') {
     if(`${args[0]}` === 'undefined') {
       client.say(channel, `${user} --> The code for the whole bot can be found at: http://bot.darkvypr.com/ | Input a command name to view the code for a command. Example: "!code loyalty".`);
@@ -565,18 +582,18 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'dance') {
-    client.say(channel, `${user} elisDance https://i.darkvypr.com/dance.mp4`);
-    client.say(channel, `elisDance`);
-    client.say(channel, `elisDance`);
-    client.say(channel, `elisDance`);
-    client.say(channel, `elisDance`);
-    client.say(channel, `elisDance`);
-    client.say(channel, `elisDance`);
-    client.say(channel, `elisDance`);
-    client.say(channel, `elisDance`);
-    client.say(channel, `elisDance`);
-    client.say(channel, `elisDance`);
-    client.say(channel, `elisDance`);
+    client.privmsg(channel, `${user} elisDance https://i.darkvypr.com/dance.mp4`);
+    client.privmsg(channel, `elisDance`);
+    client.privmsg(channel, `elisDance`);
+    client.privmsg(channel, `elisDance`);
+    client.privmsg(channel, `elisDance`);
+    client.privmsg(channel, `elisDance`);
+    client.privmsg(channel, `elisDance`);
+    client.privmsg(channel, `elisDance`);
+    client.privmsg(channel, `elisDance`);
+    client.privmsg(channel, `elisDance`);
+    client.privmsg(channel, `elisDance`);
+    client.privmsg(channel, `elisDance`);
   }
 
   if(command === 'define') {
@@ -603,16 +620,16 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'dogjam') {
-    client.say(channel, `dogJAM`);
-    client.say(channel, `dogJAM`);
-    client.say(channel, `dogJAM`);
-    client.say(channel, `dogJAM`);
-    client.say(channel, `dogJAM`);
-    client.say(channel, `dogJAM`);
-    client.say(channel, `dogJAM`);
-    client.say(channel, `dogJAM`);
-    client.say(channel, `dogJAM`);
-    client.say(channel, `dogJAM`);
+    client.privmsg(channel, `dogJAM`);
+    client.privmsg(channel, `dogJAM`);
+    client.privmsg(channel, `dogJAM`);
+    client.privmsg(channel, `dogJAM`);
+    client.privmsg(channel, `dogJAM`);
+    client.privmsg(channel, `dogJAM`);
+    client.privmsg(channel, `dogJAM`);
+    client.privmsg(channel, `dogJAM`);
+    client.privmsg(channel, `dogJAM`);
+    client.privmsg(channel, `dogJAM`);
   }
 
   if(command === 'domain') {
@@ -961,6 +978,18 @@ client.on("PRIVMSG", (msg) => {
 
   if(command === 'request') {
     client.say(channel, `${user} --> If you would like the bot in your chat, you can use the !vbsuggest command. Example: "!vbsuggest I would like the bot added to my channel."`);
+  }
+
+  if(command === 'spam') {
+    let spamamount = +`${args[0]}`
+    if(spamamount > 50) {
+      client.privmsg(channel, `${user} --> The max spam is 50 messages!`);
+    }
+    else {
+      let cleanedupresponse = args.join(' ').replace(/[1-9][0-9]?|50/, '')
+      for( let i=spamamount; i--; )
+        client.privmsg(channel, `${cleanedupresponse}`);
+    }
   }
 
   if(command === 'say') {
