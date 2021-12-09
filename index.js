@@ -7,17 +7,17 @@ const Database = require("@replit/database")
 const db = new Database()
 const humanizeDuration = require("humanize-duration");
 const axios = require('axios').default;
-const { ChatClient, AlternateMessageModifier } = require("dank-twitch-irc");
+const { ChatClient, AlternateMessageModifier, SlowModeRateLimiter } = require("dank-twitch-irc");
 let client = new ChatClient({
   
   username: process.env['TWITCH_USERNAME'],
   password: process.env['TWITCH_PASSWORD'],
 
   rateLimits: "verifiedBot",
-  maxChannelCountPerConnection: 100, // 90 by default
+  maxChannelCountPerConnection: 100,
 
   connectionRateLimits: {
-    parallelConnections: 10,
+    parallelConnections: 50,
     releaseTime: 500,
   },
 
@@ -27,7 +27,8 @@ let client = new ChatClient({
   },
 });
 
-client.use(new AlternateMessageModifier(client));
+client.use(new SlowModeRateLimiter(client))
+client.use(new AlternateMessageModifier(client))
 
 client.on("ready", () => console.log("Successfully connected to chat"));
 client.on("close", (error) => {
@@ -807,7 +808,30 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'nam') {
-    client.say(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
   }
 
   if(command === 'noah') {
@@ -933,10 +957,6 @@ client.on("PRIVMSG", (msg) => {
           client.say(channel, `${user} Results: ${queryresults}`);
         }
       })
-  }
-
-  if(command === 'regex101pings') {
-    client.say(channel, `${user} --> DinkDonk https://regex101.com/r/WtN0Sp/12`);
   }
 
   if(command === 'request') {
