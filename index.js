@@ -925,8 +925,14 @@ client.on("PRIVMSG", (msg) => {
       .catch(err => { client.say(channel, `${user} --> Wolfram|Alpha did not understand your question! PANIC`)}) 
       .then((response) => {
         let queryresults = response.data
-        client.say(channel, `${user} Results: ${queryresults}`);
-        })
+        testForNumber = /\b(\W)n*(i*|1*)(g*)?(e*|3*|)?(a*|4*|e*r*)()(\W)\b/gim.test(queryresults)
+        if(`${testForNumber}` === 'true') {
+          client.say(channel, `${user} --> cmonNep ??????`);
+        }
+        else {
+          client.say(channel, `${user} Results: ${queryresults}`);
+        }
+      })
   }
 
   if(command === 'regex101pings') {
@@ -1064,7 +1070,13 @@ client.on("PRIVMSG", (msg) => {
         else {
           let dirtyresponse = urbanresult.list[0].definition
           let cleanedupresponse = dirtyresponse.replace(/\[|\]/gim, '')
-          client.say(channel, `${user} --> ${cleanedupresponse}`)
+          testForNumber = /\bn(i*|1*)(g*)?(e*|3*)?(a|4*|e*r*)\b/gim.test(cleanedupresponse)
+          if(`${testForNumber}` === 'true') {
+            client.say(channel, `${user} --> cmonNep ??????`);
+          }
+          else {
+            client.say(channel, `${user} --> ${cleanedupresponse}`)
+          }
         }
       });
   }
