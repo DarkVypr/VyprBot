@@ -989,6 +989,11 @@ client.on("PRIVMSG", (msg) => {
       let cleanedupresponse = args.join(' ').replace(/[1-9][0-9]?|50/, '')
       for( let i=spamamount; i--; )
         client.privmsg(channel, `${cleanedupresponse}`);
+
+      db.get("commandusage").then(function(value) {
+        let fixedusage = +value - spamamount
+        db.set("commandusage", fixedusage);
+      })
     }
   }
 
