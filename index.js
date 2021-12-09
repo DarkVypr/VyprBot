@@ -370,9 +370,31 @@ client.on("PRIVMSG", (msg) => {
         let today = new Date().toISOString().slice(0, 10)
         let state = 'ACTIVE'
 
-        fs.writeFile(`suggestions/${user}_ID:${plusone}.txt`, `User: ${user} | State: ${state} | Date: ${today} | Suggestion: ${content}`, err => {})
+        fs.writeFile(`suggestions/ACTIVE/${user}_ID:${plusone}.txt`, `User: ${user} | State: ${state} | Date: ${today} | Suggestion: ${content}`, err => {})
         client.say(channel, `${user} --> Your suggestion has been saved and will be read shortly. (ID: ${plusone})`)
       })
+    }
+  }
+
+  if(command === 'vbunset') {
+    if(`${args[0]}` === 'undefined') {
+      client.say(channel, `${user} --> You must provide a suggestion to unset when using this command. Example: "!suggest I would like the bot to be added to my channel."`)
+    }
+    else {
+      let suggestionid = `${args[0]}`
+      let today = new Date().toISOString().slice(0, 10)
+      let state = 'DISMISSED BY AUTHOR'
+      let checkfile = fs.existsSync(`suggestions/ACTIVE/${user}_ID:${suggestionid}.txt`)
+
+      if(`${checkfile}` === 'true') {
+        fs.rename(`suggestions/ACTIVE/${user}_ID:${suggestionid}.txt`, `suggestions/DISMISSED/${user}_ID:${suggestionid}.txt`, function (err) {
+          if (err) throw err
+        })
+        client.say(channel, `${user} --> Successfully unset suggestion: ${suggestionid}`)
+      }
+      else {
+        client.say(channel, `${user} --> Invalid Command. You either didn't make this suggestion or it dosen't exist!`)
+      }
     }
   }
 
