@@ -74,14 +74,14 @@ client.on("PRIVMSG", (msg) => {
 
   // Command Usage Counter
 
-  if(userlow === 'vyprbot') {
+  /*if(userlow === 'vyprbot') {
     db.get("commandusage").then(function(value) {
       let origusage = `${value}`
       let plusoneusage = +origusage + 1
       db.set("commandusage", plusoneusage);
       console.log(plusoneusage)
     })
-  }
+  }*/
 
   if(!message.startsWith('!') || userlow === 'vyprbot') {
     return
@@ -248,14 +248,10 @@ client.on("PRIVMSG", (msg) => {
   // Bot Info
 
   if(command === 'ping' || command === 'help' || command === 'info') {
+    let latency = Math.floor(Math.random() * 70)
+    let Sseconds = process.uptime()
 
-    db.get("commandusage").then(function(value) {
-      let usage = +value + 1
-      let latency = Math.floor(Math.random() * 70)
-      let Sseconds = process.uptime()
-
-      client.say(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | Commands Used: ${usage} | Prefix: "!" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
-    })
+    client.say(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | Prefix: "!" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
   }
 
   if(command === 'commands') {
@@ -989,11 +985,6 @@ client.on("PRIVMSG", (msg) => {
       let cleanedupresponse = args.join(' ').replace(/[1-9][0-9]?|50/, '')
       for( let i=spamamount; i--; )
         client.privmsg(channel, `${cleanedupresponse}`);
-
-      db.get("commandusage").then(function(value) {
-        let fixedusage = +value - spamamount
-        db.set("commandusage", fixedusage);
-      })
     }
   }
 
