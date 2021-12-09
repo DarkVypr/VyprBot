@@ -50,7 +50,7 @@ client.joinAll(channelOptions)
 
 setInterval(function() {
   axios.get(`https://supinic.com/api/test/auth?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}`)
-  .catch(err => { client.whisper(darkvypr, `There was an error pinging Supi's API!`)})
+  .catch(err => { client.whisper('darkvypr', `There was an error pinging Supi's API!`)})
   .then((response) => {
     let supiresults = response.data
     if(supiresults.statusCode === 200) {
@@ -150,18 +150,22 @@ client.on("PRIVMSG", (msg) => {
 
   if(command === 'part') {
     if(`${userlow}` === `${channel}`) {
-      if(`${userlow}` === 'darkvypr') {
-        const channellist = fs.readFileSync(channelsFile).toString()
-        let removedchannel = channellist.replace(`${args[0].toLowerCase()}`, '')
-        let removedchannelandspaces = removedchannel.replace(/\s\s+/g, ' ').trim()
+      const channellist = fs.readFileSync(channelsFile).toString()
+      let removedchannel = channellist.replace(`${channel.toLowerCase()}`, '')
+      let removedchannelandspaces = removedchannel.replace(/\s\s+/g, ' ').trim()
         
-        fs.writeFile('channels.txt', removedchannelandspaces, err => {})
-        client.say(channel, (`${user} --> Succesfully left channel: "${args[0].toLowerCase()}"! SadCat`))
-        client.part(`${args[0].toLowerCase()}`)
-      }
-      else {
-        client.say(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
-      }
+      fs.writeFile('channels.txt', removedchannelandspaces, err => {})
+      client.say(channel, (`${user} --> Succesfully left channel: "${channel.toLowerCase()}"! SadCat`))
+      client.part(`${channel.toLowerCase()}`)
+    }
+    else if(`${userlow}` === 'darkvypr') {
+      const channellist = fs.readFileSync(channelsFile).toString()
+      let removedchannel = channellist.replace(`${args[0].toLowerCase()}`, '')
+      let removedchannelandspaces = removedchannel.replace(/\s\s+/g, ' ').trim()
+        
+      fs.writeFile('channels.txt', removedchannelandspaces, err => {})
+      client.say(channel, (`${user} --> Succesfully left channel: "${args[0].toLowerCase()}"! SadCat`))
+      client.part(`${args[0].toLowerCase()}`)
     }
     else {
       client.say(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
