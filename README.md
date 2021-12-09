@@ -10,7 +10,7 @@ Owner Twitch : `DarkVypr`
 
 # Bot Info
 
-VyprBot is a general-purpose bot with user-based commands, a loyalty system and other interesting and fun commands to check out. This bot started as a personal project, but eventualy turned into something that I found fun and engaging. I started this bot with 0 knowledge of Node.JS on November 12, 2021. 
+VyprBot is a general-purpose bot with user-based commands, a loyalty system and other interesting and fun commands to check out. I started this bot with 0 knowledge of Node.JS on November 12, 2021. This bot started as a personal project, but eventualy turned into something that I found fun and engaging. I don't see it fizzling out of existence any time soon.
 
 ---
 
