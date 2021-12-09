@@ -10,7 +10,7 @@ Owner Twitch : `DarkVypr`
 
 # Bot Info
 
-I originally made this bot to replace some of the Fossabot commands that I had, but it eventually just turned into a project that I like working on and dumping time into lol. I added a point system, various user-based commands and shit like that.
+VyprBot is a general-purpose bot with user-based commands, a loyalty system and other interesting and fun commands to check out. I started this bot with 0 knowledge of Node.JS on November 12, 2021. This bot started as a personal project, but eventualy turned into something that I found fun and engaging. I don't see it fizzling out of existence any time soon.
 
 ---
 
