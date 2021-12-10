@@ -370,7 +370,7 @@ client.on("PRIVMSG", (msg) => {
         let today = new Date().toISOString().slice(0, 10)
         let state = 'ACTIVE'
 
-        fs.writeFile(`suggestions/ACTIVE/${user}_ID:${plusone}.txt`, `User: ${user} | State: ${state} | Date: ${today} | Suggestion: ${content}`, err => {})
+        fs.writeFile(`suggestions/ACTIVE/${userlow}_ID:${plusone}.txt`, `User: ${user} | State: ${state} | Date: ${today} | Suggestion: ${content}`, err => {})
         client.say(channel, `${user} --> Your suggestion has been saved and will be read shortly. (ID: ${plusone})`)
       })
     }
@@ -382,12 +382,11 @@ client.on("PRIVMSG", (msg) => {
     }
     else {
       let suggestionid = `${args[0]}`
-      let today = new Date().toISOString().slice(0, 10)
       let state = 'DISMISSED BY AUTHOR'
-      let checkfile = fs.existsSync(`suggestions/ACTIVE/${user}_ID:${suggestionid}.txt`)
+      let checkfile = fs.existsSync(`suggestions/ACTIVE/${userlow}_ID:${suggestionid}.txt`)
 
       if(`${checkfile}` === 'true') {
-        fs.rename(`suggestions/ACTIVE/${user}_ID:${suggestionid}.txt`, `suggestions/DISMISSED/${user}_ID:${suggestionid}.txt`, function (err) {
+        fs.rename(`suggestions/ACTIVE/${userlow}_ID:${suggestionid}.txt`, `suggestions/DISMISSED/${userlow}_ID:${suggestionid}.txt`, function (err) {
           if (err) throw err
         })
         client.say(channel, `${user} --> Successfully unset suggestion: ${suggestionid}`)
@@ -395,6 +394,50 @@ client.on("PRIVMSG", (msg) => {
       else {
         client.say(channel, `${user} --> Invalid Command. You either didn't make this suggestion or it dosen't exist!`)
       }
+    }
+  }
+
+  if(command === 'vbcomplete') {
+    let suggestionuser = `${args[0].toLowerCase()}`
+    let suggestionid = `${args[1]}`
+    let suggestionstatus = `${args[2].toUpperCase()}`
+    let suggestionreasonunsplit = `${args.join(' ')}`
+    let suggestionreasonsplit = suggestionreasonunsplit.split(" ")
+    let suggestionreason = suggestionreasonsplit.slice(3).toString().replace(/,/g, ' ')
+    if(userlow === 'darkvypr') {
+      if(`${suggestionuser}` === 'undefined') {
+        client.say(channel, `This guy dosen't even know how to use his own command LULW --> DarkVypr`)
+      }
+      else {
+        let checkfile = fs.existsSync(`suggestions/ACTIVE/${suggestionuser}_ID:${suggestionid}.txt`)
+        if(`${suggestionstatus}` === 'DENIED') {
+          if(`${checkfile}` === 'true') {
+            fs.rename(`suggestions/ACTIVE/${suggestionuser}_ID:${suggestionid}.txt`, `suggestions/DENIED-CLOSED/${suggestionuser}_ID:${suggestionid}.txt`, function (err) {
+              if (err) throw err
+            })
+            client.say(channel, `${user} --> Successfully denied suggestion ${suggestionid}, and whispered the user.`)
+            client.whisper(suggestionuser, `[Suggestion Update] Your suggestion with the ID:${suggestionid} was denied! Reason: ${suggestionreason}`)
+          }
+          else {
+            client.say(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !vbcomplete {user} {id} {completed|approved|denied}`)
+          }
+        }
+        else {
+          if(`${checkfile}` === 'true') {
+            fs.rename(`suggestions/ACTIVE/${suggestionuser}_ID:${suggestionid}.txt`, `suggestions/COMPLETED/${suggestionuser}_ID:${suggestionid}.txt`, function (err) {
+              if (err) throw err
+            })
+            client.say(channel, `${user} --> Successfully approved suggestion ${suggestionid}, and whispered the user.`)
+            client.whisper(suggestionuser, `[Suggestion Update] Your suggestion with the ID:${suggestionid} was approved! Reason: ${suggestionreason}`)
+          }
+          else {
+            client.say(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !vbcomplete {user} {id} {completed|approved|denied}.`)
+          }
+        }
+      }
+    }
+    else {
+      client.say(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
     }
   }
 
