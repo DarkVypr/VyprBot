@@ -943,8 +943,13 @@ client.on("PRIVMSG", (msg) => {
     axios.get(`https://api.ocr.space/parse/imageurl?apikey=${process.env['OCR_KEY']}&url=${args[0]}${ocrlangresult}`)
       .then((response) => {
         let ocrresults = response.data.ParsedResults[0].ParsedText
-        client.privmsg(channel, `${user} --> OCR Results: ${ocrresults.replace('\r\n', '')}`);
-      });
+        if(ocrresults === 'undefined' || ocrresults === '' || ocrresults === ' ') {
+          client.privmsg(channel, `${user} --> OCR.space was unable to find the text in that image. Make sure that the image's text is clearly visible with no pictures or items that may confuse the API.`);
+        }
+        else {
+          client.privmsg(channel, `${user} --> OCR Results: ${ocrresults.replace('\r\n', '')}`);
+        }
+      })
   }
 
   if(command === 'pfp') {
