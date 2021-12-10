@@ -896,30 +896,8 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'nam') {
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
-    client.me(channel, `${user} --> 👉 🚪 NammersOut elisDance NammersOut`);
+    for( let i=20; i--; )
+      client.privmsg(channel, `AYAYA --> 👉 🚪 NammersOut elisDance NammersOut`);
   }
 
   if(command === 'noah') {
