@@ -399,25 +399,25 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'vbcomplete') {
-    let suggestionuser = `${args[0].toLowerCase()}`
+    let suggestionuser = `${args[0]}`
     let suggestionid = `${args[1]}`
-    let suggestionstatus = `${args[2].toUpperCase()}`
+    let suggestionstatus = `${args[2]}`
     let suggestionreasonunsplit = `${args.join(' ')}`
     let suggestionreasonsplit = suggestionreasonunsplit.split(" ")
     let suggestionreason = suggestionreasonsplit.slice(3).toString().replace(/,/g, ' ')
     if(userlow === 'darkvypr') {
-      if(`${suggestionuser}` === 'undefined') {
+      if(`${suggestionuser.toLowerCase()}` === 'undefined') {
         client.say(channel, `This guy dosen't even know how to use his own command LULW --> DarkVypr`)
       }
       else {
-        let checkfile = fs.existsSync(`suggestions/ACTIVE/${suggestionuser}_ID:${suggestionid}.txt`)
-        if(`${suggestionstatus}` === 'DENIED') {
+        let checkfile = fs.existsSync(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`)
+        if(`${suggestionstatus.toUpperCase()}` === 'DENIED') {
           if(`${checkfile}` === 'true') {
-            fs.rename(`suggestions/ACTIVE/${suggestionuser}_ID:${suggestionid}.txt`, `suggestions/DENIED-CLOSED/${suggestionuser}_ID:${suggestionid}.txt`, function (err) {
+            fs.rename(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, `suggestions/DENIED-CLOSED/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, function (err) {
               if (err) throw err
             })
             client.say(channel, `${user} --> Successfully denied suggestion ${suggestionid}, and whispered the user.`)
-            client.whisper(suggestionuser, `[Suggestion Update] Your suggestion with the ID:${suggestionid} was denied! Reason: ${suggestionreason}`)
+            client.whisper(suggestionuser.toLowerCase(), `[Suggestion Update] Your suggestion with the ID:${suggestionid} was denied! Reason: ${suggestionreason}`)
           }
           else {
             client.say(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !vbcomplete {user} {id} {completed|approved|denied}`)
@@ -425,11 +425,11 @@ client.on("PRIVMSG", (msg) => {
         }
         else {
           if(`${checkfile}` === 'true') {
-            fs.rename(`suggestions/ACTIVE/${suggestionuser}_ID:${suggestionid}.txt`, `suggestions/COMPLETED/${suggestionuser}_ID:${suggestionid}.txt`, function (err) {
+            fs.rename(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, `suggestions/COMPLETED/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, function (err) {
               if (err) throw err
             })
             client.say(channel, `${user} --> Successfully approved suggestion ${suggestionid}, and whispered the user.`)
-            client.whisper(suggestionuser, `[Suggestion Update] Your suggestion with the ID:${suggestionid} was approved! Reason: ${suggestionreason}`)
+            client.whisper(suggestionuser.toLowerCase(), `[Suggestion Update] Your suggestion with the ID:${suggestionid} was approved! Reason: ${suggestionreason}`)
           }
           else {
             client.say(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !vbcomplete {user} {id} {completed|approved|denied}.`)
