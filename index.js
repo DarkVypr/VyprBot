@@ -942,8 +942,8 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'ocr') {
     axios.get(`https://api.ocr.space/parse/imageurl?apikey=${process.env['OCR_KEY']}&url=${args[0]}${ocrlangresult}`)
       .then((response) => {
-        let ocrresults = response.data
-        client.say(channel, `${user} --> OCR Results: ${ocrresults.ParsedResults[0].ParsedText}`);
+        let ocrresults = response.data.ParsedResults[0].ParsedText
+        client.privmsg(channel, `${user} --> OCR Results: ${ocrresults.replace('\r\n', '')}`);
       });
   }
 
