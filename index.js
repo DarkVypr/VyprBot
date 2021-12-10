@@ -416,6 +416,7 @@ client.on("PRIVMSG", (msg) => {
         let checkfile = fs.existsSync(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`)
         if(`${suggestionstatus.toUpperCase()}` === 'DENIED') {
           if(`${checkfile}` === 'true') {
+            fs.writeFile(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, ` | Reason: ${suggestionreason}`, { flag: 'a+' }, err => {})
             fs.rename(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, `suggestions/DENIED-CLOSED/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, function (err) {
               if (err) throw err
             })
@@ -428,6 +429,7 @@ client.on("PRIVMSG", (msg) => {
         }
         else {
           if(`${checkfile}` === 'true') {
+            fs.writeFile(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, ` | Reason: ${suggestionreason}`, { flag: 'a+' }, err => {})
             fs.rename(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, `suggestions/COMPLETED/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, function (err) {
               if (err) throw err
             })
