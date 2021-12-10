@@ -252,12 +252,14 @@ client.on("PRIVMSG", (msg) => {
   // Bot Info
 
   if(command === 'ping' || command === 'help' || command === 'info') {
-    let latency = Math.floor(Math.random() * 70)
-    let Sseconds = process.uptime()
+    os.cpuUsage(function(v){
+      let latency = Math.floor(Math.random() * 70)
+      let Sseconds = process.uptime()
 
-    let ramusage = `${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB`
+      let ramusage = `${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB`
 
-    client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | RAM Usage: ${ramusage} | Prefix: "!" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
+      client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | RAM Usage: ${ramusage} | Prefix: "!" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
+    })
   }
 
   if(command === 'commands') {
