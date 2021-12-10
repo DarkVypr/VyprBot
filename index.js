@@ -1022,6 +1022,10 @@ client.on("PRIVMSG", (msg) => {
     client.me(channel, `${user} --> https://i.imgur.com/tPNuJ4r.png`);
   }
 
+  if(command === 'plop11') {
+    client.me(channel, `${user} --> https://i.imgur.com/McBKJwY.png`);
+  }
+
   if(command === 'plopcolour') {
     client.me(channel, `${user} --> #94DCCC`);
   }
