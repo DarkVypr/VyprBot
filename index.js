@@ -3,6 +3,7 @@ const talkedRecently = new Set();
 const commandcooldown = new Set();
 const cdrcooldown = new Set();
 const fs = require('fs')
+const os = require('os');
 const Database = require("@replit/database")
 const db = new Database()
 const humanizeDuration = require("humanize-duration");
@@ -252,14 +253,12 @@ client.on("PRIVMSG", (msg) => {
   // Bot Info
 
   if(command === 'ping' || command === 'help' || command === 'info') {
-    os.cpuUsage(function(v){
-      let latency = Math.floor(Math.random() * 70)
-      let Sseconds = process.uptime()
+    let latency = Math.floor(Math.random() * 70)
+    let Sseconds = process.uptime()
 
-      let ramusage = `${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB`
+    let ramusage = `${Math.round(process.memoryUsage().rss / 1024 / 1024)}`
 
-      client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | RAM Usage: ${ramusage} | Prefix: "!" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
-    })
+    client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | RAM Usage: ${ramusage} MB | Prefix: "!" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
   }
 
   if(command === 'commands') {
