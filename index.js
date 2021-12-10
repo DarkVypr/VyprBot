@@ -382,7 +382,7 @@ client.on("PRIVMSG", (msg) => {
 
   if(command === 'vbunset') {
     if(`${args[0]}` === 'undefined') {
-      client.me(channel, `${user} --> You must provide a suggestion to unset when using this command. Example: "!suggest I would like the bot to be added to my channel."`)
+      client.me(channel, `${user} --> You must provide a suggestion to unset when using this command. Example: "!unset 10" would unset the suggestion with the ID of '10'.`)
     }
     else {
       let suggestionid = `${args[0]}`
