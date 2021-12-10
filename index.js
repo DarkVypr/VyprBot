@@ -372,6 +372,7 @@ client.on("PRIVMSG", (msg) => {
 
         fs.writeFile(`suggestions/ACTIVE/${userlow}_ID:${plusone}.txt`, `User: ${user} | State: ${state} | Date: ${today} | Suggestion: ${content}`, err => {})
         client.say(channel, `${user} --> Your suggestion has been saved and will be read shortly. (ID: ${plusone})`)
+        client.whisper('darkvypr', `[New Suggestion] A new suggestion has been made: User: ${userlow} | ID: ${plusone} | Suggestion: ${content}`)
       })
     }
   }
