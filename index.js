@@ -255,7 +255,9 @@ client.on("PRIVMSG", (msg) => {
     let latency = Math.floor(Math.random() * 70)
     let Sseconds = process.uptime()
 
-    client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | Prefix: "!" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
+    let ramusage = `${Math.round(process.memoryUsage().rss / 1024 / 1024)}MB`
+
+    client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | RAM Usage: ${ramusage} | Prefix: "!" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
   }
 
   if(command === 'commands') {
