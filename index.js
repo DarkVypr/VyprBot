@@ -83,7 +83,7 @@ client.on("PRIVMSG", (msg) => {
     })
   }*/
 
-  if(userlow === 'thepositivebot' && message.includes('this command has been removed')) {
+  if(userlow === 'thepositivebot' && message.includes('this command has been removed') && channel === 'darkvypr') {
     client.privmsg(channel, `SHUT THE FUCK UP THEPOSITIVEBOT LAUGH`);
   }
 
