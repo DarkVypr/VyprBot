@@ -72,7 +72,7 @@ client.on("PRIVMSG", (msg) => {
   let channel = msg.channelName
   let message = msg.messageText
 
-  // Command Usage Counter
+  // Command Usage Counter (DEPRECATED)
 
   /*if(userlow === 'vyprbot') {
     db.get("commandusage").then(function(value) {
@@ -82,6 +82,10 @@ client.on("PRIVMSG", (msg) => {
       console.log(plusoneusage)
     })
   }*/
+
+  if(userlow === 'thepositivebot' && message.includes('this command has been removed')) {
+    client.privmsg(channel, `SHUT THE FUCK UP THEPOSITIVEBOT LAUGH`);
+  }
 
   if(!message.startsWith('!') || userlow === 'vyprbot') {
     return
@@ -273,12 +277,12 @@ client.on("PRIVMSG", (msg) => {
       .then(client.me(channel, `${user} --> Succesfully set your Twitter account to ${args[0]}!`))
   }
 
-  if(command === 'setbirthday') {
+  /*if(command === 'setbirthday') { // (DEPRECATED)
     let bdaymonthlow = `${args.join(' ')}`
     let bdaymonthup = bdaymonthlow[0].toUpperCase() + bdaymonthlow.substring(1)
     db.set(`${userlow}bday`, `${bdaymonthup}`)
       .then(client.me(channel, `${user} --> Succesfully set your birthday to ${bdaymonthup}!`))
-  }
+  }*/
 
   if(command === 'setlocation') {
     let location1 = `${args[0]}`
@@ -315,11 +319,16 @@ client.on("PRIVMSG", (msg) => {
   // Social Commands - Self Promo
 
   if(command === 'disc' || command === 'discord') {
-    client.me(channel, `Join the homie server ${user} TriHard 👉 http://idiotas.darkvypr.com`);
+    if(channel === 'darkvypr' || channel === 'visioisiv' || channel === 'gotiand' || userlow === 'darkvypr') {
+      client.me(channel, `Join the homie server ${user} TriHard 👉 http://idiotas.darkvypr.com`);
+    }
+    else {
+      client.me(channel, `${user} --> GearScare This command is only available in darkvypr, #VisioisiV and #Gotiand.`);
+    }
   }
 
   if(command === 'youtube'|| command === 'yt') {
-    if(channel === '#darkvypr' || `${userlow}` === 'darkvypr') {
+    if(channel === 'darkvypr' || `${userlow}` === 'darkvypr') {
       client.me(channel, `${user} --> Sub pls AYAYAsmile http://yt.darkvypr.com`);
     }
     else {
@@ -340,7 +349,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'github' || command === 'git') {
-    if(channel === '#darkvypr' || `${userlow}` === 'darkvypr') {
+    if(channel === 'darkvypr' || `${userlow}` === 'darkvypr') {
       client.me(channel, `${user} --> peepoChat http://git.darkvypr.com`);
     }
     else {
@@ -349,7 +358,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'site' || command === 'website' || command === 'links') {
-    if(channel === '#darkvypr' || `${userlow}` === 'darkvypr') {
+    if(channel === 'darkvypr' || `${userlow}` === 'darkvypr') {
       client.me(channel, `${user} --> https://darkvypr.com NekoProud`);
     }
     else {
@@ -488,6 +497,7 @@ client.on("PRIVMSG", (msg) => {
         let removeduserandspaces = removeduserpermit.replace(/\s\s+/g, ' ').trim()
         let tojsonremoved = JSON.stringify({permittedusers: removeduserandspaces})
         fs.writeFileSync(`permissions/${channel}/permittedusers.json`, tojsonremoved)
+        client.me(channel, `${user} --> Successfully removed user "${usertounpermit}" from the list of permitted users in this channel (#${channel})!`)
       }
       else {
         fs.ensureFileSync(`permissions/${channel}/permittedusers.json`)
@@ -499,6 +509,7 @@ client.on("PRIVMSG", (msg) => {
         let removeduserandspaces = removeduserpermit.replace(/\s\s+/g, ' ').trim()
         let tojsonremoved = JSON.stringify({permittedusers: removeduserandspaces})
         fs.writeFileSync(`permissions/${channel}/permittedusers.json`, tojsonremoved)
+        client.me(channel, `${user} --> Successfully removed user "${usertounpermit}" from the list of permitted users in this channel (#${channel})!`)
       }
     }
     else {
@@ -615,14 +626,39 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'clear') {
-    let clearamount = +`${args[0]}`
-    if(clearamount > 50) {
-      client.me(channel, `${user} --> The max clear is 50 messages!`);
+    if(userlow === channel || userlow === 'darkvypr') {
+      let clearamount = +`${args[0]}`
+      if(clearamount > 50) {
+        client.me(channel, `${user} --> The max clear is 50!`);
+      }
+      else {
+        for( let i=clearamount; i--; )
+          client.privmsg(channel, `/clear`);
+      }
     }
     else {
-      let cleanedupresponse = args.join(' ').replace(/[1-9][0-9]?|50/, '')
-      for( let i=clearamount; i--; )
-        client.privmsg(channel, `/clear`);
+      let checkfile = fs.existsSync(`permissions/${channel}/permittedusers.json`)
+      if(checkfile === true) {
+        let jsonnames = fs.readJsonSync(`permissions/${channel}/permittedusers.json`)
+        let jsonnamesparsed = jsonnames.permittedusers
+        let checkifuserpermitted = jsonnamesparsed.includes(`${userlow}`)
+        if(`${checkifuserpermitted}` === 'true') {
+          let clearamount = +`${args[0]}`
+          if(clearamount > 50) {
+            client.me(channel, `${user} --> The max clear is 50!`);
+          }
+          else {
+            for( let i=clearamount; i--; )
+              client.privmsg(channel, `/clear`);
+          }
+        }
+        else {
+          client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !permit {username_here}`)
+        }
+      }
+      else {
+        client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !permit {username_here}`)
+      }
     }
   }
 
@@ -790,7 +826,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'elischat') {
-    if(channel === '#darkvypr' || `${userlow}` === 'darkvypr') {
+    if(channel === 'darkvypr' || `${userlow}` === 'darkvypr') {
       client.me(channel, `${user} --> https://i.imgur.com/J3qKoiZ.png`);
     }
     else {
@@ -1098,14 +1134,41 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'spam') {
-    let spamamount = +`${args[0]}`
-    if(spamamount > 50) {
-      client.me(channel, `${user} --> The max spam is 50 messages!`);
+    if(userlow === channel || userlow === 'darkvypr') {
+      let spamamount = +`${args[0]}`
+      if(spamamount > 50) {
+        client.me(channel, `${user} --> The max spam is 50 messages!`);
+      }
+      else {
+        let cleanedupresponse = args.join(' ').replace(/[1-9][0-9]?|50/, '')
+        for( let i=spamamount; i--; )
+          client.privmsg(channel, `${cleanedupresponse}`);
+      }
     }
     else {
-      let cleanedupresponse = args.join(' ').replace(/[1-9][0-9]?|50/, '')
-      for( let i=spamamount; i--; )
-        client.privmsg(channel, `${cleanedupresponse}`);
+      let checkfile = fs.existsSync(`permissions/${channel}/permittedusers.json`)
+      if(checkfile === true) {
+        let jsonnames = fs.readJsonSync(`permissions/${channel}/permittedusers.json`)
+        let jsonnamesparsed = jsonnames.permittedusers
+        let checkifuserpermitted = jsonnamesparsed.includes(`${userlow}`)
+        if(`${checkifuserpermitted}` === 'true') {
+          let spamamount = +`${args[0]}`
+          if(spamamount > 50) {
+            client.me(channel, `${user} --> The max spam is 50 messages!`);
+          }
+          else {
+            let cleanedupresponse = args.join(' ').replace(/[1-9][0-9]?|50/, '')
+            for( let i=spamamount; i--; )
+              client.privmsg(channel, `${cleanedupresponse}`);
+          }
+        }
+        else {
+          client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !permit {username_here}`)
+        }
+      }
+      else {
+        client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !permit {username_here}`)
+      }
     }
   }
 
