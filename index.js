@@ -622,7 +622,7 @@ client.on("PRIVMSG", (msg) => {
     hrsLeft = Math.floor(e_hrsLeft);
     minsLeft = Math.floor((e_hrsLeft - hrsLeft) * 60);
 
-    client.me(channel, `${user} --> There is ${daysLeft} days, ${hrsLeft} hours and ${minsLeft} minutes left until christmas! peepoSnow 🎄`);
+    client.me(channel, `${user} --> There is ${daysLeft} days, ${+hrsLeft + 5} hours and ${minsLeft} minutes (EST) left until christmas! peepoSnow 🎄`);
   }
 
   if(command === 'clear') {
