@@ -2,8 +2,7 @@
 const talkedRecently = new Set();
 const commandcooldown = new Set();
 const cdrcooldown = new Set();
-const fs = require('fs')
-const os = require('os');
+const fs = require('fs-extra')
 const Database = require("@replit/database")
 const db = new Database()
 const humanizeDuration = require("humanize-duration");
@@ -150,16 +149,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'part') {
-    if(`${userlow}` === `${channel}`) {
-      const channellist = fs.readFileSync(channelsFile).toString()
-      let removedchannel = channellist.replace(`${channel.toLowerCase()}`, '')
-      let removedchannelandspaces = removedchannel.replace(/\s\s+/g, ' ').trim()
-        
-      fs.writeFile('channels.txt', removedchannelandspaces, err => {})
-      client.me(channel, (`${user} --> Succesfully left channel: "${channel.toLowerCase()}"! SadCat`))
-      client.part(`${channel.toLowerCase()}`)
-    }
-    else if(`${userlow}` === 'darkvypr') {
+    if(`${userlow}` === 'darkvypr') {
       const channellist = fs.readFileSync(channelsFile).toString()
       let removedchannel = channellist.replace(`${args[0].toLowerCase()}`, '')
       let removedchannelandspaces = removedchannel.replace(/\s\s+/g, ' ').trim()
@@ -167,6 +157,15 @@ client.on("PRIVMSG", (msg) => {
       fs.writeFile('channels.txt', removedchannelandspaces, err => {})
       client.me(channel, (`${user} --> Succesfully left channel: "${args[0].toLowerCase()}"! SadCat`))
       client.part(`${args[0].toLowerCase()}`)
+    }
+    else if(`${userlow}` === `${channel}`) {
+      const channellist = fs.readFileSync(channelsFile).toString()
+      let removedchannel = channellist.replace(`${channel.toLowerCase()}`, '')
+      let removedchannelandspaces = removedchannel.replace(/\s\s+/g, ' ').trim()
+        
+      fs.writeFile('channels.txt', removedchannelandspaces, err => {})
+      client.me(channel, (`${user} --> Succesfully left channel: "${channel.toLowerCase()}"! SadCat`))
+      client.part(`${channel.toLowerCase()}`)
     }
     else {
       client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
@@ -447,6 +446,66 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
+  // Permission System
+
+  if(command === 'vbpermit') {
+    if(channel === userlow || userlow === 'darkvypr') {
+      let doesuserhavepermits = fs.existsSync(`permissions/${channel}`)
+
+      if(doesuserhavepermits === true) {
+        let usertopermit = args[0]
+        let existingjson = fs.readJsonSync(`permissions/${channel}/permittedusers.json`)
+        let existingadded = existingjson.permittedusers + ' ' + usertopermit.toLowerCase().trim()
+        let tojsonadded = JSON.stringify({permittedusers: existingadded})
+        fs.writeFileSync(`permissions/${channel}/permittedusers.json`, tojsonadded)
+        client.me(channel, `${user} --> Successfully allowed user "${usertopermit}" to use all permissible commands.`)
+      }
+      else {
+        fs.ensureFileSync(`permissions/${channel}/permittedusers.json`)
+        fs.writeFileSync(`permissions/${channel}/permittedusers.json`, `{"permittedusers":"darkvypr"}`)
+        let usertopermit = args[0]
+        let existingjson = fs.readJsonSync(`permissions/${channel}/permittedusers.json`)
+        let existingadded = existingjson.permittedusers + ' ' + usertopermit.toLowerCase().trim()
+        let tojsonadded = JSON.stringify({permittedusers: existingadded})
+        fs.writeFileSync(`permissions/${channel}/permittedusers.json`, tojsonadded)
+        client.me(channel, `${user} --> Successfully allowed user "${usertopermit}" to use all permissible commands.`)
+      }
+    }
+    else {
+      client.me(channel, `Whoops! ${user} --> You need to be a channel owner to use that command. PANIC`);
+    }
+  }
+
+  if(command === 'vbunpermit') {
+    if(channel === userlow || userlow === 'darkvypr') {
+      let doesuserhavepermits = fs.existsSync(`permissions/${channel}`)
+
+      if(doesuserhavepermits === true) {
+        let usertounpermit = args[0]
+        let existingjson = fs.readJsonSync(`permissions/${channel}/permittedusers.json`)
+        let permitteduserslist = existingjson.permittedusers
+        let removeduserpermit = permitteduserslist.replace(`${usertounpermit.toLowerCase()}`, '')
+        let removeduserandspaces = removeduserpermit.replace(/\s\s+/g, ' ').trim()
+        let tojsonremoved = JSON.stringify({permittedusers: removeduserandspaces})
+        fs.writeFileSync(`permissions/${channel}/permittedusers.json`, tojsonremoved)
+      }
+      else {
+        fs.ensureFileSync(`permissions/${channel}/permittedusers.json`)
+        fs.writeFileSync(`permissions/${channel}/permittedusers.json`, `{"permittedusers":"darkvypr"}`)
+        let usertounpermit = args[0]
+        let existingjson = fs.readJsonSync(`permissions/${channel}/permittedusers.json`)
+        let permitteduserslist = existingjson.permittedusers
+        let removeduserpermit = permitteduserslist.replace(`${usertounpermit.toLowerCase()}`, '')
+        let removeduserandspaces = removeduserpermit.replace(/\s\s+/g, ' ').trim()
+        let tojsonremoved = JSON.stringify({permittedusers: removeduserandspaces})
+        fs.writeFileSync(`permissions/${channel}/permittedusers.json`, tojsonremoved)
+      }
+    }
+    else {
+      client.say(channel, `Whoops! ${user} --> You need to be a channel owner to use that command. PANIC`);
+    }
+  }
+
   // General Commands - Not Self Promo or attached to me
 
   if(command === '7tvemote') {
@@ -723,10 +782,10 @@ client.on("PRIVMSG", (msg) => {
 
   if(command === 'echo') {
     if(userlow === 'darkvypr') {
-      client.me(channel, `${args.join(' ')}`);
+      client.privmsg(channel, `${args.join(' ')}`);
     }
     else {
-      client.me(channel, `${user} --> You dont have the required permission to use that command!`);
+      client.me(channel, `${user} --> You dont have the required permission to use that command! Use !say instead.`);
     }
   }
 
@@ -792,7 +851,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'following') {
-    client.me(channel, `${user} --> Visit: https://okayeg.com/followlist?username=${defaultname} for a list of people that ${defaultname} is following.`);
+    client.me(channel, `${user} --> Visit: https://www.twitchfollowing.com/?${defaultname} for a list of people that ${defaultname} is following.`);
   }
 
   if(command === 'fuck') {

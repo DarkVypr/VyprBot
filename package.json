@@ -13,7 +13,7 @@
     "@replit/database": "^2.0.1",
     "axios": "^0.24.0",
     "dank-twitch-irc": "^4.3.0",
-    "humanize-duration": "^3.27.0",
-    "os-utils": "0.0.14"
+    "fs-extra": "^10.0.0",
+    "humanize-duration": "^3.27.0"
   }
 }
