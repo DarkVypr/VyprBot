@@ -562,7 +562,7 @@ client.on("PRIVMSG", (msg) => {
           let month = d.getMonth()
           let year = d.getFullYear()
           let today = `${day}` + '/' + `${month}` + '/' + `${year}`
-          let userbday2021 = senderbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, '2021')
+          let userbdaycurrentyear = senderbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, year)
 
           // AGES
 
@@ -571,12 +571,12 @@ client.on("PRIVMSG", (msg) => {
 
           // TIME UNTIL
 
-          let differencebetweendays = new Date(userbday2021) - new Date(today)
+          let differencebetweendays = new Date(userbdaycurrentyear) - new Date(today)
           if(differencebetweendays < 0) {
             let timeuntilbday = 31536000000 + differencebetweendays
             let humanizedtime = humanizeDuration(timeuntilbday, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
-            let userbday2022 = senderbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, '2022')
-            client.me(channel, `${user} --> You are currently ${currentage} years old, and will be turning ${turningage} on ${userbday2022} which is in ${humanizedtime}. PauseChamp ⌚`)
+            let userbdayplusoneyear = senderbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, year + 1)
+            client.me(channel, `${user} --> You are currently ${currentage} years old, and will be turning ${turningage} on ${userbdayplusoneyear} which is in ${humanizedtime}. PauseChamp ⌚`)
           }
           else {
             let humanizedtime = humanizeDuration(differencebetweendays, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
@@ -584,7 +584,7 @@ client.on("PRIVMSG", (msg) => {
               client.me(channel, `${user} --> FeelsBirthdayMan❗Today is your birthday! Congrats on ${currentage} years, you have plenty more to come. catKISS 💖`)
             }
             else {
-              client.me(channel, `${user} --> You are currently ${currentage} years old, and will be turning ${turningage} on ${userbday2021} which is in ${humanizedtime}. PauseChamp ⌚`)
+              client.me(channel, `${user} --> You are currently ${currentage} years old, and will be turning ${turningage} on ${userbdaycurrentyear} which is in ${humanizedtime}. PauseChamp ⌚`)
             }
           }
         }
@@ -607,7 +607,7 @@ client.on("PRIVMSG", (msg) => {
             let month = d.getMonth()
             let year = d.getFullYear()
             let today = `${day}` + '/' + `${month}` + '/' + `${year}`
-            let userbday2021 = lookupbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, '2021')
+            let userbdaycurrentyear = lookupbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, year)
 
             // AGES
 
@@ -616,12 +616,12 @@ client.on("PRIVMSG", (msg) => {
 
             // TIME UNTIL
 
-            let differencebetweendays = new Date(userbday2021) - new Date(today)
+            let differencebetweendays = new Date(userbdaycurrentyear) - new Date(today)
             if(differencebetweendays < 0) {
               let timeuntilbday = 31536000000 + differencebetweendays
               let humanizedtime = humanizeDuration(timeuntilbday, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
-              let userbday2022 = lookupbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, '2022')
-              client.me(channel, `${user} --> User ${specificuser} is ${currentage} years old, and will be turning ${turningage} on ${userbday2022} which is in ${humanizedtime}. PauseChamp ⌚`)
+              let userbdayplusoneyear = lookupbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, year + 1)
+              client.me(channel, `${user} --> User ${specificuser} is ${currentage} years old, and will be turning ${turningage} on ${userbdayplusoneyear} which is in ${humanizedtime}. PauseChamp ⌚`)
             }
             else {
               let humanizedtime = humanizeDuration(differencebetweendays, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
@@ -629,7 +629,7 @@ client.on("PRIVMSG", (msg) => {
                 client.me(channel, `${user} --> FeelsBirthdayMan❗Today ${specificuser}'s' birthday! Give them a "Happy Birthday" and a congrats on turning ${currentage}. catKISS 💖`)
               }
               else {
-                client.me(channel, `${user} --> User ${specificuser} is ${currentage} years old, and will be turning ${turningage} on ${userbday2021} which is in ${humanizedtime}. PauseChamp ⌚`)
+                client.me(channel, `${user} --> User ${specificuser} is ${currentage} years old, and will be turning ${turningage} on ${userbdaycurrentyear} which is in ${humanizedtime}. PauseChamp ⌚`)
               }
             }
           }
@@ -647,7 +647,7 @@ client.on("PRIVMSG", (msg) => {
             let month = d.getMonth()
             let year = d.getFullYear()
             let today = `${day}` + '/' + `${month}` + '/' + `${year}`
-            let userbday2021 = lookupbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, '2021')
+            let userbdaycurrentyear = lookupbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, year)
 
             // AGES
 
@@ -656,12 +656,12 @@ client.on("PRIVMSG", (msg) => {
 
             // TIME UNTIL
 
-            let differencebetweendays = new Date(userbday2021) - new Date(today)
+            let differencebetweendays = new Date(userbdaycurrentyear) - new Date(today)
             if(differencebetweendays < 0) {
               let timeuntilbday = 31536000000 + differencebetweendays
               let humanizedtime = humanizeDuration(timeuntilbday, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
-              let userbday2022 = lookupbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, '2022')
-              client.me(channel, `${user} --> User ${specificuser} is ${currentage} years old, and will be turning ${turningage} on ${userbday2022} which is in ${humanizedtime}. PauseChamp ⌚`)
+              let userbdayplusoneyear = lookupbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, year + 1)
+              client.me(channel, `${user} --> User ${specificuser} is ${currentage} years old, and will be turning ${turningage} on ${userbdayplusoneyear} which is in ${humanizedtime}. PauseChamp ⌚`)
             }
             else {
               let humanizedtime = humanizeDuration(differencebetweendays, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
@@ -669,7 +669,7 @@ client.on("PRIVMSG", (msg) => {
                 client.me(channel, `${user} --> FeelsBirthdayMan❗Today ${specificuser}'s' birthday! Give them a "Happy Birthday" and a congrats on turning ${currentage}. catKISS 💖`)
               }
               else {
-                client.me(channel, `${user} --> User ${specificuser} is ${currentage} years old, and will be turning ${turningage} on ${userbday2021} which is in ${humanizedtime}. PauseChamp ⌚`)
+                client.me(channel, `${user} --> User ${specificuser} is ${currentage} years old, and will be turning ${turningage} on ${userbdaycurrentyear} which is in ${humanizedtime}. PauseChamp ⌚`)
               }
             }
           }
@@ -1300,11 +1300,11 @@ client.on("PRIVMSG", (msg) => {
     client.me(channel, `👥 ${args.join(' ')}`);
   }
 
-  if(command === 'shiba') {
+  if(command === 'shibe' || command === 'shiba') {
     axios.get(`http://shibe.online/api/shibes?count=1&httpsUrls=true`)
       .then((response) => {
-        let shibaresult = response.data
-        client.me(channel, `${user} --> Random Shiba: ${shibaresult}`);
+        let shiberesult = response.data
+        client.me(channel, `${user} --> Random Shibe: ${shiberesult}`);
       });
   }
 
@@ -1693,7 +1693,7 @@ client.on("PRIVMSG", (msg) => {
     })
   }
 
-  if(command === 'zamn') {
+  if(command === 'zamnkeyword') {
     client.me(channel, `${user} --> https://files.darkvypr.com/backups/zamn.txt ZAMN`);
   }
 
