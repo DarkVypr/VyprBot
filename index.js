@@ -788,8 +788,8 @@ client.on("PRIVMSG", (msg) => {
     function getRandomInt(max) {
       return Math.floor(Math.random() * max);
     }
-    let flipresult = getRandomInt(5)
-    if(flipresult <= 2) {
+    let flipresult = getRandomInt(2)
+    if(flipresult === 2) {
       client.me(channel, `${user} --> Result of your coin flip: "Heads!" (Yes)`);
     }
     else {
@@ -930,7 +930,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'echo') {
-    if(userlow === 'darkvypr') {
+    if(userlow === 'darkvypr' || userlow === 'yagnesh') {
       let checkifin = args[0].toLowerCase()
       if(checkifin[0] === 'i' && checkifin[1] === 'n' && checkifin[2] === ":") {
         let channelsay = checkifin.replace('in:', '')
@@ -1298,6 +1298,15 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'say') {
     client.me(channel, `👥 ${args.join(' ')}`);
   }
+
+  if(command === 'shiba') {
+    axios.get(`http://shibe.online/api/shibes?count=1&httpsUrls=true`)
+      .then((response) => {
+        let shibaresult = response.data
+        client.me(channel, `${user} --> Random Shiba: ${shibaresult}`);
+      });
+  }
+
 
   if(command === 'specs') {
     client.me(channel, `${user} --> https://darkvypr.com/specs NekoProud`);
