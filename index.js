@@ -437,7 +437,20 @@ client.on("PRIVMSG", (msg) => {
             client.whisper(suggestionuser.toLowerCase(), `[Suggestion Update] Your suggestion with the ID:${suggestionid} was denied! Reason: ${suggestionreason}`)
           }
           else {
-            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !vbcomplete {user} {id} {completed|approved|denied}`)
+            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !vbcomplete {user} {id} {completed|approved|denied|held}`)
+          }
+        }
+        else if(`${suggestionstatus.toUpperCase()}` === 'HELD' || `${suggestionstatus.toUpperCase()}` === 'ON-HOLD') {
+          if(`${checkfile}` === 'true') {
+            fs.writeFile(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, ` | Reason: ${suggestionreason}`, { flag: 'a+' }, err => {})
+            fs.rename(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, `suggestions/HELD/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, function (err) {
+              if (err) throw err
+            })
+            client.me(channel, `${user} --> Successfully held suggestion ${suggestionid}, and whispered the user.`)
+            client.whisper(suggestionuser.toLowerCase(), `[Suggestion Update] Your suggestion with the ID:${suggestionid} was put on hold! Reason: ${suggestionreason}`)
+          }
+          else {
+            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !vbcomplete {user} {id} {completed|approved|denied|held}`)
           }
         }
         else {
@@ -450,7 +463,7 @@ client.on("PRIVMSG", (msg) => {
             client.whisper(suggestionuser.toLowerCase(), `[Suggestion Update] Your suggestion with the ID:${suggestionid} was approved! Reason: ${suggestionreason}`)
           }
           else {
-            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !vbcomplete {user} {id} {completed|approved|denied}.`)
+            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !vbcomplete {user} {id} {completed|approved|denied|held}.`)
           }
         }
       }
