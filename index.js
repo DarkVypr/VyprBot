@@ -755,8 +755,8 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'clear') {
     if(userlow === channel || userlow === 'darkvypr') {
       let clearamount = +`${args[0]}`
-      if(clearamount > 50) {
-        client.me(channel, `${user} --> The max clear is 50!`);
+      if(clearamount > 100) {
+        client.me(channel, `${user} --> The max clear is 100!`);
       }
       else {
         for( let i=clearamount; i--; )
