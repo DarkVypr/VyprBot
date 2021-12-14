@@ -562,129 +562,83 @@ client.on("PRIVMSG", (msg) => {
     client.me(channel, `${user} --> https://logs.apulxd.ga/?channel=${defaultname2}&username=${defaultname}`)
   }
 
-	if(command === 'birthday' || command === 'bday') {
-    if(`${args[0]}` === 'undefined') {
-      db.get(`${userlow}bday`).then(function(value) {
-        let senderbday = `${value}`
-        if(senderbday === 'null') {
+  async function getBirthdayDetails(name) {
+    let bday = await db.get(`${name}bday`)
+    if (`${bday}` === 'null') {
+      return 'null'
+    }
+    else {
+      let d = new Date()
+      let day = d.getDate()
+      let month = d.getMonth() + 1
+      let year = d.getFullYear()
+      let today = `${month}` + '/' + `${day}` + '/' + `${year}`
+      let userBirthdayYear = bday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/, year)
+
+      let currentage = Math.floor((new Date(today).getTime() - new Date(`${bday}`).getTime()) / 31556952000)
+      let turningage = Math.floor(((new Date(today).getTime() - new Date(`${bday}`).getTime()) / 31556952000)) + 1
+
+      let differencebetweendays = new Date(userBirthdayYear) - new Date(today)
+      if (differencebetweendays < 0) {
+        let timeuntilbday = 31536000000 + differencebetweendays
+        let humanizedtime = humanizeDuration(timeuntilbday, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
+        let userBirthdayYear = bday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, year + 1)
+        return {
+          differencebetweendays,
+          currentage,
+          turningage,
+          userBirthdayYear,
+          humanizedtime
+        }
+      }
+      else {
+        let humanizedtime = humanizeDuration(differencebetweendays, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
+        return {
+          differencebetweendays,
+          currentage,
+          turningage,
+          userBirthdayYear,
+          humanizedtime
+        }
+      }
+    }
+
+  }
+
+  if (command === 'birthday' || command === 'bday') {
+    if (`${args[0]}` === 'undefined') {
+      getBirthdayDetails(userlow).then(function(value) {
+        let birthday = value
+        if (birthday === 'null') {
           client.me(channel, `${user} --> Before using this command, you must set your birthday with the !setbirthday command. Examples: "!setbirthday 8/14/2005", "!setbirthday 10/16/2004" or "!setbirthday 9/11/1973".`)
         }
         else {
-          let d = new Date()
-          let day = d.getDate()
-          let month = d.getMonth()
-          let year = d.getFullYear()
-          let today = `${day}` + '/' + `${month}` + '/' + `${year}`
-          let userbdaycurrentyear = senderbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, year)
-
-          // AGES
-
-          let currentage = Math.floor((new Date(today).getTime() - new Date(`${senderbday}`).getTime()) / 31556952000)
-          let turningage = Math.floor(((new Date(today).getTime() - new Date(`${senderbday}`).getTime()) / 31556952000)) + 1
-
-          // TIME UNTIL
-
-          let differencebetweendays = new Date(userbdaycurrentyear) - new Date(today)
-          if(differencebetweendays < 0) {
-            let timeuntilbday = 31536000000 + differencebetweendays
-            let humanizedtime = humanizeDuration(timeuntilbday, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
-            let userbdayplusoneyear = senderbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, year + 1)
-            client.me(channel, `${user} --> You are currently ${currentage} years old, and will be turning ${turningage} on ${userbdayplusoneyear} which is in ${humanizedtime}. PauseChamp ⌚`)
-          }
-          else {
-            let humanizedtime = humanizeDuration(differencebetweendays, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
-            if(humanizedtime === '0 seconds') {
-              client.me(channel, `${user} --> FeelsBirthdayMan❗Today is your birthday! Congrats on ${currentage} years, you have plenty more to come. catKISS 💖`)
-            }
-            else {
-              client.me(channel, `${user} --> You are currently ${currentage} years old, and will be turning ${turningage} on ${userbdaycurrentyear} which is in ${humanizedtime}. PauseChamp ⌚`)
-            }
-          }
+          client.me(channel, `${user} --> You are currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
         }
       })
     }
-
     else {
       let specificuser = `${args[0]}`
-      if(specificuser[0] === '@') {
-        let removedatsign = specificuser[0].replace('@', '') + specificuser.substring(1)
-        let removedatsignlow = removedatsign.toLowerCase()
-		    db.get(`${removedatsignlow}bday`).then(function(value) {
-			    let lookupbday = `${value}`
-          if(lookupbday === 'null') {
-            client.me(channel, (`${user} --> That user hasen't set their birthday! Get them to set it and retry. PANIC`))
-		      }
+      if (specificuser[0] === '@') {
+        let removedatsign = specificuser[0].replace('@', '') + specificuser.substring(1).toLowerCase()
+        getBirthdayDetails(removedatsign).then(function(value) {
+          let birthday = value
+          if (birthday === 'null') {
+            client.me(channel, `${user} --> User, ${removedatsign} hasn't set their birthday! Get them to set it and retry this command!`)
+          }
           else {
-            let d = new Date()
-            let day = d.getDate()
-            let month = d.getMonth()
-            let year = d.getFullYear()
-            let today = `${day}` + '/' + `${month}` + '/' + `${year}`
-            let userbdaycurrentyear = lookupbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, year)
-
-            // AGES
-
-            let currentage = Math.floor((new Date(today).getTime() - new Date(`${lookupbday}`).getTime()) / 31556952000)
-            let turningage = Math.floor(((new Date(today).getTime() - new Date(`${lookupbday}`).getTime()) / 31556952000)) + 1
-
-            // TIME UNTIL
-
-            let differencebetweendays = new Date(userbdaycurrentyear) - new Date(today)
-            if(differencebetweendays < 0) {
-              let timeuntilbday = 31536000000 + differencebetweendays
-              let humanizedtime = humanizeDuration(timeuntilbday, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
-              let userbdayplusoneyear = lookupbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, year + 1)
-              client.me(channel, `${user} --> User ${specificuser} is ${currentage} years old, and will be turning ${turningage} on ${userbdayplusoneyear} which is in ${humanizedtime}. PauseChamp ⌚`)
-            }
-            else {
-              let humanizedtime = humanizeDuration(differencebetweendays, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
-              if(humanizedtime === '0 seconds') {
-                client.me(channel, `${user} --> FeelsBirthdayMan❗Today ${specificuser}'s' birthday! Give them a "Happy Birthday" and a congrats on turning ${currentage}. catKISS 💖`)
-              }
-              else {
-                client.me(channel, `${user} --> User ${specificuser} is ${currentage} years old, and will be turning ${turningage} on ${userbdaycurrentyear} which is in ${humanizedtime}. PauseChamp ⌚`)
-              }
-            }
+            client.me(channel, `${user} --> User, ${removedatsign} is currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
           }
         })
       }
       else {
-		    db.get(`${specificuser.toLowerCase()}bday`).then(function(value) {
-			    let lookupbday = `${value}`
-          if(lookupbday === 'null') {
-            client.me(channel, (`${user} --> That user hasen't set their birthday! Get them to set it and retry. PANIC`))
-		      }
+        getBirthdayDetails(args[0].toLowerCase()).then(function(value) {
+          let birthday = value
+          if (birthday === 'null') {
+            client.me(channel, `${user} --> User, ${args[0]} hasn't set their birthday! Get them to set it and retry this command!`)
+          }
           else {
-            let d = new Date()
-            let day = d.getDate()
-            let month = d.getMonth()
-            let year = d.getFullYear()
-            let today = `${day}` + '/' + `${month}` + '/' + `${year}`
-            let userbdaycurrentyear = lookupbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, year)
-
-            // AGES
-
-            let currentage = Math.floor((new Date(today).getTime() - new Date(`${lookupbday}`).getTime()) / 31556952000)
-            let turningage = Math.floor(((new Date(today).getTime() - new Date(`${lookupbday}`).getTime()) / 31556952000)) + 1
-
-            // TIME UNTIL
-
-            let differencebetweendays = new Date(userbdaycurrentyear) - new Date(today)
-            if(differencebetweendays < 0) {
-              let timeuntilbday = 31536000000 + differencebetweendays
-              let humanizedtime = humanizeDuration(timeuntilbday, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
-              let userbdayplusoneyear = lookupbday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, year + 1)
-              client.me(channel, `${user} --> User ${specificuser} is ${currentage} years old, and will be turning ${turningage} on ${userbdayplusoneyear} which is in ${humanizedtime}. PauseChamp ⌚`)
-            }
-            else {
-              let humanizedtime = humanizeDuration(differencebetweendays, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
-              if(humanizedtime === '0 seconds') {
-                client.me(channel, `${user} --> FeelsBirthdayMan❗Today ${specificuser}'s' birthday! Give them a "Happy Birthday" and a congrats on turning ${currentage}. catKISS 💖`)
-              }
-              else {
-                client.me(channel, `${user} --> User ${specificuser} is ${currentage} years old, and will be turning ${turningage} on ${userbdaycurrentyear} which is in ${humanizedtime}. PauseChamp ⌚`)
-              }
-            }
+            client.me(channel, `${user} --> User, ${args[0]} is currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
           }
         })
       }
@@ -1855,12 +1809,14 @@ client.on("PRIVMSG", (msg) => {
     const regex = new RegExp('^([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-9][0-9][0-9][0-9])$');
     testForNumber = `${regex.test(giveamount)}`
 
-    let recipient = args[0].toLowerCase()
+    let recipient = `${args[0]}`
 
-    if(`${recipient}` === `${user}`) {
-      client.me(channel, (`${user} --> Why are you trying to give nammers to urself NekoStare`))
+    if(recipient === 'undefined') {
+      client.me(channel, (`${user} --> Invalid Syntax. You must specify a recipient, and an amount to give away!`))
     }
-
+    else if(recipient.toLowerCase() === userlow) {
+      client.me(channel, (`${user} --> Invalid Syntax. You cannot give nammers to yourself!`))
+    }
     else if(`${testForNumber}` === 'true') {
       db.get(`${userlow}nammers`).then(function(value) {
         let nammers = `${value}`
@@ -1871,7 +1827,7 @@ client.on("PRIVMSG", (msg) => {
           client.me(channel, (`${user} --> GearScare ⛔ You tried to give away ${giveamount} nammers, but you only have ${nammers} nammers. You keep all of your nammers for a rainy day.`))
         }
         else {
-          db.get(`${recipient}nammers`).then(function(valuerecipient) {
+          db.get(`${recipient.toLowerCase()}nammers`).then(function(valuerecipient) {
             let recipientnammers = `${valuerecipient}`
             if(`${recipientnammers}` === 'null') {
               client.me(channel, `${user} --> That user dosen't exist in the database!`)
@@ -1881,8 +1837,8 @@ client.on("PRIVMSG", (msg) => {
               db.set(`${userlow}nammers`, aftergive)
               let recipientaddednammers = +recipientnammers + +giveamount
 
-              db.set(`${recipient}nammers`, recipientaddednammers)
-              client.me(channel, `${user} --> GearSmile 👉 🚢 Successfully shipped ${giveamount} nammers to ${recipient}! Your new balance is: ${aftergive} nammers, and ${recipient}'s new balance is: ${recipientaddednammers} nammers!`)
+              db.set(`${recipient.toLowerCase()}nammers`, recipientaddednammers)
+              client.me(channel, `${user} --> GearSmile 👉 🚢 Successfully shipped ${giveamount} nammers to ${recipient.toLowerCase()}! Your new balance is: ${aftergive} nammers, and ${recipient.toLowerCase()}'s new balance is: ${recipientaddednammers} nammers!`)
             }
           })
         }
@@ -1898,7 +1854,7 @@ client.on("PRIVMSG", (msg) => {
           client.me(channel, (`${user} --> GearScare ⛔ You tried to give away ${giveamount} nammers, but you only have ${nammers} nammers. You keep all of your nammers for a rainy day.`))
         }
         else {
-          db.get(`${recipient}nammers`).then(function(valuerecipient) {
+          db.get(`${recipient.toLowerCase()}nammers`).then(function(valuerecipient) {
             let recipientnammers = `${valuerecipient}`
             if(`${recipientnammers}` === 'null') {
               client.me(channel, `${user} --> That user dosen't exist in the database!`)
@@ -1908,8 +1864,8 @@ client.on("PRIVMSG", (msg) => {
               db.set(`${userlow}nammers`, 0)
               let recipientaddednammers = +recipientnammers + +giveamount
 
-              db.set(`${recipient}nammers`, recipientaddednammers)
-              client.me(channel, `${user} --> GearSmile 👉 🚢 Successfully shipped all of your nammers (${giveamount}) to ${recipient}! ${recipient}'s new balance is: ${recipientaddednammers} nammers!`)
+              db.set(`${recipient.toLowerCase()}nammers`, recipientaddednammers)
+              client.me(channel, `${user} --> GearSmile 👉 🚢 Successfully shipped all of your nammers (${giveamount}) to ${recipient.toLowerCase()}! ${recipient.toLowerCase()}'s new balance is: ${recipientaddednammers} nammers!`)
             }
           })
         }
