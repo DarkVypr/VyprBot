@@ -54,10 +54,10 @@ setInterval(function() {
   .then((response) => {
     let supiresults = response.data
     if(supiresults.statusCode === 200) {
-      console.log('✅SUCCESS Supinic API Ping✅')
+      console.log('✅ SUCCESS Supinic API Ping ✅')
     }
     else {
-      console.log('⛔UNSUCCESSFUL Supinic API Ping⛔')
+      console.log('⛔ UNSUCCESSFUL Supinic API Ping ⛔')
       client.whisper('darkvypr', `There was an error pinging Supi's API!`)
     }
   });
