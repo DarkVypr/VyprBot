@@ -1437,196 +1437,169 @@ client.on("PRIVMSG", (msg) => {
     client.me(channel, `${user} --> #FF7FD3`);
   }
 
-	if(command === 'weather') {
-    if(`${args[0]}` === 'undefined') {
-      db.get(`${userlow}time`).then(function(value) {
-        let usercitycountry = `${value}`
-        if(usercitycountry === 'null') {
+  async function getWeatherUser(name) {
+    let userLocation = await db.get(`${name}time`)
+    if (`${userLocation}` === 'null') {
+      return 'null'
+    }
+    else {
+      let userCoordinates = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${userLocation}&apiKey=${process.env['GEOCODING_KEY']}`)
+      let userLatitude = userCoordinates.data.items[0].position.lat
+      let userLongitude = userCoordinates.data.items[0].position.lng
+      let userLocationAPI = userCoordinates.data.items[0].title
+
+      let userWeather = await axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${userLatitude}&lon=${userLongitude}&units=metric&appid=${process.env['WEATHER_KEY']}`)
+      let condition = userWeather.data.weather[0].main
+      let icon = userWeather.data.weather[0].icon
+      let description = userWeather.data.weather[0].description
+
+      let userTempC = Math.round(userWeather.data.main.temp)
+      let userTempF = Math.round(+userTempC * 1.8 + 32)
+      let userFeelsLikeC = Math.round(userWeather.data.main.feels_like)
+      let userFeelsLikeF = Math.round(+userFeelsLikeC * 1.8 + 32)
+
+      let userWindKMH = Math.round(+userWeather.data.wind.speed * 3.6)
+      let userWindMPH = Math.round(userWindKMH / 1.609)
+
+      let userHumidity = userWeather.data.main.humidity
+
+      let cloudCoverage = userWeather.data.clouds.all
+
+      function getCondition(checkCondition) {
+        switch (checkCondition) {
+          case 'Clear':
+            return 'with clear skies ☀️⛱️'
+            break
+          case 'Thunderstorm':
+            return `with a ${description} ⛈️☔`
+            break
+          case 'Drizzle':
+            return 'with slight rain 🌦️🌧️'
+            break
+          case 'Rain':
+            return `with ${description} 🌧️☔`
+            break
+          case 'Snow':
+            return `with ${description} 🌨️❄️`
+            break
+          case 'Clouds':
+            return `with ${description} ☁️🌥️`
+            break
+          default:
+            return `with a special weather event: ${condition} 📊🔍`
+        }
+      }
+
+      let conditionString = getCondition(condition)
+
+      var weatherDetails = {
+        location: userLocationAPI,
+        tempC: userTempC,
+        feelsLikeC: userFeelsLikeC,
+        tempF: userTempF,
+        feelsLikeF: userFeelsLikeF,
+        windKMH: userWindKMH,
+        windMPH: userWindMPH,
+        humidity: userHumidity,
+        condition: conditionString,
+        cloudCoverage: cloudCoverage
+      }
+      return weatherDetails
+    }
+  }
+
+  async function getWeatherLocation(location) {
+    let userCoordinates = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${location}&apiKey=${process.env['GEOCODING_KEY']}`)
+    let userLatitude = userCoordinates.data.items[0].position.lat
+    let userLongitude = userCoordinates.data.items[0].position.lng
+    let userLocationAPI = userCoordinates.data.items[0].title
+
+    let userWeather = await axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${userLatitude}&lon=${userLongitude}&units=metric&appid=${process.env['WEATHER_KEY']}`)
+    let condition = userWeather.data.weather[0].main
+    let icon = userWeather.data.weather[0].icon
+    let description = userWeather.data.weather[0].description
+
+    let userTempC = Math.round(userWeather.data.main.temp)
+    let userTempF = Math.round(+userTempC * 1.8 + 32)
+    let userFeelsLikeC = Math.round(userWeather.data.main.feels_like)
+    let userFeelsLikeF = Math.round(+userFeelsLikeC * 1.8 + 32)
+
+    let userWindKMH = Math.round(+userWeather.data.wind.speed * 3.6)
+    let userWindMPH = Math.round(userWindKMH / 1.609)
+
+    let userHumidity = userWeather.data.main.humidity
+
+    let cloudCoverage = userWeather.data.clouds.all
+
+    function getCondition(checkCondition) {
+      switch (checkCondition) {
+        case 'Clear':
+          return 'with clear skies ☀️⛱️'
+          break
+        case 'Thunderstorm':
+          return `with a ${description} ⛈️☔`
+          break
+        case 'Drizzle':
+          return 'with slight rain 🌦️🌧️'
+          break
+        case 'Rain':
+          return `with ${description} 🌧️☔`
+          break
+        case 'Snow':
+          return `with ${description} 🌨️❄️`
+          break
+        case 'Clouds':
+          return `with ${description} ☁️🌥️`
+          break
+        default:
+          return `with a special weather event: ${condition} 📊🔍`
+      }
+    }
+
+    let conditionString = getCondition(condition)
+
+    var weatherDetails = {
+      location: userLocationAPI,
+      tempC: userTempC,
+      feelsLikeC: userFeelsLikeC,
+      tempF: userTempF,
+      feelsLikeF: userFeelsLikeF,
+      windKMH: userWindKMH,
+      windMPH: userWindMPH,
+      humidity: userHumidity,
+      condition: conditionString,
+      cloudCoverage: cloudCoverage
+    }
+    return weatherDetails
+  }
+
+  if (command === 'weather') {
+    let specificLocation = `${args.join(' ')}`
+    if (`${args[0]}` === 'undefined') {
+      getWeatherUser(userlow).then(function(value) {
+        if (value === 'null') {
           client.me(channel, `${user} --> Before using this command, you must set your location with the !setlocation command. Example: “!setlocation lasalle ontario”, “!setlocation springfield virginia” or “!setlocation stockholm sweden”. More info: https://darkvypr.com/commands`)
         }
         else {
-          axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${usercitycountry}&apiKey=${process.env['GEOCODING_KEY']}`)
-          .then((response) => {
-            let unparsedcoords = response.data
-            let parsedcoordslat = `${unparsedcoords.items[0].position.lat}`
-            let parsedcoordslong = `${unparsedcoords.items[0].position.lng}`
-            let namefromapi = `${unparsedcoords.items[0].title}`
-            
-
-          axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${parsedcoordslat}&lon=${parsedcoordslong}&units=metric&appid=${process.env['WEATHER_KEY']}`)
-          .then((response) => {
-            let weatherresults = response.data
-
-            let checkcondition = `${weatherresults.weather[0].main}`
-            let checkicon = `${weatherresults.weather[0].icon}`
-            let weatherdescription = `${weatherresults.weather[0].description}`
-            let speedkmh = +`${weatherresults.wind.speed}` * 3.6
-            let speedmph = speedkmh / 1.609
-
-            if(checkcondition === 'Clear') {
-              let checkedcondition = 'with clear skies ☀️🌇'
-              let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-              client.me(channel, `${user} --> The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-            }
-            else if(checkcondition === 'Thunderstorm') {
-              let checkedcondition = `with a ${weatherdescription} ⛈️☔`
-              let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-              client.me(channel, `${user} --> The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-            }
-            else if(checkcondition === 'Drizzle') {
-              let checkedcondition = 'with slight rain 🌦️🌧️'
-              let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-              client.me(channel, `${user} --> The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-            }
-            else if(checkcondition === 'Rain') {
-              let checkedcondition = `with ${weatherdescription} 🌧️☔`
-              let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-              client.me(channel, `${user} --> The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-            }
-            else if(checkcondition === 'Snow') {
-              let checkedcondition = `with ${weatherdescription} 🌨️❄️`
-              let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-              client.me(channel, `${user} --> The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-            }
-            else if(checkcondition === 'Clouds') {
-              let checkedcondition = `with ${weatherdescription} ☁️🌥️`
-              let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-              client.me(channel, `${user} --> The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-            }
-            else if(checkicon === '50d' || checkicon === '50n') {
-              let checkedcondition = `with a special weather event: ${checkcondition} 🔍`
-              let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-              client.me(channel, `${user} --> The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-            }
-          });
-          });
+          client.me(channel, `${user} --> The weather in ${value.location} is currently ${value.tempC}°C (${value.tempF}°F) ${value.condition} Wind speed: ${value.windKMH} km/h (${value.windMPH} mp/h) 💨 Humidity: ${value.humidity}% 💧 Cloud Coverage: ${value.cloudCoverage}% ☁️`)
         }
       })
     }
-
+    else if (`${specificLocation[0]}` === "@") {
+      cleanedUpUser = specificLocation.replace('@', '').toLowerCase()
+      getWeatherUser(cleanedUpUser).then(function(value) {
+        if (value === 'null') {
+          client.me(channel, `${user} --> That user hasn't set their location! Get them to set it and retry! PANIC`)
+        }
+        else {
+          client.me(channel, `${user} --> The weather in ${cleanedUpUser}'s location (${value.location}) is currently ${value.tempC}°C (${value.tempF}°F) ${value.condition} Wind speed: ${value.windKMH} km/h (${value.windMPH} mp/h) 💨 Humidity: ${value.humidity}% 💧 Cloud Coverage: ${value.cloudCoverage}% ☁️`)
+        }
+      })
+    }
     else {
-      let specificlocation = `${args.join(' ')}`
-      if(specificlocation[0] === '@') {
-        let removedatsign = specificlocation[0].replace('@', '') + specificlocation.substring(1)
-        let removedatsignlow = removedatsign.toLowerCase()
-		    db.get(`${removedatsignlow}time`).then(function(value) {
-			    let lookuptime = `${value}`
-          if(lookuptime === 'null') {
-            client.me(channel, (`${user} --> That user hasen't set their location! Get them to set it and retry. PANIC`))
-		      }
-          else {
-            axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${lookuptime}&apiKey=${process.env['GEOCODING_KEY']}`)
-            .then((response) => {
-              let unparsedcoords = response.data
-              let parsedcoordslat = `${unparsedcoords.items[0].position.lat}`
-              let parsedcoordslong = `${unparsedcoords.items[0].position.lng}`
-              let namefromapi = `${unparsedcoords.items[0].title}`
-
-            axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${parsedcoordslat}&lon=${parsedcoordslong}&units=metric&appid=${process.env['WEATHER_KEY']}`)
-            .then((response) => {
-             let weatherresults = response.data
-             let checkcondition = `${weatherresults.weather[0].main}`
-             let checkicon = `${weatherresults.weather[0].icon}`
-             let weatherdescription = `${weatherresults.weather[0].description}`
-             let speedkmh = +`${weatherresults.wind.speed}` * 3.6
-             let speedmph = speedkmh / 1.609
-
-             if(checkcondition === 'Clear') {
-                let checkedcondition = 'with clear skies ☀️🌇'
-                let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-                client.me(channel, `${user} --> The temperature in ${args[0]}'s location (${namefromapi}) is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round  (toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-             }
-             else if(checkcondition === 'Thunderstorm') {
-                let checkedcondition = `with a ${weatherdescription} ⛈️☔`
-                let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-                client.me(channel, `${user} --> The temperature in ${args[0]}'s location (${namefromapi}) is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-              }
-              else if(checkcondition === 'Drizzle') {
-                let checkedcondition = 'with slight rain 🌦️🌧️'
-                let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-                client.me(channel, `${user} --> The temperature in ${args[0]}'s location (${namefromapi}) is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-              }
-              else if(checkcondition === 'Rain') {
-                let checkedcondition = `with ${weatherdescription} 🌧️☔`
-                let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-                client.me(channel, `${user} --> The temperature in ${args[0]}'s location (${namefromapi}) is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-              }
-              else if(checkcondition === 'Snow') {
-                let checkedcondition = `with ${weatherdescription} 🌨️❄️`
-                let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-                client.me(channel, `${user} --> The temperature in ${args[0]}'s location (${namefromapi}) is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-              }
-              else if(checkcondition === 'Clouds') {
-                let checkedcondition = `with ${weatherdescription} ☁️🌥️`
-                let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-                client.me(channel, `${user} --> The temperature in ${args[0]}'s location (${namefromapi}) is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-              }
-              else if(checkicon === '50d' || checkicon === '50n') {
-                let checkedcondition = `with a special weather event: ${checkcondition} 🔍`
-                let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-                client.me(channel, `${user} --> The temperature in ${args[0]}'s location (${namefromapi}) is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-              }
-            });
-            });
-          }
-        })
-      }
-
-      else {
-        axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${args.join(' ')}&apiKey=${process.env['GEOCODING_KEY']}`)
-          .then((response) => {
-            let unparsedcoords = response.data
-            let parsedcoordslat = `${unparsedcoords.items[0].position.lat}`
-            let parsedcoordslong = `${unparsedcoords.items[0].position.lng}`
-            let namefromapi = `${unparsedcoords.items[0].title}`
-
-        axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${parsedcoordslat}&lon=${parsedcoordslong}&units=metric&appid=${process.env['WEATHER_KEY']}`)
-        .then((response) => {
-          let weatherresults = response.data
-          let checkcondition = `${weatherresults.weather[0].main}`
-          let checkicon = `${weatherresults.weather[0].icon}`
-          let weatherdescription = `${weatherresults.weather[0].description}`
-          let speedkmh = +`${weatherresults.wind.speed}` * 3.6
-          let speedmph = speedkmh / 1.609
-
-          if(checkcondition === 'Clear') {
-            let checkedcondition = 'with clear skies ☀️🌇'
-            let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-            client.me(channel, `${user} --> The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-          }
-          else if(checkcondition === 'Thunderstorm') {
-            let checkedcondition = `with a ${weatherdescription} ⛈️☔`
-            let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-            client.me(channel, `${user} --> The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-          }
-          else if(checkcondition === 'Drizzle') {
-            let checkedcondition = 'with slight rain 🌦️🌧️'
-            let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-            client.me(channel, `${user} --> The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-          }
-          else if(checkcondition === 'Rain') {
-            let checkedcondition = `with ${weatherdescription} 🌧️☔`
-            let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-            client.me(channel, `${user} --> The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-          }
-          else if(checkcondition === 'Snow') {
-            let checkedcondition = `with ${weatherdescription} 🌨️❄️`
-            let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-            client.me(channel, `${user} --> The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-          }
-          else if(checkcondition === 'Clouds') {
-            let checkedcondition = `with ${weatherdescription} ☁️🌥️`
-            let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-            client.me(channel, `${user} --> The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-          }
-          else if(checkicon === '50d' || checkicon === '50n') {
-            let checkedcondition = `with a special weather event: ${checkcondition} 🔍`
-            let toFahrenheit = +`${weatherresults.main.temp}` * 1.8 + 32
-            client.me(channel, `${user} --> The temperature in ${namefromapi} is currently ${Math.round(weatherresults.main.temp)}°C (${Math.round(toFahrenheit)}°F) ${checkedcondition}. Wind speed: ${Math.round(speedkmh)} km/h (${Math.round(speedmph)} mp/h). 💨 Humidity: ${weatherresults.main.humidity}% 💧`)
-          }
-        });
-        });
-      }
+      getWeatherLocation(specificLocation).then(function(value) {
+        client.me(channel, `${user} --> The weather in ${value.location} is currently ${value.tempC}°C (${value.tempF}°F) ${value.condition} Wind speed: ${value.windKMH} km/h (${value.windMPH} mp/h) 💨 Humidity: ${value.humidity}% 💧 Cloud Coverage: ${value.cloudCoverage}% ☁️`)
+      })
     }
   }
 
