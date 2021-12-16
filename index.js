@@ -692,18 +692,22 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'christmas') {
-    today = new Date();
+    Date.prototype.addHours= function(h){
+        this.setHours(this.getHours()+h);
+        return this;
+    }
 
+    today = new Date().addHours(-5)
     xmas = new Date("December 25, 2021");
-    msPerDay = 24 * 60 * 60 * 1000;
-    timeLeft = (xmas.getTime() - today.getTime());
-    e_daysLeft = timeLeft / msPerDay;
-    daysLeft = Math.floor(e_daysLeft);
-    e_hrsLeft = (e_daysLeft - daysLeft) * 24;
-    hrsLeft = Math.floor(e_hrsLeft);
-    minsLeft = Math.floor((e_hrsLeft - hrsLeft) * 60);
 
-    client.me(channel, `${user} --> There is ${daysLeft} days, ${+hrsLeft + 5} hours and ${minsLeft} minutes (EST) left until christmas! peepoSnow 🎄`);
+    let timeUntilChristmas = humanizeDuration(xmas - today, { units: ["d", "h", "m", "s"], round: true, largest: 2})
+
+    if(today.toDateString() === 'Sat Dec 25 2021') {
+      client.me(channel, `YAAAY peepoSnow It's finally that time of year! YAAAY peepoSnow`);
+    }
+    else {
+      client.me(channel, `${user} --> There is ${timeUntilChristmas} (EST +5) left until christmas! peepoSnow 🎄`);
+    }
   }
 
   if(command === 'clear') {
