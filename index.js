@@ -703,7 +703,7 @@ client.on("PRIVMSG", (msg) => {
     let timeUntilChristmas = humanizeDuration(xmas - today, { units: ["d", "h", "m", "s"], round: true, largest: 2})
 
     if(today.toDateString() === 'Sat Dec 25 2021') {
-      client.me(channel, `YAAAY peepoSnow It's finally that time of year! YAAAY peepoSnow`);
+      client.me(channel, `YAAAY peepoSnow It's finally that time of year! Merry Christmas! YAAAY peepoSnow`);
     }
     else {
       client.me(channel, `${user} --> There is ${timeUntilChristmas} (EST +5) left until christmas! peepoSnow 🎄`);
