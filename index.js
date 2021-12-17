@@ -1102,6 +1102,15 @@ client.on("PRIVMSG", (msg) => {
       client.privmsg(channel, `AYAYA --> 👉 🚪 NammersOut elisDance NammersOut`);
   }
 
+  if(command === 'neko') {
+    if(channel === 'darkvypr') {
+      client.me(channel, `${user} --> https://i.darkvypr.com/neko.mp4`);
+    }
+    else {
+      client.me(channel, `${user} --> GearScare This command is only available in darkvypr's chat!`);
+    }
+  }
+  
   if(command === 'noah') {
     client.me(channel, `${user} --> https://i.imgur.com/Dn0CjkF.png`);
   }
@@ -1300,7 +1309,7 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'specs') {
     client.me(channel, `${user} --> https://darkvypr.com/specs NekoProud`);
   }
-
+  
   if(command === '🥪') {
     client.me(channel, `${user} --> https://www.youtube.com/shorts/7XkP11Pomuc`);
   }
