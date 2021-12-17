@@ -256,7 +256,7 @@ client.on("PRIVMSG", (msg) => {
   // Check for no-no words
 
   function checkPhrase(phrase) {
-    let regex = new RegExp(/(?:(?:\b(?<![-=\.])|monka)(?:[Nnñ]|[Ii7]V)|[\/|]\\[\/|])[\s\.]*?[liI1y!j\/|]+[\s\.]*?(?:[GgbB6934Q 🅱 qğĜƃ၅5\*][\s\.]*?){2,}(?!arcS|l|Ktlw|ylul|ie217|64|\d? ?times)/)
+    let regex = new RegExp('(?:(?:\b(?<![-=\.])|monka)(?:[Nnñ]|[Ii7]V)|η|[\/|]\\[\/|])[\s\.]*?[liI1y!j\/|]+[\s\.]*?(?:[GgbB6934Q🅱qğĜƃ၅5\*][\s\.]*?){2,}(?!arcS|l|Ktlw|ylul|ie217|64|\d? ?times)')
     return regex.test(phrase)
   }
   
@@ -1234,13 +1234,11 @@ client.on("PRIVMSG", (msg) => {
     axios.get(`https://api.wolframalpha.com/v1/result?i=${args.join(' ')}&appid=${process.env['WOLFRAM_KEY']}`)
       .catch(err => { client.me(channel, `${user} --> Wolfram|Alpha did not understand your question! PANIC`)}) 
       .then((response) => {
-        let queryresults = response.data
-        testForNumber = /\b(\W)n*(i*|1*)(g*)?(e*|3*)?(a*|e*)r*(\W)\b/gim.test(queryresults)
-        if(`${testForNumber}` === 'true') {
+        if(checkPhrase(response.data) === true) {
           client.me(channel, `${user} --> cmonNep ??????`);
         }
         else {
-          client.me(channel, `${user} Results: ${queryresults}`);
+          client.me(channel, `${user} Results: ${response.data}`);
         }
       })
   }
