@@ -253,6 +253,13 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
+  // Check for no-no words
+
+  function checkPhrase(phrase) {
+    let regex = new RegExp(/(?:(?:\b(?<![-=\.])|monka)(?:[Nnñ]|[Ii7]V)|[\/|]\\[\/|])[\s\.]*?[liI1y!j\/|]+[\s\.]*?(?:[GgbB6934Q 🅱 qğĜƃ၅5\*][\s\.]*?){2,}(?!arcS|l|Ktlw|ylul|ie217|64|\d? ?times)/)
+    return regex.test(phrase)
+  }
+  
   // Bot Info
 
   if(command === 'ping' || command === 'help' || command === 'info') {
@@ -348,11 +355,11 @@ client.on("PRIVMSG", (msg) => {
         client.me(channel, (`${user} --> ${user}'s Twitter can be found at: https://twitter.com/${sendertwitter}`))
       }
       else {
-        client.me(channel, (`${user} --> To use the "!twitter" command, you must first set your Twitter account with the !settwitter command, followed by your twitter handle. Example: "!settwitter darkvyprr". More info: https://darkvypr.com/commands YESIDOTHINKSO`))
+        client.me(channel, (`${user} --> To use the "!twitter" command, you must first set your Twitter account with the !settwitter command, followed by your Twitter handle. Example: "!settwitter darkvyprr". More info: https://darkvypr.com/commands YESIDOTHINKSO`))
       }
     })
   }
-
+  
   if(command === 'github' || command === 'git') {
     if(channel === 'darkvypr' || `${userlow}` === 'darkvypr') {
       client.me(channel, `${user} --> peepoChat http://git.darkvypr.com`);
@@ -860,7 +867,12 @@ client.on("PRIVMSG", (msg) => {
             client.me(channel, `${user} --> No definition available for that string or word!`)
           }
           else {
-            client.me(channel, `${user} --> Definition: ${shortanswer}`)
+            if(checkPhrase(shortanswer) === true) {
+              client.me(channel, `${user} --> cmonNep ?????`)
+            }
+            else {
+              client.me(channel, `${user} --> Definition: ${shortanswer}`)
+            }
           }
         }
       });
@@ -902,7 +914,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'echo') {
-    if(userlow === 'darkvypr' || userlow === 'yagnesh') {
+    if(userlow === 'darkvypr' || userlow === 'yagnesh' || userlow === 'xenoplopqb') {
       let checkifin = args[0].toLowerCase()
       if(checkifin[0] === 'i' && checkifin[1] === 'n' && checkifin[2] === ":") {
         let channelsay = checkifin.replace('in:', '')
@@ -1228,6 +1240,15 @@ client.on("PRIVMSG", (msg) => {
     client.me(channel, `${user} --> If you would like the bot in your chat, you can use the !vbsuggest command. Example: "!vbsuggest I would like the bot added to my channel."`);
   }
 
+  if(command === 'say') {
+    if(checkPhrase(`${args.join(' ')}`) === true) {
+      client.me(channel, `👥 cmonNep ?????`);
+    }
+    else {
+      client.me(channel, `👥 ${args.join(' ')}`);
+    }
+  }
+  
   if(command === 'spam') {
     if(userlow === channel || userlow === 'darkvypr') {
       let spamamount = +`${args[0]}`
@@ -1265,10 +1286,6 @@ client.on("PRIVMSG", (msg) => {
         client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !permit {username_here}`)
       }
     }
-  }
-
-  if(command === 'say') {
-    client.me(channel, `👥 ${args.join(' ')}`);
   }
 
   if(command === 'shibe' || command === 'shiba') {
@@ -1403,9 +1420,7 @@ client.on("PRIVMSG", (msg) => {
         else {
           let dirtyresponse = urbanresult.list[0].definition
           let cleanedupresponse = dirtyresponse.replace(/\[|\]/gim, '')
-          const regex = new RegExp(/(?:(?:\b(?<![-=\.])|monka)(?:[Nnñ]|[Ii7]V)|[\/|]\\[\/|])[\s\.]*?[liI1y!j\/|]+[\s\.]*?(?:[GgbB6934Q 🅱 qğĜƃ၅5\*][\s\.]*?){2,}(?!arcS|l|Ktlw|ylul|ie217|64|\d? ?times)/); 
-          badshit = regex.test(cleanedupresponse)
-          if(`${badshit}` === 'true') {
+          if(checkPhrase(cleanedupresponse) === true) {
             client.me(channel, `${user} --> cmonNep ??????`);
           }
           else {

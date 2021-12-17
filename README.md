@@ -4,7 +4,7 @@ Owner: `DarkVypr`
 
 Owner Discord: `DarkVypr#5567`
 
-Owner Twitch : `DarkVypr`
+Owner Twitch: `DarkVypr`
 
 ---
 
@@ -16,4 +16,4 @@ VyprBot is a general-purpose bot with user-based commands, a loyalty system and 
 
 # How can I get the bot in my chat?
 
-If you would like this bot to be added to your chat, make sure to read [the commands page](https://darkvypr.com/commands) before asking. After reading, you can use the !suggest command in the bot's chat. Go to [its chat](https://twitch.tv/vyprbot) and use the !vbsuggest command. Example: "`!vbsuggest I would like the bot to be added to my chat!`". Once I read the suggestion, you will recieve a DM on Twitch from the bot saying if you were accepted or denied. I probably wont deny any bot addition requests, but some suggestions may be.
+If you would like this bot to be added to your chat, make sure to read [the commands page](https://darkvypr.com/commands) before asking. After reading, you can use the !suggest command in the bot's chat. Go to [the bots chat](https://twitch.tv/vyprbot) and use the !vbsuggest command. Example: "`!vbsuggest I would like the bot to be added to my chat!`". Once I read the suggestion, you will receive a DM on Twitch from the bot saying if you were accepted or denied. I probably wont deny any bot addition requests, but some suggestions may be.
