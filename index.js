@@ -87,10 +87,22 @@ client.on("PRIVMSG", (msg) => {
     client.privmsg(channel, `SHUT THE FUCK UP THEPOSITIVEBOT LAUGH`);
   }
 
+  if(/\bn(a|4)m(mer|ming)?\b/gi.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
+    client.privmsg(channel, `NammersOut elisDance NammersOut`);
+  }
+
+  if(/\bokge\b/g.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
+    client.privmsg(channel, `okge`);
+  }
+  
   if(!message.startsWith('!') || userlow === 'vyprbot') {
     return
   }
-
+  
+  if(!message.startsWith('!') || userlow === 'vyprbot') {
+    return
+  }
+  
   if(user !== 'VyprBot') {
     if(commandcooldown.has(`${user}`)) {
       return
@@ -148,7 +160,7 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, (`${user} --> Succesfully joined channel: "${args[0].toLowerCase()}"! MrDestructoid 👍`))
     }
     else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
+      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
     }
   }
 
@@ -172,7 +184,7 @@ client.on("PRIVMSG", (msg) => {
       client.part(`${channel.toLowerCase()}`)
     }
     else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
+      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer or Channel Broadcaster.`);
     }
   }
 
@@ -185,7 +197,7 @@ client.on("PRIVMSG", (msg) => {
       })
     }
     else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
+      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
     }
   }
 
@@ -195,7 +207,7 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, `${user} --> Succesfully added key: "${args[0]}"  value: "${args[1]}" NOTED`)
     }
     else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
+      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
     }
   }
 
@@ -206,7 +218,7 @@ client.on("PRIVMSG", (msg) => {
       })
     }
     else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
+      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
     }
   }
 
@@ -216,7 +228,7 @@ client.on("PRIVMSG", (msg) => {
       .then(keys => console.log(keys))
     }
     else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
+      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
     }
   }
 
@@ -226,7 +238,7 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, (`${user} --> Set ${args[0]}'s nammers to ${args[1]}!`))
     }
     else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
+      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
     }
   }
 
@@ -239,7 +251,7 @@ client.on("PRIVMSG", (msg) => {
       })
     }
     else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
+      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
     }
   }
 
@@ -249,7 +261,7 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, `${user} --> Reset the cooldown of user: "${args[0]}"!`);
     }
     else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
+      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
     }
   }
 
@@ -324,7 +336,7 @@ client.on("PRIVMSG", (msg) => {
       db.set(`pvcL777time`, `Milano, Italy`);
     }
     else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
+      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
     }
   }
 
@@ -476,7 +488,7 @@ client.on("PRIVMSG", (msg) => {
       }
     }
     else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command!`);
+      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
     }
   }
 
@@ -506,7 +518,7 @@ client.on("PRIVMSG", (msg) => {
       }
     }
     else {
-      client.me(channel, `Whoops! ${user} --> You need to be a channel owner to use that command. PANIC`);
+      client.me(channel, `Whoops! ${user} --> You need to be a channel owner to use that command. Required: Bot Developer or Channel Broadcaster.`);
     }
   }
 
@@ -538,7 +550,7 @@ client.on("PRIVMSG", (msg) => {
       }
     }
     else {
-      client.say(channel, `Whoops! ${user} --> You need to be a channel owner to use that command. PANIC`);
+      client.say(channel, `Whoops! ${user} --> You need to be a channel owner to use that command. Bot Developer or Channel Broadcaster.`);
     }
   }
 
@@ -1307,9 +1319,77 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'specs') {
     client.me(channel, `${user} --> https://darkvypr.com/specs NekoProud`);
   }
+
+  if(command === 'setstatus') {
+    fs.ensureFileSync(`status/${userlow}.json`)
+    if(`${args.join(' ').trim()}` === 'clear' || `${args.join(' ').trim()}` === 'none') {
+      let newStatus = JSON.stringify({status: `noActiveStatus`, dateOfStatus: ``})
+      fs.writeFileSync(`status/${userlow}.json`, newStatus)
+      client.me(channel, `${user} --> Successfully cleared your status.`);
+    }
+    else if(`${args.join(' ')}` === '') {
+      client.me(channel, `${user} --> This command gives you a status that people can check. Example: "!setstatus learning javascript". To clear your status, use: "!setstatus none" "!setstatus clear".`)
+    }
+    else {
+      let newStatus = JSON.stringify({status: `${args.join(' ')}`, dateOfStatus: `${new Date()}`})
+      fs.writeFileSync(`status/${userlow}.json`, newStatus)
+      client.me(channel, `${user} --> Successfully set your current status to: "${args.join(" ")}"`);
+    }
+  }
   
   if(command === '🥪') {
     client.me(channel, `${user} --> https://www.youtube.com/shorts/7XkP11Pomuc`);
+  }
+  
+  if(command === 'status') {
+    if(`${args[0]}` === 'undefined') {
+      let doesUserExist = fs.existsSync(`status/${userlow}.json`) 
+      if(doesUserExist === true) {
+        function addZero(i) {
+          if (i < 10) {i = "0" + i}
+          return i;
+        }
+        let status = fs.readJsonSync(`status/${userlow}.json`)
+        let currentStatus = status.status
+        if(currentStatus === 'noActiveStatus') {
+          client.me(channel, `${user} --> You have not set your status. Example: "!setstatus learning javascript"`)
+        }
+        else {
+          let dateSetDateObj = new Date(status.dateOfStatus)
+          let sinceDateSet = humanizeDuration(new Date(dateSetDateObj) - new Date(), { units: ["d", "h", "m", "s"], round: true, largest: 2 })
+          let dateSetFormatted = (dateSetDateObj.getMonth() + 1) + '/' + dateSetDateObj.getDate() + '/' + dateSetDateObj.getFullYear() + ' at ' + (+dateSetDateObj.getHours() - 5) + ':' + addZero(dateSetDateObj.getMinutes())
+          
+          client.me(channel, `${user} --> Your current status is: ${currentStatus} | Set on ${dateSetFormatted} (${sinceDateSet} ago) (EST-5). To clear your status, use: "!setstatus none" "!setstatus clear".`) 
+        }
+      }
+      else {
+        client.me(channel, `${user} --> You have not set your status. Example: "!setstatus learning javascript"`)
+      }
+    }
+    else {
+      let userToCheck = `${args[0].replace('@', '').toLowerCase()}`
+      let doesUserExist = fs.existsSync(`status/${userToCheck}.json`)
+      if(doesUserExist === true) {
+        function addZero(i) {
+          if (i < 10) {i = "0" + i}
+          return i;
+        }
+        let status = fs.readJsonSync(`status/${userToCheck}.json`)
+        let currentStatus = status.status
+        if(currentStatus === 'noActiveStatus') {
+          client.me(channel, `${user} --> That user has not yet set their status.`)
+        }
+        else {
+          let dateSetDateObj = new Date(status.dateOfStatus)
+          let sinceDateSet = humanizeDuration(new Date(dateSetDateObj) - new Date(), { units: ["d", "h", "m", "s"], round: true, largest: 2 })
+          let dateSetFormatted = (dateSetDateObj.getMonth() + 1) + '/' + dateSetDateObj.getDate() + '/' + dateSetDateObj.getFullYear() + ' at ' + (+dateSetDateObj.getHours() - 5) + ':' + addZero(dateSetDateObj.getMinutes())
+          client.me(channel, `${user} --> ${userToCheck}'s current status is: ${currentStatus} | Set on ${dateSetFormatted} (${sinceDateSet} ago) (EST-5)`)
+        }
+      }
+      else {
+        client.me(channel, `${user} --> That user has not yet set their status.`)
+      }
+    }
   }
 
 	if(command === 'time') {
@@ -1418,7 +1498,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'urban') {
-    axios.get(`https://api.urbandictionary.com/v0/define?term=${args.join(' ')}`)
+    axios.get(`https://api.urbandictionary.com/v0/define?term=${args.join(' ')}`, { timeout: 10000 })
       .then((response) => {
         let urbanresult = response.data
         if(`${urbanresult.list[0]}` === 'undefined') {
@@ -1927,4 +2007,14 @@ client.on("PRIVMSG", (msg) => {
       })
     }
   }
+
+  if(command === 'color' || command === 'colour') {
+    let c = `${args.join(' ')}`.toLowerCase()
+    if(c === 'undefined' || c !== 'red' || c !== 'blue' || c !== 'green' || c !== 'firebrick' || c !== 'coral' || c !== 'yellow green' || c !== 'orange red' || c !== 'sea green' || c !== 'goldenrod' || c !== 'chocolate' || c !== 'cadet blue' || c !== 'dodger blue' || c !== 'hot pink' || c !== 'blue violet' || c !== 'spring green') {
+      client.me(channel, (`${user} --> That command was not valid. Use: !setcolour red|blue|green|firebrick|coral|yellow green|orange red|sea green|goldenrod|chocolate|cadet blue|dodger blue|hot pink|blue violet|spring green.`))
+    }
+    else {
+    }
+  }
+  
 })
