@@ -1363,7 +1363,7 @@ client.on("PRIVMSG", (msg) => {
           let sinceDateSet = humanizeDuration(new Date(dateSetDateObj) - new Date(), { units: ["d", "h", "m", "s"], round: true, largest: 2 })
           let dateSetFormatted = (dateSetDateObj.getMonth() + 1) + '/' + dateSetDateObj.getDate() + '/' + dateSetDateObj.getFullYear() + ' at ' + (+dateSetDateObj.getHours() - 5) + ':' + addZero(dateSetDateObj.getMinutes())
           
-          client.me(channel, `${user} --> Your current status is: ${currentStatus} | Set on ${dateSetFormatted} (${sinceDateSet} ago) (EST-5). To clear your status, use: "!setstatus none" "!setstatus clear".`) 
+          client.me(channel, `${user} --> Your current status is: ${currentStatus} | Set on ${dateSetFormatted} (${sinceDateSet} ago) (EST-5). To clear your status, use: "!setstatus none" or "!setstatus clear".`) 
         }
       }
       else {
@@ -2122,11 +2122,21 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'color' || command === 'colour') {
-    let c = `${args.join(' ')}`.toLowerCase()
-    if(c === 'undefined' || c !== 'red' || c !== 'blue' || c !== 'green' || c !== 'firebrick' || c !== 'coral' || c !== 'yellow green' || c !== 'orange red' || c !== 'sea green' || c !== 'goldenrod' || c !== 'chocolate' || c !== 'cadet blue' || c !== 'dodger blue' || c !== 'hot pink' || c !== 'blue violet' || c !== 'spring green') {
-      client.me(channel, (`${user} --> That command was not valid. Use: !setcolour red|blue|green|firebrick|coral|yellow green|orange red|sea green|goldenrod|chocolate|cadet blue|dodger blue|hot pink|blue violet|spring green.`))
+    if(/\b^red$|^blue$|^green$|firebrick|coral|yellowgreen|orangered|seagreen|goldenrod|chocolate|cadetblue|dodgerblue|hotpink|blueviolet|springgreen\b/i.test(`${args[0]}`)) {
+      db.get(`${userlow}nammers`).then(function(value){
+        if(+value < 300) {
+          client.me(channel, (`${user} --> You don't have enough nammers. You need at least 300 to use this command!`))
+        }
+        else {
+          let deductedNammers = +value - 300
+          db.set(`${userlow}nammers`, deductedNammers)
+          client.privmsg(channel, `/color ${args[0]}`)
+          client.me(channel, `${user} --> You successfully set my color to "${args[0]}", costing you 300 nammers. You now have ${deductedNammers} nammers. TehePelo`)
+        }
+      })
     }
     else {
+      client.me(channel, (`${user} --> That command was not valid. Price: 300 nammers. Available Colours: https://i.darkvypr.com/colours.png`))
     }
   }
   
