@@ -1272,7 +1272,7 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
-  if(command === 'shop') {
+  if(command === 'shop' || command === 'store') {
     client.me(channel, `${user} --> A list of all purchasable items can be found here: https://darkvypr.com/shop`);
   }
   
