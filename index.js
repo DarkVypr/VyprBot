@@ -90,7 +90,15 @@ client.on("PRIVMSG", (msg) => {
   if(/\bn(a|4)m(mer|ming)?\b/gi.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
     client.privmsg(channel, `NammersOut elisDance NammersOut`);
   }
+  
+  if(/NaN/.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
+    client.privmsg(channel, `NaN`);
+  }
 
+  if(/\bunhandled\s?promise\s?rejection\b/i.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
+    client.privmsg(channel, `js`);
+  }
+  
   if(/\bokge\b/g.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
     client.privmsg(channel, `okge`);
   }
@@ -1493,6 +1501,115 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
+  async function translateText(text, toLanguage) {
+    function checkTargetLang(toLanguage) {
+      switch(toLanguage) {
+        case 'bulgarian':
+          return 'BG'
+          break
+        case 'czech':
+          return 'CS'
+          break
+        case 'danish':
+          return 'DA'
+          break
+        case 'german':
+          return 'DE'
+          break
+        case 'spanish':
+          return 'ES'
+          break
+        case 'greek':
+          return 'EL'
+          break
+        case 'estonian':
+          return 'ET'
+          break
+        case 'french':
+          return 'FR'
+          break
+        case 'finnish':
+          return 'FI'
+          break
+        case 'hungarian':
+          return 'HU'
+          break
+        case 'italian':
+          return 'IT'
+          break
+        case 'japanese':
+          return 'JA'
+          break
+        case 'lithuanian':
+          return 'LT'
+          break
+        case 'latvian':
+          return 'LV'
+          break
+        case 'dutch':
+          return 'NL'
+          break
+        case 'polish':
+          return 'PL'
+          break
+        case 'portuguese':
+          return 'PT-PT'
+          break
+        case 'romanian':
+          return 'RO'
+          break
+        case 'russian':
+          return 'RU'
+          break
+        case 'slovak':
+          return 'SK'
+          break
+        case 'slovenian':
+          return 'SL'
+          break
+        case 'swedish':
+          return 'SV'
+          break
+        case 'chinese':
+          return 'ZH'
+          break
+        default:
+          return 'EN-US'
+      }
+    }
+    let targetLang = checkTargetLang(toLanguage)
+    let translation = await axios.get(`https://api-free.deepl.com/v2/translate?auth_key=${process.env['TRANSLATE_KEY']}&text=${text}&target_lang=${targetLang}`)
+
+    var translationDetails = {
+      translatedText: translation.data.translations[0].text,
+      sourceLang: translation.data.translations[0].detected_source_language,
+      targetLang: targetLang
+    }
+      return translationDetails
+  }
+  
+  if(command === 'translate') {
+    if(`${args[0]}`.includes('to:')) {
+      let targetLang = `${args[0]}`.replace('to:', '').toLowerCase().trim()
+      if(/\bfrench|Bulgarian|Czech|Danish|German|Greek|English|Spanish|Estonian|Finnish|French|Hungarian|Italian|Japanese|Lithuanian|Latvian|Dutch|Polish|Portuguese|Romanian|Russian|Slovak|Slovenian|swedish|chinese/i.test(`${targetLang}`)) {
+        let textUnsplit = `${args.join(' ')}`
+        let textSplit = textUnsplit.split(" ")
+        let textSend = textSplit.slice(1).toString().replace(/,/g, ' ')
+        translateText(textSend, targetLang).then(function(value){
+          client.me(channel, `${user} --> ${value.sourceLang} > ${value.targetLang} | Text: ${value.translatedText}`)
+        })
+      }
+      else {
+        client.me(channel, `${user} --> That isn't a valid language! Valid languages can be found here: https://i.darkvypr.com/languages.png`)
+      }
+    }
+    else {
+      translateText(`${args.join(' ')}`).then(function(value){
+        client.me(channel, `${user} --> ${value.sourceLang} > EN | Text: ${value.translatedText}`)
+      })
+    }
+  }
+  
   if(command === 'urban') {
     axios.get(`https://api.urbandictionary.com/v0/define?term=${args.join(' ')}`, { timeout: 10000 })
       .then((response) => {
