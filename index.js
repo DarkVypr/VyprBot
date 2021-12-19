@@ -1271,6 +1271,10 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, `👥 ${args.join(' ')}`);
     }
   }
+
+  if(command === 'shop') {
+    client.me(channel, `${user} --> A list of all purchasable items can be found here: https://darkvypr.com/shop"`);
+  }
   
   if(command === 'spam') {
     if(userlow === channel || userlow === 'darkvypr') {
@@ -2122,7 +2126,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'color' || command === 'colour') {
-    if(/\b^red$|^blue$|^green$|firebrick|coral|yellowgreen|orangered|seagreen|goldenrod|chocolate|cadetblue|dodgerblue|hotpink|blueviolet|springgreen\b/i.test(`${args[0]}`)) {
+    if(/\b^red$|^blue$|^green$|firebrick|coral|yellowgreen|orangered|seagreen|goldenrod|chocolate|cadetblue|dodgerblue|hotpink|blueviolet|springgreen\b/i.test(`${args.join(' ')}`)) {
       db.get(`${userlow}nammers`).then(function(value){
         if(+value < 300) {
           client.me(channel, (`${user} --> You don't have enough nammers. You need at least 300 to use this command!`))
