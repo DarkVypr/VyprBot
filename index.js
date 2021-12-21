@@ -83,6 +83,37 @@ client.on("PRIVMSG", (msg) => {
     })
   }*/
 
+  function globalPing(msg, userSaid, channelSaid) {
+    const ping1 = new RegExp(/\b(v|b)ypa(')?(s)?\b/)
+    const ping2 = new RegExp(/(bright|dark)?(v|b)(y)p(e|u|o)?r/)
+    const ping3 = new RegExp(/\b(dv(')?(s)?)\b/)
+    const ping4 = new RegExp(/vpyr/)
+    const ping5 = new RegExp(/\b(b|v)o?ip(o*|u)r\b/)
+    const ping6 = new RegExp(/\b(bright|dark)vip(e|u|o)r\b/)
+    const ping7 = new RegExp(/\b(b|v)ip(o|u)r\b/)
+    const ping8 = new RegExp(/\b(b|v)pe?r\b/)
+    const ping9 = new RegExp(/darkv/)
+    const ping10 = new RegExp(/\b(dark|bright)?\s?dype?(r|a)\b/)
+    const ping11 = new RegExp(/\b(b|v)ooper\b/)
+    const ping12 = new RegExp(/(dark|bright)\s?diaper/)
+    const ping13 = new RegExp(/(dark|bright)\s?viper|vypr/)
+
+    const blacklistedChannels = new RegExp(/visioisiv|darkvypr|vyprbottesting|vyprbot|gotiand|arkadlus|vexnade|boronics|xenoplopqb/)
+    const blacklistedUsers = new RegExp(/darkvypr|vyprbot|vyprbottesting|hhharrisonnnbot|apulxd|daumenbot|kuharabot|snappingbot|kaedtn|カイデン|oura_bot/)
+
+    if(!blacklistedChannels.test(channelSaid) && !blacklistedUsers.test(userSaid)) {
+      if(ping1.test(msg) || ping2.test(msg) || ping3.test(msg) || ping4.test(msg) || ping5.test(msg) || ping6.test(msg) || ping7.test(msg) || ping8.test(msg) || ping9.test(msg) || ping10.test(msg) || ping11.test(msg) || ping12.test(msg) || ping13.test(msg)) {
+        client.whisper('darkvypr', `Channel: #${channel} | User: ${user} | Message: ${message}`)
+      }
+    }
+  }
+
+  globalPing(message, userlow, channel)
+  
+  if(/\bn(a|4)m(mer|ming)?\b/gi.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
+    client.privmsg(channel, `NammersOut elisDance NammersOut`);
+  }
+  
   if(userlow === 'thepositivebot' && message.includes('this command has been removed') && channel === 'darkvypr') {
     client.privmsg(channel, `SHUT THE FUCK UP THEPOSITIVEBOT LAUGH`);
   }
@@ -647,10 +678,10 @@ client.on("PRIVMSG", (msg) => {
         getBirthdayDetails(removedatsign).then(function(value) {
           let birthday = value
           if (birthday === 'null') {
-            client.me(channel, `${user} --> User, ${removedatsign} hasn't set their birthday! Get them to set it and retry this command!`)
+            client.me(channel, `${user} --> User ${removedatsign} hasn't set their birthday! Get them to set it and retry this command!`)
           }
           else {
-            client.me(channel, `${user} --> User, ${removedatsign} is currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
+            client.me(channel, `${user} --> User ${removedatsign} is currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
           }
         })
       }
@@ -658,10 +689,10 @@ client.on("PRIVMSG", (msg) => {
         getBirthdayDetails(args[0].toLowerCase()).then(function(value) {
           let birthday = value
           if (birthday === 'null') {
-            client.me(channel, `${user} --> User, ${args[0]} hasn't set their birthday! Get them to set it and retry this command!`)
+            client.me(channel, `${user} --> User ${args[0]} hasn't set their birthday! Get them to set it and retry this command!`)
           }
           else {
-            client.me(channel, `${user} --> User, ${args[0]} is currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
+            client.me(channel, `${user} --> User ${args[0]} is currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
           }
         })
       }
@@ -1059,10 +1090,10 @@ client.on("PRIVMSG", (msg) => {
     .then((response) => {
       let userdata = response.data
       if(`${userdata.bot}` === 'true') {
-        client.me(channel, `${user} --> User, "${userdata.displayName}" is a verified bot! ✅`)
+        client.me(channel, `${user} --> User "${userdata.displayName}" is a verified bot! ✅`)
       }
       else {
-        client.me(channel, `${user} --> User, "${userdata.displayName}" is NOT a verified bot! ❌`)
+        client.me(channel, `${user} --> User "${userdata.displayName}" is NOT a verified bot! ❌`)
       }
     });
   }
