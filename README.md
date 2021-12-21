@@ -2,7 +2,7 @@
 
 Owner: `DarkVypr`
 
-Owner Discord: `DarkVypr#5567`
+Owner Discord: `DarkVypr#5786`
 
 Owner Twitch: `DarkVypr`
 
