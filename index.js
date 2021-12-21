@@ -1431,108 +1431,126 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
-	if(command === 'time') {
-    if(`${args[0]}` === 'undefined') {
-      db.get(`${userlow}time`).then(function(value) {
-        let senderttime = `${value}`
-        if(senderttime === 'null') {
-          client.me(channel, `${user} --> Before using this command, you must set your location with the !setlocation command. Example: “!setlocation lasalle ontario”, “!setlocation springfield virginia” or “!setlocation stockholm sweden”. More info: https://darkvypr.com/commands`)
+  async function getUserTime(username) {
+    let userLocation = await db.get(`${username}time`)
+    if(`${userLocation}` === 'null') {
+      return 'null'
+    }
+    else {
+      let userTime = await axios.get(`https://timezone.abstractapi.com/v1/current_time/?api_key=${process.env['TIME_KEY']}&location=${userLocation}`)
+      let dateTime = userTime.data.datetime
+      let timezone = userTime.data.timezone_abbreviation
+      let yearMonthDay = dateTime[0] + dateTime[1] + dateTime[2] + dateTime[3] + dateTime[4] + dateTime[5] + dateTime[6] + dateTime[7] + dateTime[8] + dateTime[9]
+      let currentHour = dateTime[11] + dateTime[12]
+      let currentMinute = dateTime[14] + dateTime[15]
+      let currentSecond = dateTime[17] + dateTime[18]
+      function checkAMPM(currentHour) {
+        if(+currentHour < 12) {
+          return 'am'
         }
         else {
-          axios.get(`https://timezone.abstractapi.com/v1/current_time/?api_key=${process.env['TIME_KEY']}&location=${senderttime}`)
-          .then((response) => {
-            let timeresults = response.data
-            let datetime = timeresults.datetime
-            let date = datetime[5] + datetime[6] + '/' + datetime[8] + datetime[9] + '/' + datetime[0] + datetime[1] + datetime[2] + datetime[3]
-            let hourfromdatetime = datetime[11] + datetime[12]
-            let restofdatetime = datetime[13] + datetime[14] + datetime[15] + datetime[16] + datetime[17] + datetime[18]
-            if(+hourfromdatetime > 12) {
-              let toampm = (+hourfromdatetime - 12) + restofdatetime + ' pm'
-              client.me(channel, (`${user} --> The time in your location, ${senderttime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
-            }
-            else if(+hourfromdatetime === 12) {
-              let toampm = 12 + restofdatetime + ' pm'
-              client.me(channel, (`${user} --> The time in your location, ${senderttime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`)) 
-            }
-            else if(+hourfromdatetime === 00) {
-              let toampm = 12 + restofdatetime + ' am'
-              client.me(channel, (`${user} --> The time in your location, ${senderttime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`)) 
-            } 
-            else {
-              let hourfromdatetime = datetime[12]
-              let toampm = hourfromdatetime + restofdatetime + ' am'
-              client.me(channel, (`${user} --> The time in your location, ${senderttime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
-            }
-          });
+          return 'pm'
+        }
+      }
+      let meridiem = checkAMPM(currentHour)
+      
+      function getHour(currentHour) {
+        if(+currentHour === 00) {
+          return 12
+        }
+        else if(+currentHour < 10) {
+          return dateTime[12]
+        }
+        else if(+currentHour === 10 || +currentHour === 11 || +currentHour === 12) {
+          return currentHour
+        }
+        else {
+          return currentHour - 12
+        }
+      }
+      let hour = getHour(currentHour)
+
+      var currentTime = {
+        date: yearMonthDay,
+        time: hour + ":" + currentMinute + ":" + currentSecond + " " + meridiem,
+        timezone: timezone,
+        location: userLocation
+      }
+      return currentTime
+    }
+  }
+
+  async function getLocationTime(location) {
+    let locationTime = await axios.get(`https://timezone.abstractapi.com/v1/current_time/?api_key=${process.env['TIME_KEY']}&location=${location}`)
+    let dateTime = locationTime.data.datetime
+    let timezone = locationTime.data.timezone_abbreviation
+    let yearMonthDay = dateTime[0] + dateTime[1] + dateTime[2] + dateTime[3] + dateTime[4] + dateTime[5] + dateTime[6] + dateTime[7] + dateTime[8] + dateTime[9]
+    let currentHour = dateTime[11] + dateTime[12]
+    let currentMinute = dateTime[14] + dateTime[15]
+    let currentSecond = dateTime[17] + dateTime[18]
+    function checkAMPM(currentHour) {
+      if(+currentHour < 12) {
+        return 'am'
+      }
+      else {
+        return 'pm'
+      }
+    }
+    let meridiem = checkAMPM(currentHour) 
+    function getHour(currentHour) {
+      if(+currentHour === 00) {
+        return 12
+      }
+      else if(+currentHour < 10) {
+        return dateTime[12]
+      }
+      else if(+currentHour === 10 || +currentHour === 11 || +currentHour === 12) {
+        return currentHour
+      }
+      else {
+        return currentHour - 12
+      }
+    }
+    let hour = getHour(currentHour)
+    var currentTime = {
+      date: yearMonthDay,
+      time: hour + ":" + currentMinute + ":" + currentSecond + " " + meridiem,
+      timezone: timezone
+    }
+    return currentTime
+  }
+  
+  if(command === 'time') {
+    let lookupSpecific = `${args.join(' ')}`
+    console.log(lookupSpecific)
+    if(lookupSpecific === '') {
+      console.log('undefined')
+      getUserTime(userlow).then(function(value){
+        if(value === 'null') {
+          client.me(channel, `${user} --> That user hasn't set their location! Get them to set it and retry! PANIC`)
+        }
+        else {
+          client.me(channel, `${user} --> At your location (${value.location}) (${value.timezone}) it's ${value.time} and the date is ${value.date}.`)
         }
       })
     }
-
+    else if(lookupSpecific[0] === '@') {
+      console.log('test')
+      let cleanedUserLookup = lookupSpecific.replace('@', '').toLowerCase()
+      getUserTime(cleanedUserLookup).then(function(value) {
+        if(value === 'null') {
+          client.me(channel, `${user} --> That user hasn't set their location! Get them to set it and retry! PANIC`)
+        }
+        else {
+          client.me(channel, `${user} --> ${lookupSpecific}'s current time (${value.location}) (${value.timezone}) is ${value.time} and the date is ${value.date}.`)          
+        }
+      })
+    }
     else {
-      let specificlocation = `${args.join(' ')}`
-      if(specificlocation[0] === '@') {
-        let removedatsign = specificlocation[0].replace('@', '') + specificlocation.substring(1)
-        let removedatsignlow = removedatsign.toLowerCase()
-		    db.get(`${removedatsignlow}time`).then(function(value) {
-			    let lookuptime = `${value}`
-          if(lookuptime === 'null') {
-            client.me(channel, (`${user} --> That user hasen't set their location! Get them to set it and retry. PANIC`))
-		      }
-          else {
-            axios.get(`https://timezone.abstractapi.com/v1/current_time/?api_key=${process.env['TIME_KEY']}&location=${lookuptime}`)
-            .then((response) => {
-              let timeresults = response.data
-              let datetime = timeresults.datetime
-              let date = datetime[5] + datetime[6] + '/' + datetime[8] + datetime[9] + '/' + datetime[0] + datetime[1] + datetime[2] + datetime[3]
-              let hourfromdatetime = datetime[11] + datetime[12]
-              let restofdatetime = datetime[13] + datetime[14] + datetime[15] + datetime[16] + datetime[17] + datetime[18]
-              if(+hourfromdatetime > 12) {
-                let toampm = (+hourfromdatetime - 12) + restofdatetime + ' pm'
-                client.me(channel, (`${user} --> @${removedatsign}'s local time, ${lookuptime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
-              }
-              else if(+hourfromdatetime === 12) {
-                let toampm = 12 + restofdatetime + ' pm'
-                client.me(channel, (`${user} --> @${removedatsign}'s local time, ${lookuptime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
-              }
-              else if(+hourfromdatetime === 00) {
-                let toampm = 12 + restofdatetime + ' am'
-                client.me(channel, (`${user} --> @${removedatsign}'s local time, ${lookuptime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))              } 
-              else {
-                let hourfromdatetime = datetime[12]
-                let toampm = hourfromdatetime + restofdatetime + ' am'
-                client.me(channel, (`${user} --> @${removedatsign}'s local time, ${lookuptime} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
-              }
-            });
-          }
-        })
-      }
-      else {
-        axios.get(`https://timezone.abstractapi.com/v1/current_time/?api_key=${process.env['TIME_KEY']}&location=${args.join(' ')}`)
-          .then((response) => {
-            let timeresults = response.data
-            let datetime = timeresults.datetime
-            let date = datetime[5] + datetime[6] + '/' + datetime[8] + datetime[9] + '/' + datetime[0] + datetime[1] + datetime[2] + datetime[3]
-            let hourfromdatetime = datetime[11] + datetime[12]
-            let restofdatetime = datetime[13] + datetime[14] + datetime[15] + datetime[16] + datetime[17] + datetime[18]
-            if(+hourfromdatetime > 12) {
-              let toampm = (+hourfromdatetime - 12) + restofdatetime + ' pm'
-              client.me(channel, (`${user} --> The time in ${args.join(' ')} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
-            }
-            else if(+hourfromdatetime === 12) {
-              let toampm = 12 + restofdatetime + ' pm'
-              client.me(channel, (`${user} --> The time in ${args.join(' ')} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`)) 
-            }
-            else if(+hourfromdatetime === 00) {
-              let toampm = 12 + restofdatetime + ' am'
-              client.me(channel, (`${user} --> The time in ${args.join(' ')} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
-            } 
-            else {
-              let hourfromdatetime = datetime[12]
-              let toampm = hourfromdatetime + restofdatetime + ' am'
-              client.me(channel, (`${user} --> The time in ${args.join(' ')} (${timeresults.timezone_abbreviation}) is: ${toampm} and the date is: ${date} ⌚`))
-            }
-          });
-      }
+      console.log('lol')
+      getLocationTime(lookupSpecific).then(function(value){
+        client.me(channel, `${user} --> The current time in ${lookupSpecific} (${value.timezone}) is ${value.time} and the date is ${value.date}.`)
+      })
     }
   }
 
