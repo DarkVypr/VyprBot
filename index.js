@@ -321,7 +321,7 @@ client.on("PRIVMSG", (msg) => {
     }
     db.get("commandusage").then(function(usage) {
       pingServer().then(function(latency){
-        client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | Commands Used: ${usage} | RAM Usage: ${ramusage} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
+        client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | Commands Used: ${usage} | RAM Usage: ${ramusage} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use "vb request" for info on requesting the bot.`))
       })
     })
   }
@@ -1307,7 +1307,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'request') {
-    client.me(channel, `${user} --> If you would like the bot in your chat, you can use the !suggest command. Example: "!suggest I would like the bot added to my channel."`);
+    client.me(channel, `${user} --> If you would like the bot in your chat, you can use the "vb suggest" command. Example: "vb suggest I would like the bot in my channel."`);
   }
 
   if(command === 'say') {
