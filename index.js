@@ -203,7 +203,7 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
     }
   }
-
+  
   if(command === 'part') {
     if(`${userlow}` === 'darkvypr') {
       const channellist = fs.readFileSync(channelsFile).toString()
@@ -320,7 +320,7 @@ client.on("PRIVMSG", (msg) => {
 
     let ramusage = `${Math.round(process.memoryUsage().rss / 1024 / 1024)}`
 
-    client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | RAM Usage: ${ramusage} MB | Prefix: "!" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
+    client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | RAM Usage: ${ramusage} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
   }
 
   if(command === 'commands') {
@@ -973,7 +973,15 @@ client.on("PRIVMSG", (msg) => {
         let messagesendunsplit = `${args.join(' ')}`
         let messagesendsplit = messagesendunsplit.split(" ")
         let messagesend = messagesendsplit.slice(1).toString().replace(/,/g, ' ')
-        client.privmsg(channelsay, messagesend);
+        if(channelsay === 'all') {
+          for (let i = 0; i < channelOptions.length; i++) {
+            channelsay += channelOptions[i]
+            client.privmsg(channelsay, messagesend);
+          }
+        }
+        else {
+          client.privmsg(channelsay, messagesend);
+        }
       }
       else {
         client.privmsg(channel, `${args.join(' ')}`);
@@ -1307,7 +1315,7 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, `👥 ${args.join(' ')}`);
     }
   }
-
+  
   if(command === 'shop' || command === 'store') {
     client.me(channel, `${user} --> A list of all purchasable items can be found here: https://darkvypr.com/shop`);
   }
@@ -1924,7 +1932,7 @@ client.on("PRIVMSG", (msg) => {
     return Math.floor(Math.random() * max);
   }
 
-  if(command === 'cdreset') {
+  if(command === 'cdr') {
     if(cdrcooldown.has(`${user}`)) {
       client.me(channel, (`${user} --> Your cdr is on cooldown. Wait 2 hours in between each cdr. GearScare ⛔`))
     }
