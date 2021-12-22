@@ -975,7 +975,7 @@ client.on("PRIVMSG", (msg) => {
         let messagesend = messagesendsplit.slice(1).toString().replace(/,/g, ' ')
         if(channelsay === 'all') {
           for (let i = 0; i < channelOptions.length; i++) {
-            channelsay += channelOptions[i]
+            channelsay = channelOptions[i]
             client.privmsg(channelsay, messagesend);
           }
         }
