@@ -118,6 +118,10 @@ client.on("PRIVMSG", (msg) => {
     client.privmsg(channel, `SHUT THE FUCK UP THEPOSITIVEBOT LAUGH`);
   }
 
+  if(userlow === 'xenoplopqb' && message.includes('modCheck') && channel === 'darkvypr') {
+    client.privmsg(channel, `modCheck`);
+  }
+  
   if(/\bn(a|4)m(mer|ming)?\b/gi.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
     client.privmsg(channel, `NammersOut elisDance NammersOut`);
   }
