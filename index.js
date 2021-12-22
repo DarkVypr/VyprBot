@@ -3,6 +3,7 @@ const talkedRecently = new Set();
 const commandcooldown = new Set();
 const cdrcooldown = new Set();
 const fs = require('fs-extra')
+const {performance} = require('perf_hooks');
 const Database = require("@replit/database")
 const db = new Database()
 const humanizeDuration = require("humanize-duration");
@@ -311,9 +312,17 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'ping' || command === 'help' || command === 'info') {
     let Sseconds = process.uptime()
     let ramusage = `${Math.round(process.memoryUsage().rss / 1024 / 1024)}`
-    db.get("commandusage").then(function(value) {
-      let usage = value
-      client.me(channel, (`PunOko 🏓 ${user} --> | Bot Uptime: ${cleanSeconds(Sseconds)} | Commands Used: ${usage} | RAM Usage: ${ramusage} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
+    async function pingServer() {
+      const t0 = performance.now()
+      await client.ping()
+      const t1 = performance.now()
+      const latency = (t1 - t0).toFixed()
+      return latency
+    }
+    db.get("commandusage").then(function(usage) {
+      pingServer().then(function(latency){
+        client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | Commands Used: ${usage} | RAM Usage: ${ramusage} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
+      })
     })
   }
 
