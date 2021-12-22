@@ -72,17 +72,6 @@ client.on("PRIVMSG", (msg) => {
   let channel = msg.channelName
   let message = msg.messageText
 
-  // Command Usage Counter (DEPRECATED)
-
-  /*if(userlow === 'vyprbot') {
-    db.get("commandusage").then(function(value) {
-      let origusage = `${value}`
-      let plusoneusage = +origusage + 1
-      db.set("commandusage", plusoneusage);
-      console.log(plusoneusage)
-    })
-  }*/
-
   function globalPing(msg, userSaid, channelSaid) {
     const ping1 = new RegExp(/\b(v|b)ypa(')?(s)?\b/)
     const ping2 = new RegExp(/(bright|dark)?(v|b)(y)p(e|u|o)?r/)
@@ -151,9 +140,14 @@ client.on("PRIVMSG", (msg) => {
       setTimeout(() => {
         commandcooldown.delete(`${user}`);
       }, 2000);
+      
+      db.get("commandusage").then(function(value) {
+        let usage = +value + 1
+        db.set("commandusage", usage);
+      })
     }
   }
-
+  
   const PREFIX = "vb ";
   let [command, ...args] = msg.messageText.slice(PREFIX.length).split(/ +/g);
 
@@ -317,10 +311,11 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'ping' || command === 'help' || command === 'info') {
     let latency = Math.floor(Math.random() * 70)
     let Sseconds = process.uptime()
-
     let ramusage = `${Math.round(process.memoryUsage().rss / 1024 / 1024)}`
-
-    client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | RAM Usage: ${ramusage} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
+    db.get("commandusage").then(function(value) {
+      let usage = value
+      client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | Commands Used: ${usage} | RAM Usage: ${ramusage} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
+    })
   }
 
   if(command === 'commands') {
