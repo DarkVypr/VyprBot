@@ -196,7 +196,8 @@ client.on("PRIVMSG", (msg) => {
       client.join(`${args[0].toLowerCase()}`)
       let content = ' ' + args[0].toLowerCase()
       fs.writeFile('channels.txt', content, { flag: 'a+' }, err => {})
-      client.me(channel, (`${user} --> Succesfully joined channel: "${args[0].toLowerCase()}"! MrDestructoid 👍`))
+      client.me(channel, (`${user} --> Succesfully joined channel: "${args[0].toLowerCase()}"! TehePelo 👍`))
+      client.me(`${args[0].toLowerCase()}`, (`Successfully joined! KonCha`))
     }
     else {
       client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
