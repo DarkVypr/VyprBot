@@ -1895,6 +1895,10 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'xqcow2') {
     client.me(channel, `${user} --> https://i.imgur.com/d8KqqiD.png`);
   }
+	
+  if(command === 'dv') {
+    client.me(channel, `${user} --> https://gyazo.com/9855f434af4a04ce25d1e3e2117562fb);
+  }
 
   if(command === 'yag') {
     client.me(channel, `${user} --> idk this yagnesh person, but they are making a shit first impression to me xqcMood TeaTime so cringe wtf`);
