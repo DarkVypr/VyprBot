@@ -1897,7 +1897,7 @@ client.on("PRIVMSG", (msg) => {
   }
 	
   if(command === 'dv') {
-    client.me(channel, `${user} --> https://gyazo.com/9855f434af4a04ce25d1e3e2117562fb);
+    client.me(channel, `${user} --> https://gyazo.com/9855f434af4a04ce25d1e3e2117562fb`);
   }
 
   if(command === 'yag') {
