@@ -309,12 +309,11 @@ client.on("PRIVMSG", (msg) => {
   // Bot Info
 
   if(command === 'ping' || command === 'help' || command === 'info') {
-    let latency = Math.floor(Math.random() * 70)
     let Sseconds = process.uptime()
     let ramusage = `${Math.round(process.memoryUsage().rss / 1024 / 1024)}`
     db.get("commandusage").then(function(value) {
       let usage = value
-      client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | Commands Used: ${usage} | RAM Usage: ${ramusage} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
+      client.me(channel, (`PunOko 🏓 ${user} --> | Bot Uptime: ${cleanSeconds(Sseconds)} | Commands Used: ${usage} | RAM Usage: ${ramusage} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use !request for info on requesting the bot.`))
     })
   }
 
