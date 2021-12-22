@@ -138,7 +138,7 @@ client.on("PRIVMSG", (msg) => {
     client.privmsg(channel, `okge`);
   }
   
-  if(!message.startsWith('!') || userlow === 'vyprbot') {
+  if(!message.startsWith('vb ') || userlow === 'vyprbot') {
     return
   }
   
@@ -154,7 +154,7 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
-  const PREFIX = "!";
+  const PREFIX = "vb ";
   let [command, ...args] = msg.messageText.slice(PREFIX.length).split(/ +/g);
 
   // Variables
@@ -432,7 +432,7 @@ client.on("PRIVMSG", (msg) => {
 
   // Suggestions
 
-  if(command === 'vbsuggest') {
+  if(command === 'suggest') {
     if(`${args[0]}` === 'undefined') {
       client.me(channel, `${user} --> You must provide a suggestion when using this command. Example: "!suggest I would like the bot to be added to my channel."`)
     }
@@ -452,7 +452,7 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
-  if(command === 'vbunset') {
+  if(command === 'unset') {
     if(`${args[0]}` === 'undefined') {
       client.me(channel, `${user} --> You must provide a suggestion to unset when using this command. Example: "!unset 10" would unset the suggestion with the ID of '10'.`)
     }
@@ -473,7 +473,7 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
-  if(command === 'vbcomplete') {
+  if(command === 'complete') {
     let suggestionuser = `${args[0]}`
     let suggestionid = `${args[1]}`
     let suggestionstatus = `${args[2]}`
@@ -496,7 +496,7 @@ client.on("PRIVMSG", (msg) => {
             client.whisper(suggestionuser.toLowerCase(), `[Suggestion Update] Your suggestion with the ID:${suggestionid} was denied! Reason: ${suggestionreason}`)
           }
           else {
-            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !vbcomplete {user} {id} {completed|approved|denied|held}`)
+            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !complete {user} {id} {completed|approved|denied|held}`)
           }
         }
         else if(`${suggestionstatus.toUpperCase()}` === 'HELD' || `${suggestionstatus.toUpperCase()}` === 'ON-HOLD') {
@@ -509,7 +509,7 @@ client.on("PRIVMSG", (msg) => {
             client.whisper(suggestionuser.toLowerCase(), `[Suggestion Update] Your suggestion with the ID:${suggestionid} was put on hold! Reason: ${suggestionreason}`)
           }
           else {
-            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !vbcomplete {user} {id} {completed|approved|denied|held}`)
+            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !complete {user} {id} {completed|approved|denied|held}`)
           }
         }
         else {
@@ -522,7 +522,7 @@ client.on("PRIVMSG", (msg) => {
             client.whisper(suggestionuser.toLowerCase(), `[Suggestion Update] Your suggestion with the ID:${suggestionid} was approved! Reason: ${suggestionreason}`)
           }
           else {
-            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !vbcomplete {user} {id} {completed|approved|denied|held}.`)
+            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !complete {user} {id} {completed|approved|denied|held}.`)
           }
         }
       }
@@ -534,7 +534,7 @@ client.on("PRIVMSG", (msg) => {
 
   // Permission System
 
-  if(command === 'vbpermit') {
+  if(command === 'permit') {
     if(channel === userlow || userlow === 'darkvypr') {
       let doesuserhavepermits = fs.existsSync(`permissions/${channel}`)
 
@@ -562,7 +562,7 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
-  if(command === 'vbunpermit') {
+  if(command === 'unpermit') {
     if(channel === userlow || userlow === 'darkvypr') {
       let doesuserhavepermits = fs.existsSync(`permissions/${channel}`)
 
@@ -797,11 +797,11 @@ client.on("PRIVMSG", (msg) => {
           }
         }
         else {
-          client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !vbpermit {username_here}`)
+          client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !permit {username_here}`)
         }
       }
       else {
-        client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !vbpermit {username_here}`)
+        client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !permit {username_here}`)
       }
     }
   }
@@ -1296,7 +1296,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'request') {
-    client.me(channel, `${user} --> If you would like the bot in your chat, you can use the !vbsuggest command. Example: "!vbsuggest I would like the bot added to my channel."`);
+    client.me(channel, `${user} --> If you would like the bot in your chat, you can use the !suggest command. Example: "!suggest I would like the bot added to my channel."`);
   }
 
   if(command === 'say') {
@@ -1342,11 +1342,11 @@ client.on("PRIVMSG", (msg) => {
           }
         }
         else {
-          client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !vbpermit {username_here}`)
+          client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !permit {username_here}`)
         }
       }
       else {
-        client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !vbpermit {username_here}`)
+        client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !permit {username_here}`)
       }
     }
   }
