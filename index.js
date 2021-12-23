@@ -2048,7 +2048,7 @@ client.on("PRIVMSG", (msg) => {
           }
           else {
             let killamount = `${args[0]}`
-            const regex = new RegExp('^([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-9][0-9][0-9][0-9])$');
+            const regex = new RegExp('^([1-9]|[1-9][0-9]{1,6})$');
             testForNumber = `${regex.test(killamount)}`
 
             if(testForNumber === 'true') {
