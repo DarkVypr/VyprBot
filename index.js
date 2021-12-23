@@ -127,6 +127,8 @@ client.on("PRIVMSG", (msg) => {
   if(/\bokge\b/g.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
     client.privmsg(channel, `okge`);
   }
+
+
   
   if(!message.startsWith('vb ') || userlow === 'vyprbot') {
     return
@@ -2007,6 +2009,33 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
+  function killMessage(amount) {
+    if(+amount >= 1 && +amount < 20) {
+      return `You line ${amount} nammers up in front of a firing squad,`
+    }
+    else if(+amount >= 20 && +amount < 50) {
+      return `You send ${amount} nammers off to "training" (a volcano),`
+    }
+    else if(+amount >= 50 && +amount < 80) {
+      return `You drop a car on ${amount} nammers killing them,`
+    }
+    else if(+amount >= 80 && +amount < 120) {
+      return `You stare ${amount} nammers in the eyes as you stab them one-by-one,`
+    }
+    else if(+amount >= 120 && +amount < 200) {
+      return `You lethally inject ${amount} nammers with rat poison,`
+    }
+    else if(+amount >= 200 && +amount < 250) {
+      return `You fatally electrocute ${amount} nammers one-by-one, make the others watch,`
+    }
+    else if(+amount >= 250 && +amount < 1000) {
+      return `You make ${amount} nammers jump off of a building in a single file line,`
+    }
+    else {
+      return `You enlist ${amount} nammers into the VietNaM war,`
+    }
+  }
+  
   if(command === 'kill') {
 		db.get(`${userlow}nammers`).then(function(value) {
 			let nammers = `${value}`
@@ -2025,7 +2054,7 @@ client.on("PRIVMSG", (msg) => {
             if(testForNumber === 'true') {
               let afterkill = +nammers - +killamount
               db.set(`${userlow}nammers`, afterkill)
-              client.me(channel, (`${user} --> NekoProud 🔪 You brutally execute ${killamount} nammers, and are left with ${afterkill} nammers.`))
+              client.me(channel, (`${user} --> NekoProud 🔪 ${killMessage(killamount)} and are left with ${afterkill} nammers.`))
             }
             else if(`${args[0]}` === 'all') {
               db.set(`${userlow}nammers`, 0)
