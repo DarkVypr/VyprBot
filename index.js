@@ -2058,7 +2058,7 @@ client.on("PRIVMSG", (msg) => {
             }
             else if(`${args[0]}` === 'all') {
               db.set(`${userlow}nammers`, 0)
-              client.me(channel, (`${user} --> GearScare 🔪 You graciously mutilate all of your nammers (${nammers}), and are left with nothing.`))
+              client.me(channel, (`${user} --> GearScare 🔪 ${killMessage(nammers)} and now have nothing.`))
             }
             else {
               client.me(channel, (`${user} --> Please enter a valid amount of nammers to kill KannaSip`))
