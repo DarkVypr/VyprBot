@@ -974,7 +974,7 @@ client.on("PRIVMSG", (msg) => {
       }
     }
     else {
-      client.me(channel, `${user} --> You dont have the required permission to use that command! Use !say instead.`);
+      client.me(channel, `${user} --> You don't have the required permission to use that command! Use !say instead.`);
     }
   }
 
@@ -1992,28 +1992,28 @@ client.on("PRIVMSG", (msg) => {
 
   function killMessage(amount) {
     if(+amount >= 1 && +amount < 20) {
-      return `You line ${amount} nammers up in front of a firing squad,`
+      return `You line ${amount} nammer(s) up in front of a firing squad,`
     }
     else if(+amount >= 20 && +amount < 50) {
-      return `You send ${amount} nammers off to "training" (a volcano),`
+      return `You send ${amount} nammer(s) off to "training" (a volcano),`
     }
     else if(+amount >= 50 && +amount < 80) {
-      return `You drop a car on ${amount} nammers killing them,`
+      return `You drop a car on ${amount} nammer(s) killing them,`
     }
     else if(+amount >= 80 && +amount < 120) {
-      return `You stare ${amount} nammers in the eyes as you stab them one-by-one,`
+      return `You stare ${amount} nammer(s) in the eyes as you stab them one-by-one,`
     }
     else if(+amount >= 120 && +amount < 200) {
-      return `You lethally inject ${amount} nammers with rat poison,`
+      return `You lethally inject ${amount} nammer(s) with rat poison,`
     }
     else if(+amount >= 200 && +amount < 250) {
-      return `You fatally electrocute ${amount} nammers one-by-one, make the others watch,`
+      return `You fatally electrocute ${amount} nammer(s) one-by-one, make the others watch,`
     }
     else if(+amount >= 250 && +amount < 1000) {
-      return `You make ${amount} nammers jump off of a building in a single file line,`
+      return `You make ${amount} nammer(s) jump off of a building in a single file line,`
     }
     else {
-      return `You enlist ${amount} nammers into the VietNaM war,`
+      return `You enlist ${amount} nammer(s) into the VietNaM war,`
     }
   }
   
@@ -2025,7 +2025,7 @@ client.on("PRIVMSG", (msg) => {
 		    }
         else {
           if(+`${args[0]}` > +`${nammers}`) {
-            client.me(channel, (`${user} --> MenheraCry You try to kill ${args[0]} nammers, but realize that you only have ${nammers} nammers, and give up.`))
+            client.me(channel, (`${user} --> MenheraCry You try to kill ${args[0]} nammer(s), but realize that you only have ${nammers} nammer(s), and give up.`))
           }
           else {
             let killamount = `${args[0]}`
@@ -2035,7 +2035,7 @@ client.on("PRIVMSG", (msg) => {
             if(testForNumber === 'true') {
               let afterkill = +nammers - +killamount
               db.set(`${userlow}nammers`, afterkill)
-              client.me(channel, (`${user} --> NekoProud 🔪 ${killMessage(killamount)} and are left with ${afterkill} nammers.`))
+              client.me(channel, (`${user} --> NekoProud 🔪 ${killMessage(killamount)} and are left with ${afterkill} nammer(s).`))
             }
             else if(`${args[0]}` === 'all') {
               db.set(`${userlow}nammers`, 0)
@@ -2057,7 +2057,7 @@ client.on("PRIVMSG", (msg) => {
             client.me(channel, (`${user} --> GearScare ⛔ You don't have any nammers! Get some by typing "!hunt", and kill some by typing "!kill {amount}"!`))
           }
           else {
-            client.me(channel, (`${user} --> NOTED You have ${nammers} nammers. Get some by typing "!hunt", and kill some by typing "!kill {amount}".`))
+            client.me(channel, (`${user} --> NOTED You have ${nammers} nammer(s). Get some by typing "!hunt", and kill some by typing "!kill {amount}".`))
           }
       })
     }
@@ -2069,7 +2069,7 @@ client.on("PRIVMSG", (msg) => {
             client.me(channel, (`${user} --> GearScare ⛔ That user dosent exist!`))
           }
           else {
-            client.me(channel, (`${user} --> NOTED ${args[0]} has ${nammers} nammers.`))
+            client.me(channel, (`${user} --> NOTED ${args[0]} has ${nammers} nammer(s).`))
           }
       })
     }
@@ -2092,10 +2092,10 @@ client.on("PRIVMSG", (msg) => {
       db.get(`${userlow}nammers`).then(function(value) {
         let nammers = `${value}`
         if(nammers === 'null' || +nammers === 0) {
-          client.me(channel, (`${user} --> GearScare ⛔ It looks like you dont have any nammers to give away! Use "!hunt" to get more. ppOverheat`))
+          client.me(channel, (`${user} --> GearScare ⛔ You don't have any nammers to give away! Use "!hunt" to get more. ppOverheat`))
         }
         else if(+`${giveamount}` > +`${nammers}`) {
-          client.me(channel, (`${user} --> GearScare ⛔ You tried to give away ${giveamount} nammers, but you only have ${nammers} nammers. You keep all of your nammers for a rainy day.`))
+          client.me(channel, (`${user} --> GearScare ⛔ You tried to give away ${giveamount} nammer(s), but you only have ${nammers} nammer(s). You keep all of your nammers for a rainy day.`))
         }
         else {
           db.get(`${recipient.toLowerCase()}nammers`).then(function(valuerecipient) {
@@ -2109,7 +2109,7 @@ client.on("PRIVMSG", (msg) => {
               let recipientaddednammers = +recipientnammers + +giveamount
 
               db.set(`${recipient.toLowerCase()}nammers`, recipientaddednammers)
-              client.me(channel, `${user} --> GearSmile 👉 🚢 Successfully shipped ${giveamount} nammers to ${recipient.toLowerCase()}! Your new balance is: ${aftergive} nammers, and ${recipient.toLowerCase()}'s new balance is: ${recipientaddednammers} nammers!`)
+              client.me(channel, `${user} --> GearSmile 👉 🚢 Successfully shipped ${giveamount} nammer(s) to ${recipient.toLowerCase()}! Your new balance is: ${aftergive} nammer(s), and ${recipient.toLowerCase()}'s new balance is: ${recipientaddednammers} nammer(s)!`)
             }
           })
         }
@@ -2119,10 +2119,10 @@ client.on("PRIVMSG", (msg) => {
       db.get(`${userlow}nammers`).then(function(value) {
         let nammers = `${value}`
         if(nammers === 'null' || +nammers === 0) {
-          client.me(channel, (`${user} --> GearScare ⛔ It looks like you dont have any nammers to give away! Use "!hunt" to get more. ppOverheat`))
+          client.me(channel, (`${user} --> GearScare ⛔ It looks like you don't have any nammers to give away! Use "!hunt" to get more. ppOverheat`))
         }
         else if(+`${giveamount}` > +`${nammers}`) {
-          client.me(channel, (`${user} --> GearScare ⛔ You tried to give away ${giveamount} nammers, but you only have ${nammers} nammers. You keep all of your nammers for a rainy day.`))
+          client.me(channel, (`${user} --> GearScare ⛔ You tried to give away ${giveamount} nammer(s), but you only have ${nammers} nammer(s). You keep all of your nammers for a rainy day.`))
         }
         else {
           db.get(`${recipient.toLowerCase()}nammers`).then(function(valuerecipient) {
@@ -2136,7 +2136,7 @@ client.on("PRIVMSG", (msg) => {
               let recipientaddednammers = +recipientnammers + +giveamount
 
               db.set(`${recipient.toLowerCase()}nammers`, recipientaddednammers)
-              client.me(channel, `${user} --> GearSmile 👉 🚢 Successfully shipped all of your nammers (${giveamount}) to ${recipient.toLowerCase()}! ${recipient.toLowerCase()}'s new balance is: ${recipientaddednammers} nammers!`)
+              client.me(channel, `${user} --> GearSmile 👉 🚢 Successfully shipped all of your nammers (${giveamount}) to ${recipient.toLowerCase()}! ${recipient.toLowerCase()}'s new balance is: ${recipientaddednammers} nammer(s)!`)
             }
           })
         }
@@ -2155,7 +2155,7 @@ client.on("PRIVMSG", (msg) => {
       db.get(`${userlow}nammers`).then(function(value) {
         let nammers = `${value}`
           if(nammers === 'null' || +nammers === 0) {
-            client.me(channel, (`${user} --> You dont have any nammers to gamble with! Type !hunt to get more.`))
+            client.me(channel, (`${user} --> You don't have any nammers to gamble with! Type !hunt to get more.`))
           }
           else {
             let gambleamount = `${args[0]}`
@@ -2171,21 +2171,21 @@ client.on("PRIVMSG", (msg) => {
                 if(winloss === 1) {
                   let gamblewin = Math.round(+nammers + +gambleamount)
                   db.set(`${userlow}nammers`, `${gamblewin}`)
-                  client.me(channel, (`${user} --> You bet ${gambleamount} nammers and won! You now have ${gamblewin} nammers! PagMan 💰`))
+                  client.me(channel, (`${user} --> You bet ${gambleamount} nammer(s) and won! You now have ${gamblewin} nammers! PagMan 💰`))
                 }
                 else {
                   let gambleloss = Math.round(+nammers - +gambleamount)
                   db.set(`${userlow}nammers`, `${gambleloss}`)
-                  client.me(channel, (`${user} --> You bet ${gambleamount} nammers and lost! You now have ${gambleloss} nammers! SadCat`))
+                  client.me(channel, (`${user} --> You bet ${gambleamount} nammer(s) and lost! You now have ${gambleloss} nammers! SadCat`))
                 }
-              }
+              }        
             }
             else if(`${args[0]}` === 'all') {
               let winloss = getRandomInt(2)
               if(winloss === 1) {
                 let gamblewin = Math.round(+nammers * 2)
                 db.set(`${userlow}nammers`, `${gamblewin}`)
-                client.me(channel, (`${user} --> You went all in and won! You now have ${gamblewin} nammers! EZ 💰`))
+                client.me(channel, (`${user} --> You went all in and won! You now have ${gamblewin} nammer(s)! EZ 💰`))
               }
               else {
                 db.set(`${userlow}nammers`, '0')
@@ -2204,7 +2204,7 @@ client.on("PRIVMSG", (msg) => {
     if(/\b^red$|^blue$|^green$|firebrick|coral|yellowgreen|orangered|seagreen|goldenrod|chocolate|cadetblue|dodgerblue|hotpink|blueviolet|springgreen\b/i.test(`${args.join(' ')}`)) {
       db.get(`${userlow}nammers`).then(function(value){
         if(+value < 300) {
-          client.me(channel, (`${user} --> You don't have enough nammers. You need at least 300 to use this command!`))
+          client.me(channel, (`${user} --> You don't have enough nammers. You need at least 300 to use this command! You have ${value}.`))
         }
         else {
           let deductedNammers = +value - 300
