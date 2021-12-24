@@ -331,15 +331,8 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'commands') {
     client.me(channel, `${user} --> A list of commands can be found here NekoProud 👉 https://darkvypr.com/commands`);
   }
-
+  
   // Set Commands
-
-  if(command === 'settwitter') {
-    db.set(`${userlow}twitter`, `${args[0]}`)
-      .then(() => db.list())
-      .then(keys => console.log(keys))
-      .then(client.me(channel, `${user} --> Succesfully set your Twitter account to ${args[0]}!`))
-  }
 
   if(command === 'setbirthday') {
     const regex = new RegExp('^(?!0?2/3)(?!0?2/29/.{3}[13579])(?!0?2/29/.{2}[02468][26])(?!0?2/29/.{2}[13579][048])(?!(0?[469]|11)/31)(?!0?2/29/[13579][01345789]0{2})(?!0?2/29/[02468][1235679]0{2})(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/([0-9]{4})$')
@@ -403,18 +396,6 @@ client.on("PRIVMSG", (msg) => {
     else {
       client.me(channel, `${user} --> GearScare This command is only available in DarkVypr's chat`);
     }
-  }
-
-  if(command === 'twitter') {
-    db.get(`${userlow}twitter`).then(function(value) {
-      let sendertwitter = `${value}`
-      if(sendertwitter !== 'null') {
-        client.me(channel, (`${user} --> ${user}'s Twitter can be found at: https://twitter.com/${sendertwitter}`))
-      }
-      else {
-        client.me(channel, (`${user} --> To use the "!twitter" command, you must first set your Twitter account with the !settwitter command, followed by your Twitter handle. Example: "!settwitter darkvyprr". More info: https://darkvypr.com/commands YESIDOTHINKSO`))
-      }
-    })
   }
   
   if(command === 'github' || command === 'git') {
@@ -2166,7 +2147,7 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
-  if(command === 'gamble') {
+  if(command === 'gamble' || command === 'roulette') {
     if(`${args[0]}` === 'undefined') {
       client.me(channel, (`${user} --> PANIC Please enter an amount of nammers to gamble with!`))
     }
