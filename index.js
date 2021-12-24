@@ -788,7 +788,7 @@ client.on("PRIVMSG", (msg) => {
     today = new Date().addHours(-5)
     xmas = new Date("December 25, 2021");
 
-    let timeUntilChristmas = humanizeDuration(xmas - today, { units: ["d", "h", "m", "s"], round: true, largest: 2})
+    let timeUntilChristmas = humanizeDuration(xmas - today, { units: ["d", "h", "m", "s"], round: true, largest: 2, delimiter: " and "})
 
     if(today.toDateString() === 'Sat Dec 25 2021') {
       client.me(channel, `YAAAY peepoSnow It's finally that time of year! Merry Christmas! peepoSnow YAAAY`);
