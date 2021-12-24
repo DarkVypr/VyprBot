@@ -227,7 +227,7 @@ client.on("PRIVMSG", (msg) => {
       }
     }
     else {
-      client.me(channel, `${user} --> You don't have the required permission to use that command! Required: Developer`)
+      client.me(channel, `${user} --> You don't have the required permission to use that command! If you would like to have all of your data moved over to a new name, use "vb suggest" and I will get to it. Required: Developer`)
     }
   }
 
