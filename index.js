@@ -134,7 +134,7 @@ client.on("PRIVMSG", (msg) => {
     return
   }
   
-  if(user !== 'VyprBot') {
+  if(userlow !== 'vyprbot' && userlow !== 'darkvypr') {
     if(commandcooldown.has(`${user}`)) {
       return
     }
