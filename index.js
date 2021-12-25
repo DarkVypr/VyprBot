@@ -1002,7 +1002,7 @@ client.on("PRIVMSG", (msg) => {
         let messagesendunsplit = `${args.join(' ')}`
         let messagesendsplit = messagesendunsplit.split(" ")
         let messagesend = messagesendsplit.slice(1).toString().replace(/,/g, ' ')
-        if(channelsay === 'all') {
+        if(channelsay === 'all' && userlow === 'darkvypr') {
           for (let i = 0; i < channelOptions.length; i++) {
             channelsay = channelOptions[i]
             client.privmsg(channelsay, messagesend);
