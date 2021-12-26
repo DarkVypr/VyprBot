@@ -623,6 +623,46 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
+  // Countdowns
+
+  if(command === 'christmas') {
+    Date.prototype.addHours= function(h){
+        this.setHours(this.getHours()+h);
+        return this;
+    }
+
+    today = new Date().addHours(-5)
+    xmas = new Date("December 25, 2022");
+
+    let timeUntilChristmas = humanizeDuration(xmas - today, { units: ["d", "h", "m", "s"], round: true, largest: 2, delimiter: " and "})
+
+    if(today.toDateString() === 'Sat Dec 25 2022') {
+      client.me(channel, `YAAAY peepoSnow It's finally that time of year! Merry Christmas! peepoSnow YAAAY`);
+    }
+    else {
+      client.me(channel, `${user} --> There is ${timeUntilChristmas} (EST +5) left until christmas! peepoSnow 🎄`);
+    }
+  }
+
+  if(command === '2022' || command === 'newyears') {
+    Date.prototype.addHours= function(h){
+        this.setHours(this.getHours()+h);
+        return this;
+    }
+
+    today = new Date().addHours(-5)
+    newYears = new Date("January 1, 2022");
+
+    let timeUntilNewYears = humanizeDuration(newYears - today, { units: ["d", "h", "m", "s"], round: true, largest: 2, delimiter: " and "})
+
+    if(today.toDateString() === 'Sat Jan 1 2022') {
+      client.me(channel, `YAAAY 🎉🎈🎊 HAPPY NEW YEARS! 🎊🎈🎉YAAAY`);
+    }
+    else {
+      client.me(channel, `${user} --> There is ${timeUntilNewYears} (EST +5) left until new years! PauseChamp 🎉🎈🎊`);
+    }
+  }
+  
   // General Commands - Not Self Promo or attached to me
 
   if(command === '7tvemote') {
@@ -779,24 +819,7 @@ client.on("PRIVMSG", (msg) => {
     client.me(channel, `${user} --> Homies: http://chatterinohomies.darkvypr.com Dankerino: http://dankerino.darkvypr.com`);
   }
 
-  if(command === 'christmas') {
-    Date.prototype.addHours= function(h){
-        this.setHours(this.getHours()+h);
-        return this;
-    }
 
-    today = new Date().addHours(-5)
-    xmas = new Date("December 25, 2021");
-
-    let timeUntilChristmas = humanizeDuration(xmas - today, { units: ["d", "h", "m", "s"], round: true, largest: 2, delimiter: " and "})
-
-    if(today.toDateString() === 'Sat Dec 25 2021') {
-      client.me(channel, `YAAAY peepoSnow It's finally that time of year! Merry Christmas! peepoSnow YAAAY`);
-    }
-    else {
-      client.me(channel, `${user} --> There is ${timeUntilChristmas} (EST +5) left until christmas! peepoSnow 🎄`);
-    }
-  }
 
   if(command === 'clear') {
     if(userlow === channel || userlow === 'darkvypr') {
