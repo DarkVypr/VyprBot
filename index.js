@@ -304,8 +304,12 @@ client.on("PRIVMSG", (msg) => {
 
   if(command === 'datalist') {
     if(`${userlow}` === 'darkvypr') {
-      db.list()
-      .then(keys => console.log(keys))
+      if(`${args[0]}` === 'undefined') {
+        db.list().then(keys => console.log(keys))
+      }
+      else {
+        db.list(`${args[0].toLowerCase()}`).then(keys => console.log(keys))
+      }
     }
     else {
       client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
