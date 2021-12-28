@@ -787,6 +787,20 @@ client.on("PRIVMSG", (msg) => {
     })
   }
 
+  if(command === 'bot') {
+    axios.get(`https://api.ivr.fi/twitch/resolve/${args[0]}`)
+    .catch(err => { client.me(channel, `${user}, That user doesn't exist!`)})
+    .then((response) => {
+      let userdata = response.data
+      if(`${userdata.bot}` === 'true') {
+        client.me(channel, `${user} --> User "${userdata.displayName}" is a verified bot! ✅`)
+      }
+      else {
+        client.me(channel, `${user} --> User "${userdata.displayName}" is NOT a verified bot! ❌`)
+      }
+    });
+  }
+  
   if(command === 'botlist') {
     client.me(channel, `${user} --> MrDestructoid BOP https://files.darkvypr.com/DarkVyprBotList.txt`);
   }
@@ -1151,20 +1165,6 @@ client.on("PRIVMSG", (msg) => {
         let ipresults = response.data
         client.me(channel, `${user} --> Results for "${ipresults.ip}": Type: "${ipresults.type}" | Location ( ${ipresults.location.country_flag_emoji} ): "${ipresults.city}, ${ipresults.region_name}, ${ipresults.country_name}"`);
       });
-  }
-
-  if(command === 'isbot') {
-    axios.get(`https://api.ivr.fi/twitch/resolve/${args[0]}`)
-    .catch(err => { client.me(channel, `${user}, That user doesn't exist!`)})
-    .then((response) => {
-      let userdata = response.data
-      if(`${userdata.bot}` === 'true') {
-        client.me(channel, `${user} --> User "${userdata.displayName}" is a verified bot! ✅`)
-      }
-      else {
-        client.me(channel, `${user} --> User "${userdata.displayName}" is NOT a verified bot! ❌`)
-      }
-    });
   }
 
   if(command === 'kaf1') {
