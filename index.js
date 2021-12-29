@@ -1850,6 +1850,9 @@ client.on("PRIVMSG", (msg) => {
 
   async function getWeatherLocation(location) {
     let userCoordinates = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${location}&apiKey=${process.env['GEOCODING_KEY']}`)
+    if (`${userCoordinates.data.items[0]}` === 'undefined') {
+      client.me(channel, `${user} --> That wasn't a valid location!`)
+    }
     let userLatitude = userCoordinates.data.items[0].position.lat
     let userLongitude = userCoordinates.data.items[0].position.lng
     let userLocationAPI = userCoordinates.data.items[0].title
