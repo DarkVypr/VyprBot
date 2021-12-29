@@ -384,11 +384,11 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'setbirthday') {
     const regex = new RegExp('^(?!0?2/3)(?!0?2/29/.{3}[13579])(?!0?2/29/.{2}[02468][26])(?!0?2/29/.{2}[13579][048])(?!(0?[469]|11)/31)(?!0?2/29/[13579][01345789]0{2})(?!0?2/29/[02468][1235679]0{2})(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/([0-9]{4})$')
     if(args[0] === 'undefined' || !regex.test(args[0])) {
-      client.me(channel, `${user} --> Invalid syntax! Examples: "vb setbirthday 8/14/2005", "vb setbirthday 10/16/2004" or "vb setbirthday 9/11/1973".`)
+      client.me(channel, `${user} --> Invalid syntax! Make sure your birthday is in MM/DD/YYYY format. Examples: "vb setbirthday 8/14/2005", "vb setbirthday 10/16/2004" or "vb setbirthday 9/11/1973".`)
     }
     else {
       db.set(`${userlow}bday`, args[0])
-      .then(client.me(channel, `${user} --> Succesfully set your birthday to ${args[0]}!`))
+      .then(client.me(channel, `${user} --> Succesfully set your birthday to ${args[0]}! Make sure your birthday is in MM/DD/YYYY format.`))
     }
   }
 
