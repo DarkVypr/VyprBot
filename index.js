@@ -88,7 +88,7 @@ client.on("PRIVMSG", (msg) => {
     const ping12 = new RegExp(/(dark|bright)\s?diaper/)
     const ping13 = new RegExp(/(dark|bright)\s?viper|vypr/)
 
-    const blacklistedChannels = new RegExp(/visioisiv|darkvypr|vyprbottesting|vyprbot|gotiand|arkadlus|vexnade|boronics|xenoplopqb/)
+    const blacklistedChannels = new RegExp(/visioisiv|darkvypr|vyprbottesting|vyprbot|gotiand|arkadlus|vexnade|boronics|xenoplopqb|ktobaias/)
     const blacklistedUsers = new RegExp(/darkvypr|vyprbot|vyprbottesting|hhharrisonnnbot|apulxd|daumenbot|kuharabot|snappingbot|kaedtn|カイデン|oura_bot/)
 
     if(!blacklistedChannels.test(channelSaid) && !blacklistedUsers.test(userSaid)) {
@@ -384,7 +384,7 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'setbirthday') {
     const regex = new RegExp('^(?!0?2/3)(?!0?2/29/.{3}[13579])(?!0?2/29/.{2}[02468][26])(?!0?2/29/.{2}[13579][048])(?!(0?[469]|11)/31)(?!0?2/29/[13579][01345789]0{2})(?!0?2/29/[02468][1235679]0{2})(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/([0-9]{4})$')
     if(args[0] === 'undefined' || !regex.test(args[0])) {
-      client.me(channel, `${user} --> Invalid syntax! Examples: "!setbirthday 8/14/2005", "!setbirthday 10/16/2004" or "!setbirthday 9/11/1973".`)
+      client.me(channel, `${user} --> Invalid syntax! Examples: "vb setbirthday 8/14/2005", "vb setbirthday 10/16/2004" or "vb setbirthday 9/11/1973".`)
     }
     else {
       db.set(`${userlow}bday`, args[0])
@@ -398,11 +398,11 @@ client.on("PRIVMSG", (msg) => {
     let location2 = `${args[1]}`
 
     if(`${location1}`  === 'undefined') {
-      client.me(channel, `${user} --> That's not a valid location! Examples: "!setlocation stockholm sweden" or "!setlocation springfield virginia".`)
+      client.me(channel, `${user} --> That's not a valid location! Examples: "vb setlocation stockholm sweden" or "vb setlocation springfield virginia".`)
     }
     else {
       if(`${location2}` === 'undefined') {
-        client.me(channel, `${user} --> That's not a valid location! Examples: "!setlocation stockholm sweden" or "!setlocation springfield virginia".`)
+        client.me(channel, `${user} --> That's not a valid location! Examples: "vb setlocation stockholm sweden" or "vb setlocation springfield virginia".`)
       }
       else {
         let location1up = location1[0].toUpperCase() + location1.substring(1)
@@ -742,7 +742,7 @@ client.on("PRIVMSG", (msg) => {
       getBirthdayDetails(userlow).then(function(value) {
         let birthday = value
         if (birthday === 'null') {
-          client.me(channel, `${user} --> Before using this command, you must set your birthday with the !setbirthday command. Examples: "!setbirthday 8/14/2005", "!setbirthday 10/16/2004" or "!setbirthday 9/11/1973".`)
+          client.me(channel, `${user} --> Before using this command, you must set your birthday with the vb setbirthday command. Examples: "vb setbirthday 8/14/2005", "vb setbirthday 10/16/2004" or "vb setbirthday 9/11/1973".`)
         }
         else {
           client.me(channel, `${user} --> You are currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
@@ -907,7 +907,7 @@ client.on("PRIVMSG", (msg) => {
       db.get(`${userlow}time`).then(function(value) {
         let usercitycountry = `${value}`
         if(usercitycountry === 'null') {
-          client.me(channel, `${user} --> Before using this command, you must set your location with the !setlocation command. Example: “!setlocation lasalle ontario”, “!setlocation springfield virginia” or “!setlocation stockholm sweden”. More info: https://darkvypr.com/commands`)
+          client.me(channel, `${user} --> Before using this command, you must set your location with the vb setlocation command. Example: “vb setlocation lasalle ontario”, “vb setlocation springfield virginia” or “vb setlocation stockholm sweden”. More info: https://darkvypr.com/commands`)
         }
         else {
           axios.get(`https://api.tomtom.com/search/2/search/${usercitycountry}.json?key=${process.env['COUNTRY_CONVERT_KEY']}`)
@@ -1436,7 +1436,7 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, `${user} --> Successfully cleared your status.`);
     }
     else if(`${args.join(' ')}` === '') {
-      client.me(channel, `${user} --> This command gives you a status that people can check. Example: "!setstatus learning javascript". To clear your status, use: "!setstatus none" "!setstatus clear".`)
+      client.me(channel, `${user} --> This command gives you a status that people can check. Example: "vb setstatus learning javascript". To clear your status, use: "vb setstatus none" "vb setstatus clear".`)
     }
     else {
       let newStatus = JSON.stringify({status: `${args.join(' ')}`, dateOfStatus: `${new Date()}`})
@@ -1460,18 +1460,18 @@ client.on("PRIVMSG", (msg) => {
         let status = fs.readJsonSync(`status/${userlow}.json`)
         let currentStatus = status.status
         if(currentStatus === 'noActiveStatus') {
-          client.me(channel, `${user} --> You have not set your status. Example: "!setstatus learning javascript"`)
+          client.me(channel, `${user} --> You have not set your status. Example: "vb setstatus learning javascript"`)
         }
         else {
           let dateSetDateObj = new Date(status.dateOfStatus)
           let sinceDateSet = humanizeDuration(new Date(dateSetDateObj) - new Date(), { units: ["d", "h", "m", "s"], round: true, largest: 2 })
           let dateSetFormatted = (dateSetDateObj.getMonth() + 1) + '/' + dateSetDateObj.getDate() + '/' + dateSetDateObj.getFullYear() + ' at ' + (+dateSetDateObj.getHours() - 5) + ':' + addZero(dateSetDateObj.getMinutes())
           
-          client.me(channel, `${user} --> Your current status is: ${currentStatus} | Set on ${dateSetFormatted} (${sinceDateSet} ago) (EST-5). To clear your status, use: "!setstatus none" or "!setstatus clear".`) 
+          client.me(channel, `${user} --> Your current status is: ${currentStatus} | Set on ${dateSetFormatted} (${sinceDateSet} ago) (EST-5). To clear your status, use: "vb setstatus none" or "vb setstatus clear".`) 
         }
       }
       else {
-        client.me(channel, `${user} --> You have not set your status. Example: "!setstatus learning javascript"`)
+        client.me(channel, `${user} --> You have not set your status. Example: "vb setstatus learning javascript"`)
       }
     }
     else {
@@ -1921,7 +1921,7 @@ client.on("PRIVMSG", (msg) => {
     if (`${args[0]}` === 'undefined') {
       getWeatherUser(userlow).then(function(value) {
         if (value === 'null') {
-          client.me(channel, `${user} --> Before using this command, you must set your location with the !setlocation command. Example: “!setlocation lasalle ontario”, “!setlocation springfield virginia” or “!setlocation stockholm sweden”. More info: https://darkvypr.com/commands`)
+          client.me(channel, `${user} --> Before using this command, you must set your location with the vb setlocation command. Example: “vb setlocation lasalle ontario”, “vb setlocation springfield virginia” or “vb setlocation stockholm sweden”. More info: https://darkvypr.com/commands`)
         }
         else {
           client.me(channel, `${user} --> The weather in ${value.location} is currently ${value.tempC}°C (${value.tempF}°F) ${value.condition} Wind speed: ${value.windKMH} km/h (${value.windMPH} mp/h) 💨 Humidity: ${value.humidity}% 💧 Cloud Coverage: ${value.cloudCoverage}% ☁️`)
