@@ -1552,6 +1552,9 @@ client.on("PRIVMSG", (msg) => {
   async function getLocationTime(location) {
     let locationTime = await axios.get(`https://timezone.abstractapi.com/v1/current_time/?api_key=${process.env['TIME_KEY']}&location=${location}`)
     let dateTime = locationTime.data.datetime
+    if (`${dateTime}` === 'undefined') {
+      client.me(channel, `${user} --> That wasn't a valid location!`)
+    }
     let timezone = locationTime.data.timezone_abbreviation
     let yearMonthDay = dateTime[0] + dateTime[1] + dateTime[2] + dateTime[3] + dateTime[4] + dateTime[5] + dateTime[6] + dateTime[7] + dateTime[8] + dateTime[9]
     let currentHour = dateTime[11] + dateTime[12]
@@ -1591,9 +1594,7 @@ client.on("PRIVMSG", (msg) => {
   
   if(command === 'time') {
     let lookupSpecific = `${args.join(' ')}`
-    console.log(lookupSpecific)
     if(lookupSpecific === '') {
-      console.log('undefined')
       getUserTime(userlow).then(function(value){
         if(value === 'null') {
           client.me(channel, `${user} --> That user hasn't set their location! Get them to set it and retry! PANIC`)
@@ -1604,7 +1605,6 @@ client.on("PRIVMSG", (msg) => {
       })
     }
     else if(lookupSpecific[0] === '@') {
-      console.log('test')
       let cleanedUserLookup = lookupSpecific.replace('@', '').toLowerCase()
       getUserTime(cleanedUserLookup).then(function(value) {
         if(value === 'null') {
@@ -1616,7 +1616,6 @@ client.on("PRIVMSG", (msg) => {
       })
     }
     else {
-      console.log('lol')
       getLocationTime(lookupSpecific).then(function(value){
         client.me(channel, `${user} --> The current time in ${lookupSpecific} (${value.timezone}) is ${value.time} and the date is ${value.date}.`)
       })
