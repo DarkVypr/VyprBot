@@ -696,7 +696,7 @@ client.on("PRIVMSG", (msg) => {
       }
     }
     else {
-      client.say(channel, `Whoops! ${user} --> You need to be a channel owner to use that command. Bot Developer or Channel Broadcaster.`);
+      client.me(channel, `Whoops! ${user} --> You need to be a channel owner to use that command. Bot Developer or Channel Broadcaster.`);
     }
   }
 
@@ -2117,7 +2117,7 @@ client.on("PRIVMSG", (msg) => {
 		      }
           else { 
             let nammeramount = getRandomInt(60)
-            if(`${userlow}` === 'darkvypr') {
+            if(`${userlow}` === 'darkvypr' || `${userlow}` === 'tyebuddha') {
               console.log(nammeramount)
               let totalnammers = Math.round(+nammers + nammeramount * 1.3)
               db.set(`${userlow}nammers`, totalnammers)
