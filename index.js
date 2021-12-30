@@ -270,7 +270,7 @@ client.on("PRIVMSG", (msg) => {
 
   if(command === 'datadelete') {
     if(`${userlow}` === 'darkvypr') {
-      db.get(`${args[0]}`).then(function(value) {
+      db.get(`${args[0].toLowerCase()}`).then(function(value) {
         let valueofkey = `${value}`
         client.me(channel, (`${user} --> Succesfully deleted key: "${args[0]}" value: "${valueofkey}" MODS`))
         db.delete(`${args[0]}`)
@@ -283,7 +283,7 @@ client.on("PRIVMSG", (msg) => {
 
   if(command === 'datacreate') {
     if(`${userlow}` === 'darkvypr') {
-      db.set(`${args[0]}`, `${args[1]}`);
+      db.set(`${args[0].toLowerCase()}`, `${args[1]}`);
       client.me(channel, `${user} --> Succesfully added key: "${args[0]}"  value: "${args[1]}" NOTED`)
     }
     else {
@@ -293,7 +293,7 @@ client.on("PRIVMSG", (msg) => {
 
   if(command === 'datainspect') {
     if(`${userlow}` === 'darkvypr') {
-      db.get(`${args[0]}`).then(function(value) {
+      db.get(`${args[0].toLowerCase()}`).then(function(value) {
         client.me(channel, (`${user} --> Key: "${args[0]}" Value: "${value}". NOTED`))
       })
     }
@@ -324,7 +324,7 @@ client.on("PRIVMSG", (msg) => {
 
   if(command === 'setnammers') {
     if(`${userlow}` === 'darkvypr') {
-      db.set(`${args[0]}nammers`, `${args[1]}`)
+      db.set(`${args[0].toLowerCase()}nammers`, `${args[1]}`)
       client.me(channel, (`${user} --> Set ${args[0]}'s nammers to ${args[1]}!`))
     }
     else {
@@ -334,9 +334,9 @@ client.on("PRIVMSG", (msg) => {
 
   if(command === 'addnammers') {
     if(`${userlow}` === 'darkvypr') {
-      db.get(`${args[0]}nammers`).then(function(value) {
+      db.get(`${args[0].toLowerCase()}nammers`).then(function(value) {
         let addednammers = +value + +args[1]
-        db.set(`${args[0]}nammers`, addednammers)
+        db.set(`${args[0].toLowerCase()}nammers`, addednammers)
         client.me(channel, (`${user} --> Gave ${args[1]} nammers to ${args[0]}!`))
       })
     }
@@ -426,7 +426,7 @@ client.on("PRIVMSG", (msg) => {
 
   function checkPhrase(phrase) {
     let regex = new RegExp('(?:(?:\b(?<![-=\.])|monka)(?:[Nnñ]|[Ii7]V)|η|[\/|]\\[\/|])[\s\.]*?[liI1y!j\/|]+[\s\.]*?(?:[GgbB6934Q🅱qğĜƃ၅5\*][\s\.]*?){2,}(?!arcS|l|Ktlw|ylul|ie217|64|\d? ?times)')
-    return regex.test(phrase)
+    return regex.test(phrase.toLowerCase())
   }
   
   // Bot Info
