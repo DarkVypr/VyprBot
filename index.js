@@ -307,6 +307,12 @@ client.on("PRIVMSG", (msg) => {
       if(`${args[0]}` === 'undefined') {
         db.list().then(keys => console.log(keys))
       }
+      else if(`${args[1]}` === 'chat:true' || `${args[1]}` === 'public:true') {
+        db.list(`${args[0].toLowerCase()}`).then(function(keys) {
+          let keysClean = keys.join(', ').trim()
+          client.me(channel, `DarkVypr --> ${keysClean}`)
+        })
+      }
       else {
         db.list(`${args[0].toLowerCase()}`).then(keys => console.log(keys))
       }
