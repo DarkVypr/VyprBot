@@ -88,7 +88,7 @@ client.on("PRIVMSG", (msg) => {
     const ping12 = new RegExp(/(dark|bright)\s?diaper/)
     const ping13 = new RegExp(/(dark|bright)\s?viper|vypr/)
 
-    const blacklistedChannels = new RegExp(/visioisiv|darkvypr|vyprbottesting|vyprbot|gotiand|arkadlus|vexnade|boronics|xenoplopqb|ktobaias/)
+    const blacklistedChannels = new RegExp(/visioisiv|darkvypr|vyprbottesting|vyprbot|gotiand|arkadlus|vexnade|boronics|xenoplopqb/)
     const blacklistedUsers = new RegExp(/darkvypr|vyprbot|vyprbottesting|hhharrisonnnbot|apulxd|daumenbot|kuharabot|snappingbot|kaedtn|カイデン|oura_bot/)
 
     if(!blacklistedChannels.test(channelSaid) && !blacklistedUsers.test(userSaid)) {
@@ -187,6 +187,81 @@ client.on("PRIVMSG", (msg) => {
   }
 
   // Owner Only Commands
+
+  async function checkAdmin(user) {
+    let admins = await db.get('admins')
+    let adminsArray = admins.split(' ')
+    if(adminsArray.indexOf(user) > -1) {
+      return 'true'
+    }
+    else {
+      return 'false'
+    }
+  }
+  
+  async function addAdmin(user) {
+    let admins = await db.get('admins')
+    let adminsArray = admins.split(' ')
+    if(adminsArray.indexOf(user) > -1) {
+      return 'User is already an admin!'
+    }
+    else {
+      adminsArray.push(user)
+      db.set('admins', `${adminsArray.join(' ').trim()}`)
+    }
+  }
+
+  async function deleteAdmin(user) {
+    let admins = await db.get('admins')
+    let adminsArray = admins.split(' ')
+    let indexOfUser = adminsArray.indexOf(user)
+    if(indexOfUser > -1) {
+      adminsArray.splice(indexOfUser, 1)
+      db.set('admins', `${adminsArray.join(' ').trim()}`)
+    }
+    else {
+      return 'User is not an admin!'
+    }
+  }
+  
+  if (command === 'admin') {
+    if(`${args[0]}` === 'undefined' || `${args[1]}` === 'undefined' || !/add|remove|delete|check/i.test(`${args[0]}`) && userlow === 'darkvypr') {
+      client.me(channel, `DarkVypr --> Invalid Syntax! Example: "vb admin {add|delete|remove|check} {user}".`)
+    }
+    else if(`${args[0]}` === 'add' && userlow === 'darkvypr') {
+      addAdmin(`${args[1].toLowerCase()}`).then(function(value) {
+        if(`${value}` !== 'undefined') {
+          client.me(channel, `DarkVypr --> There was an error with that command. Reason: ${value}`)
+        }
+        else {
+          client.me(channel, `DarkVypr --> Successfully added user ${args[1].toLowerCase()} as an admin!`)
+        }
+      })
+    }
+    else if(`${args[0]}` === 'delete' || `${args[0]}` === 'remove' && userlow === 'darkvypr') {
+      deleteAdmin(`${args[1].toLowerCase()}`).then(function(value) {
+        if(`${value}` !== 'undefined') {
+          client.me(channel, `DarkVypr --> There was an error with that command. Reason: ${value}`)
+        }
+        else {
+          client.me(channel, `DarkVypr --> Successfully removed ${args[1].toLowerCase()}'s admin privileges!`)
+        }
+      })
+    }
+    else if(`${args[0]}` === 'check' && userlow === 'darkvypr') {
+      checkAdmin(`${args[1].toLowerCase()}`).then(function(value){
+        if(value === 'true') {
+          client.me(channel, `DarkVypr --> User ${args[1].toLowerCase()} is an admin! ✅`)
+        }
+        else {
+          client.me(channel, `DarkVypr --> User ${args[1].toLowerCase()} is not an admin! ❌`)
+        }
+      })
+    }
+    else {
+      client.me(channel, `${user} --> You dont have permission to use that command! Required: Bot Developer`)
+    }
+  }
   
   if(command === 'rename') {
     if(userlow === 'darkvypr') {
