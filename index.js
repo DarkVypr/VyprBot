@@ -349,6 +349,73 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
+  // Leppu Query
+
+  async function getUserData(userLookup) {
+    let userData = await axios.get(`https://api.ivr.fi/twitch/resolve/${userLookup}`)
+    .catch(err => { client.me(channel, `${user} --> That user doesn't exist!`) })
+
+    function isAffiliate(data) {
+      if(`${data}` == 'true') {
+        return 'Affiliate '
+      }
+      else {
+        return ''
+      }
+    }
+
+    function isPartner(data) {
+      if(`${data}` == 'true') {
+        return 'Partner '
+      }
+      else {
+        return ''
+      }
+    }
+
+    function isStaff(data) {
+      if(`${data}` == 'true') {
+        return 'Staff '
+      }
+      else {
+        return ''
+      }
+    }
+
+    function isSiteAdmin(data) {
+      if(`${data}` == 'true') {
+        return 'Admin '
+      }
+      else {
+        return ''
+      }
+    }
+
+    function isBot(data) {
+      if(`${data}` == 'true') {
+        return 'Verified_Bot '
+      }
+      else {
+        return ''
+      }
+    }
+
+    let rolesArray = (isAffiliate(userData.data.roles.isAffiliate) + isPartner(userData.data.roles.isPartner) + isStaff(userData.data.roles.isStaff) + isSiteAdmin(userData.data.roles.isSiteAdmin) + isBot(userData.data.bot)).trim().split(' ')
+    let roles = (isAffiliate(userData.data.roles.isAffiliate) + isPartner(userData.data.roles.isPartner) + isStaff(userData.data.roles.isStaff) + isSiteAdmin(userData.data.roles.isSiteAdmin) + isBot(userData.data.bot)).trim().split(' ').join(', ')
+
+    var obj = {
+      banned: userData.data.banned,
+      name: userData.data.displayName,
+      uid: userData.data.id,
+      bio: userData.data.bio,
+      colour: userData.data.chatColor,
+      pfp: userData.data.logo,
+      roles: roles,
+      rolesArray: rolesArray
+    }
+    return obj
+  }
+  
   // Check for no-no words
 
   function checkPhrase(phrase) {
@@ -358,7 +425,7 @@ client.on("PRIVMSG", (msg) => {
   
   // Bot Info
 
-  if(command === 'ping' || command === 'help' || command === 'info') {
+  if(command === 'ping' || command === 'help') {
     let Sseconds = process.uptime()
     let ramusage = `${Math.round(process.memoryUsage().rss / 1024 / 1024)}`
     async function pingServer() {
@@ -1159,6 +1226,19 @@ client.on("PRIVMSG", (msg) => {
     client.me(channel, `${user} --> http://imagerepo.darkvypr.com`);
   }
 
+  if(command === 'info') {
+    if(`${args[0]}` === 'undefined') {
+      getUserData(userlow).then(function(value) {
+        client.me(channel, `${user} --> Name: ${value.name} | Banned: ${value.banned} | UID: ${value.uid} | Colour: ${value.colour} | Bio: ${value.bio} | Pfp: ${value.pfp} | Roles: ${value.roles}`)
+      })
+    }
+    else {
+      getUserData(`${args[0]}`).then(function(value) {
+        client.me(channel, `${user} --> Name: ${value.name} | Banned: ${value.banned} | UID: ${value.uid} | Colour: ${value.colour} | Bio: ${value.bio} | Pfp: ${value.pfp} | Roles: ${value.roles}`)
+      })
+    }
+  }
+  
   if(command === 'ip') {
     axios.get(`http://api.ipstack.com/${args[0]}?access_key=${process.env['IP_KEY']}`)
       .then((response) => {
@@ -1264,19 +1344,14 @@ client.on("PRIVMSG", (msg) => {
 
   if(command === 'pfp') {
     if(`${args[0]}` === 'undefined') {
-     axios.get(`https://api.ivr.fi/twitch/resolve/${user}`)
-      .then((response) => {
-        let userdata = response.data
-        client.me(channel, `${user} --> ${userdata.logo}`)
-      });
+      getUserData(userlow).then(function(value){
+        client.me(channel, `${user} --> Your profile picture: ${value.pfp}`)
+      })
     }
     else {
-     axios.get(`https://api.ivr.fi/twitch/resolve/${args[0]}`)
-      .catch(err => { client.me(channel, `${user}, That user doesn't exist!`)})
-      .then((response) => {
-        let userdata = response.data
-        client.me(channel, `${user} --> ${userdata.logo}`)
-      });
+      getUserData(`${args[0]}`).then(function(value){
+        client.me(channel, `${user} --> ${value.name}'s profile picture: ${value.pfp}`)
+      })
     }
   }
 
