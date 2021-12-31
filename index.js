@@ -264,46 +264,48 @@ client.on("PRIVMSG", (msg) => {
   }
   
   if(command === 'rename') {
-    if(userlow === 'darkvypr') {
-      async function renameUser(oldName, newName) {
-        let bday = await db.get(`${oldName}bday`)
-        let location = await db.get(`${oldName}time`)
-        let twitter = await db.get(`${oldName}twitter`)
-        let nammers = await db.get(`${oldName}nammers`)
-        if(`${bday}` !== 'null') {
-          db.set(`${newName}bday`, bday)
+    checkAdmin(userlow).then(function(isAdmin) {
+      if(isAdmin === 'true') {
+        async function renameUser(oldName, newName) {
+          let bday = await db.get(`${oldName}bday`)
+          let location = await db.get(`${oldName}time`)
+          let twitter = await db.get(`${oldName}twitter`)
+          let nammers = await db.get(`${oldName}nammers`)
+          if(`${bday}` !== 'null') {
+            db.set(`${newName}bday`, bday)
+          }
+          if(`${location}` !== 'null') {
+            db.set(`${newName}time`, location)
+          }
+          if(`${twitter}` !== 'null') {
+            db.set(`${newName}twitter`, twitter)
+          }
+          if(`${nammers}` !== 'null') {
+            db.set(`${newName}nammers`, nammers)
+          }
+          if(`${nammers}` === 'null' && `${twitter}` === 'null' && `${location}` === 'null' && `${bday}` === 'null') {
+            client.me(channel, `${user} --> That user dosen't have any data associated with their account!`)
+          }
+          else {
+            db.list(oldName).then(function(value) {
+              for (let i = 0; i < value.length; i++) {
+                db.delete(value[i])
+              }
+            })
+            client.me(channel, `${user} --> Succesfully transferred all of the data from "${oldName}" to "${newName}"! EZ`) 
+          }
         }
-        if(`${location}` !== 'null') {
-          db.set(`${newName}time`, location)
-        }
-        if(`${twitter}` !== 'null') {
-          db.set(`${newName}twitter`, twitter)
-        }
-        if(`${nammers}` !== 'null') {
-          db.set(`${newName}nammers`, nammers)
-        }
-        if(`${nammers}` === 'null' && `${twitter}` === 'null' && `${location}` === 'null' && `${bday}` === 'null') {
-          client.me(channel, `${user} --> That user dosen't have any data associated with their account!`)
+        if(`${args[0]}` === 'undefined' || `${args[1]}` === 'undefined') {
+          client.me(channel, `${user} --> Provide an old and new account.`)
         }
         else {
-          db.list(oldName).then(function(value) {
-            for (let i = 0; i < value.length; i++) {
-              db.delete(value[i])
-            }
-          })
-          client.me(channel, `${user} --> Succesfully transferred all of the data from "${oldName}" to "${newName}"! EZ`) 
+          renameUser(`${args[0].toLowerCase()}`, `${args[1].toLowerCase()}`)
         }
       }
-      if(`${args[0]}` === 'undefined' || `${args[1]}` === 'undefined') {
-        client.me(channel, `${user} --> Provide an old and new account.`)
-      }
       else {
-        renameUser(`${args[0].toLowerCase()}`, `${args[1].toLowerCase()}`)
+        client.me(channel, `${user} --> You don't have the required permission to use that command! If you would like to have all of your data moved over to a new name, use "vb suggest" and I will get to it. Required: Developer`)
       }
-    }
-    else {
-      client.me(channel, `${user} --> You don't have the required permission to use that command! If you would like to have all of your data moved over to a new name, use "vb suggest" and I will get to it. Required: Developer`)
-    }
+    })
   }
 
   if(command === 'join') {
