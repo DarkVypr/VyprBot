@@ -59,8 +59,6 @@ setInterval(function() {
 }, 20 * 60000);
 
 client.on("PRIVMSG", (msg) => {
-  
-  console.log(`[#${msg.channelName}] ${msg.displayName}: ${msg.messageText}`)
 
    // BASIC VARIABLES
 
@@ -68,6 +66,8 @@ client.on("PRIVMSG", (msg) => {
   let userlow = msg.senderUsername
   let channel = msg.channelName
   let message = msg.messageText
+
+  console.log(`[#${channel}] ${user} (${userlow}): ${message}`)
 
   function globalPing(msg, userSaid, channelSaid) {
     const ping1 = new RegExp(/\b(v|b)ypa(')?(s)?\b/)
