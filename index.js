@@ -38,13 +38,7 @@ client.on("close", (error) => {
   }
 });
 
-client.on("PRIVMSG", (msg) => {
-  console.log(`[#${msg.channelName}] ${msg.displayName}: ${msg.messageText}`);
-});
-
-const channelsFile = 'channels.txt'
-const channelOptions = fs.readFileSync(channelsFile).toString().split('""').filter(
-  function(i){return i != null;}).join('').split(' ')
+const channelOptions = fs.readFileSync('channels.txt').toString().split(' ')
 
 client.connect();
 client.joinAll(channelOptions)
@@ -65,11 +59,13 @@ setInterval(function() {
 }, 20 * 60000);
 
 client.on("PRIVMSG", (msg) => {
+  
+  console.log(`[#${msg.channelName}] ${msg.displayName}: ${msg.messageText}`)
 
    // BASIC VARIABLES
 
   let user = msg.displayName
-  let userlow = msg.displayName.toLowerCase()
+  let userlow = msg.senderUsername
   let channel = msg.channelName
   let message = msg.messageText
 
