@@ -1020,26 +1020,12 @@ client.on("PRIVMSG", (msg) => {
 
 
   if(command === 'clear') {
-    if(userlow === channel || userlow === 'darkvypr') {
-      let clearamount = +`${args[0]}`
-      if(clearamount > 100) {
-        client.me(channel, `${user} --> The max clear is 100!`);
-      }
-      else {
-        for( let i=clearamount; i--; )
-          client.privmsg(channel, `/clear`);
-      }
-    }
-    else {
-      let checkfile = fs.existsSync(`permissions/${channel}/permittedusers.json`)
-      if(checkfile === true) {
-        let jsonnames = fs.readJsonSync(`permissions/${channel}/permittedusers.json`)
-        let jsonnamesparsed = jsonnames.permittedusers
-        let checkifuserpermitted = jsonnamesparsed.includes(`${userlow}`)
-        if(`${checkifuserpermitted}` === 'true') {
+    checkAdmin(userlow).then(function(isAdmin) {
+      checkPermitted(userlow).then(function(isPermitted) {
+        if(isPermitted === 'true' || isAdmin === 'true') {
           let clearamount = +`${args[0]}`
-          if(clearamount > 50) {
-            client.me(channel, `${user} --> The max clear is 50!`);
+          if(clearamount > 100) {
+            client.me(channel, `${user} --> The max clear is 100!`);
           }
           else {
             for( let i=clearamount; i--; )
@@ -1047,13 +1033,10 @@ client.on("PRIVMSG", (msg) => {
           }
         }
         else {
-          client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !permit {username_here}`)
+          client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again!`)
         }
-      }
-      else {
-        client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !permit {username_here}`)
-      }
-    }
+      })
+    })
   }
 
   if(command === 'code') {
@@ -1565,42 +1548,27 @@ client.on("PRIVMSG", (msg) => {
   }
   
   if(command === 'spam') {
-    if(userlow === channel || userlow === 'darkvypr') {
-      let spamamount = +`${args[0]}`
-      if(spamamount > 50) {
-        client.me(channel, `${user} --> The max spam is 50 messages!`);
-      }
-      else {
-        let cleanedupresponse = args.join(' ').replace(/[1-9][0-9]?|50/, '')
-        for( let i=spamamount; i--; )
-          client.privmsg(channel, `${cleanedupresponse}`);
-      }
-    }
-    else {
-      let checkfile = fs.existsSync(`permissions/${channel}/permittedusers.json`)
-      if(checkfile === true) {
-        let jsonnames = fs.readJsonSync(`permissions/${channel}/permittedusers.json`)
-        let jsonnamesparsed = jsonnames.permittedusers
-        let checkifuserpermitted = jsonnamesparsed.includes(`${userlow}`)
-        if(`${checkifuserpermitted}` === 'true') {
-          let spamamount = +`${args[0]}`
-          if(spamamount > 50) {
-            client.me(channel, `${user} --> The max spam is 50 messages!`);
+    checkAdmin(userlow).then(function(isAdmin) {
+      checkPermitted(userlow).then(function(isPermitted) {
+        if(isPermitted === 'true' || isAdmin === 'true' || userlow === channel) {
+          let spamAmount = +`${args[0]}`
+          if(spamAmount > 100) {
+            client.me(channel, `${user} --> The max clear is 100!`)
+          }
+          else if(`${checkPhrase(`${args.join(' ')}`)}` === 'false') {
+            let cleanedupresponse = args.join(' ').replace(/[1-9][0-9]?|50/, '')
+            for( let i=spamAmount; i--; )
+              client.me(channel, cleanedupresponse)
           }
           else {
-            let cleanedupresponse = args.join(' ').replace(/[1-9][0-9]?|50/, '')
-            for( let i=spamamount; i--; )
-              client.privmsg(channel, `${cleanedupresponse}`);
+            client.me(channel, `${user} --> cmonNep ??????`)
           }
         }
         else {
-          client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !permit {username_here}`)
+          client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again!`)
         }
-      }
-      else {
-        client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again! Hint: !permit {username_here}`)
-      }
-    }
+      })
+    })
   }
 
   if(command === 'shibe' || command === 'shiba') {
