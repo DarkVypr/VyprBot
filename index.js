@@ -498,8 +498,7 @@ client.on("PRIVMSG", (msg) => {
   // Check for no-no words
 
   function checkPhrase(phrase) {
-    let regex = new RegExp('(?:(?:\b(?<![-=\.])|monka)(?:[Nnñ]|[Ii7]V)|η|[\/|]\\[\/|])[\s\.]*?[liI1y!j\/|]+[\s\.]*?(?:[GgbB6934Q🅱qğĜƃ၅5\*][\s\.]*?){2,}(?!arcS|l|Ktlw|ylul|ie217|64|\d? ?times)')
-    return regex.test(phrase.toLowerCase())
+    return /(?:(?:\b(?<![-=\.])|monka)(?:[Nnñ]|[Ii7]V)|η|[\/|]\\[\/|])[\s\.]*?[liI1y!j\/|]+[\s\.]*?(?:[GgbB6934Q🅱qğĜƃ၅5\*][\s\.]*?){2,}(?!arcS|l|Ktlw|ylul|ie217|64|\d? ?times)/i.test(phrase.toLowerCase())
   }
   
   // Bot Info
@@ -1151,7 +1150,7 @@ client.on("PRIVMSG", (msg) => {
             client.me(channel, `${user} --> No definition available for that string or word!`)
           }
           else {
-            if(checkPhrase(shortanswer) === true) {
+            if(checkPhrase(shortanswer)) {
               client.me(channel, `${user} --> cmonNep ?????`)
             }
             else {
@@ -1324,12 +1323,12 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'info') {
     if(`${args[0]}` === 'undefined') {
       getUserData(userlow).then(function(value) {
-        client.me(channel, `${user} --> Name: ${value.name} | Banned: ${value.banned} | UID: ${value.uid} | Colour: ${value.colour} | Bio: ${value.bio} | Pfp: ${value.pfp} | Roles: ${value.roles}`)
+        client.me(channel, `${user} --> Name: @${value.name} | Banned: ${value.banned} | UID: ${value.uid} | Colour: ${value.colour} | Bio: ${value.bio} | Pfp: ${value.pfp} | Roles: ${value.roles}`)
       })
     }
     else {
       getUserData(`${args[0]}`).then(function(value) {
-        client.me(channel, `${user} --> Name: ${value.name} | Banned: ${value.banned} | UID: ${value.uid} | Colour: ${value.colour} | Bio: ${value.bio} | Pfp: ${value.pfp} | Roles: ${value.roles}`)
+        client.me(channel, `${user} --> Name: @${value.name} | Banned: ${value.banned} | UID: ${value.uid} | Colour: ${value.colour} | Bio: ${value.bio} | Pfp: ${value.pfp} | Roles: ${value.roles}`)
       })
     }
   }
@@ -1520,7 +1519,7 @@ client.on("PRIVMSG", (msg) => {
     axios.get(`https://api.wolframalpha.com/v1/result?i=${args.join(' ')}&appid=${process.env['WOLFRAM_KEY']}`)
       .catch(err => { client.me(channel, `${user} --> Wolfram|Alpha did not understand your question! PANIC`)}) 
       .then((response) => {
-        if(checkPhrase(response.data) === true) {
+        if(checkPhrase(response.data)) {
           client.me(channel, `${user} --> cmonNep ??????`);
         }
         else {
@@ -1534,7 +1533,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'say') {
-    if(checkPhrase(`${args.join(' ')}`) === true) {
+    if(checkPhrase(`${args.join(' ')}`)) {
       client.me(channel, `👥 cmonNep ?????`);
     }
     else {
@@ -1554,7 +1553,7 @@ client.on("PRIVMSG", (msg) => {
           if(spamAmount > 80) {
             client.me(channel, `${user} --> The max spam is 80!`)
           }
-          else if(`${checkPhrase(`${args.join(' ')}`)}` === 'false') {
+          else if(!checkPhrase(`${args.join(' ')}`)) {
             let cleanedupresponse = args.splice(1, 1).join(' ')
             for( let i=spamAmount; i--; )
               client.me(channel, cleanedupresponse)
@@ -1896,7 +1895,8 @@ client.on("PRIVMSG", (msg) => {
         else {
           let dirtyresponse = urbanresult.list[0].definition
           let cleanedupresponse = dirtyresponse.replace(/\[|\]/gim, '')
-          if(checkPhrase(cleanedupresponse) === true) {
+          console.log(checkPhrase(cleanedupresponse))
+          if(checkPhrase(cleanedupresponse)) {
             client.me(channel, `${user} --> cmonNep ??????`);
           }
           else {
