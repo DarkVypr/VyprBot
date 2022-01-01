@@ -1551,8 +1551,8 @@ client.on("PRIVMSG", (msg) => {
       checkPermitted(userlow).catch(err => { client.me(channel, `${user} --> ${err}`)}).then(function(isPermitted) {
         if(isAdmin === 'true' || isPermitted === 'true' || userlow === channel) {
           let spamAmount = +`${args[0]}`
-          if(spamAmount > 100) {
-            client.me(channel, `${user} --> The max clear is 100!`)
+          if(spamAmount > 80) {
+            client.me(channel, `${user} --> The max spam is 80!`)
           }
           else if(`${checkPhrase(`${args.join(' ')}`)}` === 'false') {
             let cleanedupresponse = args.splice(1, 1).join(' ')
