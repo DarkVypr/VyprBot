@@ -836,15 +836,15 @@ client.on("PRIVMSG", (msg) => {
     }
 
     today = new Date().addHours(-5)
-    newYears = new Date("January 1, 2022");
+    newYears = new Date("January 01, 2022");
 
     let timeUntilNewYears = humanizeDuration(newYears - today, { units: ["d", "h", "m", "s"], round: true, largest: 2, delimiter: " and "})
 
-    if(today.toDateString() === 'Sat Jan 1 2022') {
+    if(today.toDateString() === 'Sat Jan 01 2022') {
       client.me(channel, `YAAAY 🎉🎈🎊 HAPPY NEW YEARS! 🎊🎈🎉YAAAY`);
     }
     else {
-      client.me(channel, `${user} --> There is ${timeUntilNewYears} (EST +5) left until new years! PauseChamp 🎉🎈🎊`);
+      client.me(channel, `${user} --> There is ${timeUntilNewYears} (EST +5) left until new years! PauseChamp 🎊🎈🎉`);
     }
   }
   
