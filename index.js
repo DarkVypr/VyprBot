@@ -712,65 +712,99 @@ client.on("PRIVMSG", (msg) => {
   }
 
   // Permission System
-
-  if(command === 'permit') {
-    if(channel === userlow || userlow === 'darkvypr') {
-      let doesuserhavepermits = fs.existsSync(`permissions/${channel}`)
-
-      if(doesuserhavepermits === true) {
-        let usertopermit = args[0]
-        let existingjson = fs.readJsonSync(`permissions/${channel}/permittedusers.json`)
-        let existingadded = existingjson.permittedusers + ' ' + usertopermit.toLowerCase().trim()
-        let tojsonadded = JSON.stringify({permittedusers: existingadded})
-        fs.writeFileSync(`permissions/${channel}/permittedusers.json`, tojsonadded)
-        client.me(channel, `${user} --> Successfully allowed user "${usertopermit}" to use all permissible commands.`)
-      }
-      else {
-        fs.ensureFileSync(`permissions/${channel}/permittedusers.json`)
-        fs.writeFileSync(`permissions/${channel}/permittedusers.json`, `{"permittedusers":"darkvypr"}`)
-        let usertopermit = args[0]
-        let existingjson = fs.readJsonSync(`permissions/${channel}/permittedusers.json`)
-        let existingadded = existingjson.permittedusers + ' ' + usertopermit.toLowerCase().trim()
-        let tojsonadded = JSON.stringify({permittedusers: existingadded})
-        fs.writeFileSync(`permissions/${channel}/permittedusers.json`, tojsonadded)
-        client.me(channel, `${user} --> Successfully allowed user "${usertopermit}" to use all permissible commands.`)
-      }
+  
+  async function permitUser(user) {
+    var existingPermits = await db.get(`${channel}permits`)
+    if(`${existingPermits}` === 'null') {
+      await db.set(`${channel}permits`, channel)
+    }
+    var existingPermits = await db.get(`${channel}permits`)
+    let existingPermitsArray = existingPermits.split(' ')
+    if(existingPermitsArray.indexOf(user) > -1) {
+      return 'That user is alredy permitted in this channel!'
     }
     else {
-      client.me(channel, `Whoops! ${user} --> You need to be a channel owner to use that command. Required: Bot Developer or Channel Broadcaster.`);
+      existingPermitsArray.push(user)
+      let joinedExisting = existingPermitsArray.join(' ').trim()
+      db.set(`${channel}permits`, joinedExisting)
     }
   }
 
-  if(command === 'unpermit') {
-    if(channel === userlow || userlow === 'darkvypr') {
-      let doesuserhavepermits = fs.existsSync(`permissions/${channel}`)
-
-      if(doesuserhavepermits === true) {
-        let usertounpermit = args[0]
-        let existingjson = fs.readJsonSync(`permissions/${channel}/permittedusers.json`)
-        let permitteduserslist = existingjson.permittedusers
-        let removeduserpermit = permitteduserslist.replace(`${usertounpermit.toLowerCase()}`, '')
-        let removeduserandspaces = removeduserpermit.replace(/\s\s+/g, ' ').trim()
-        let tojsonremoved = JSON.stringify({permittedusers: removeduserandspaces})
-        fs.writeFileSync(`permissions/${channel}/permittedusers.json`, tojsonremoved)
-        client.me(channel, `${user} --> Successfully removed user "${usertounpermit}" from the list of permitted users in this channel (#${channel})!`)
-      }
-      else {
-        fs.ensureFileSync(`permissions/${channel}/permittedusers.json`)
-        fs.writeFileSync(`permissions/${channel}/permittedusers.json`, `{"permittedusers":"darkvypr"}`)
-        let usertounpermit = args[0]
-        let existingjson = fs.readJsonSync(`permissions/${channel}/permittedusers.json`)
-        let permitteduserslist = existingjson.permittedusers
-        let removeduserpermit = permitteduserslist.replace(`${usertounpermit.toLowerCase()}`, '')
-        let removeduserandspaces = removeduserpermit.replace(/\s\s+/g, ' ').trim()
-        let tojsonremoved = JSON.stringify({permittedusers: removeduserandspaces})
-        fs.writeFileSync(`permissions/${channel}/permittedusers.json`, tojsonremoved)
-        client.me(channel, `${user} --> Successfully removed user "${usertounpermit}" from the list of permitted users in this channel (#${channel})!`)
-      }
+  async function unpermitUser(user) {
+    var existingPermits = await db.get(`${channel}permits`)
+    if(`${existingPermits}` === 'null') {
+      await db.set(`${channel}permits`, channel)
+    }
+    var existingPermits = await db.get(`${channel}permits`)
+    let existingPermitsArray = existingPermits.split(' ')
+    let indexOfUser = existingPermitsArray.indexOf(user)
+    if(indexOfUser > -1) {
+      existingPermitsArray.splice(indexOfUser)
+      let joinedExisting = existingPermitsArray.join(' ').trim()
+      db.set(`${channel}permits`, joinedExisting)
     }
     else {
-      client.me(channel, `Whoops! ${user} --> You need to be a channel owner to use that command. Bot Developer or Channel Broadcaster.`);
+      return 'That user is not permitted in this channel!'
     }
+  }
+
+  async function checkPermitted(user) {
+    permits = await db.get(`${channel}permits`)
+    if(`${permits}` === 'null') {
+      throw `There are no permitted users in #${channel}!`
+    }
+    else {
+      permitsArray = permits.split(' ')
+      if(permitsArray.indexOf(user) > -1) {
+        return 'true'
+      }
+      else {
+        return 'false'
+      }
+    }
+  }
+
+  if(command === 'permit') {
+    checkAdmin(userlow).then(function(isAdmin) {
+      if(userlow === 'darkvypr' || userlow === channel || isAdmin === 'true') {
+        if(!/^add$|^remove$|^delete$|^check$/i.test(`${args[0]}`) || `${args[1]}` === 'undefined') {
+          client.me(channel, `${user} --> Invalid Syntax! Example: "vb permit {add|delete|remove|check} {user}".`)
+        }
+        else if(`${args[0]}` === 'add') {
+          permitUser(`${args[1].toLowerCase()}`).then(function(value) {
+            if(value === 'That user is alredy permitted in this channel!') {
+              client.me(channel, `${user} --> That user is alredy permitted in #${channel}!`)
+            }
+            else {
+              client.me(channel, `${user} --> Successfully allowed user ${args[1].toLowerCase()} to use all permission locked commands!`)
+            }
+          })
+        }
+        else if(`${args[0]}` === 'delete' || `${args[0]}` === 'remove') {
+          unpermitUser(`${args[1].toLowerCase()}`).then(function(value) {
+            if(value === 'That user is not permitted in this channel!') {
+              client.me(channel, `${user} --> That user is not permitted in #${channel}!`)
+            }
+            else {
+              client.me(channel, `${user} --> Successfully removed ${args[1].toLowerCase()}'s permissions to use all locked commands!`)
+            }
+          })
+        }
+        else if(`${args[0]}` === 'check') {
+          checkPermitted(`${args[1].toLowerCase()}`).catch(err => { client.me(channel, `${user} --> ${err}!`) }).then(function(value) {
+            if(value === 'true') {
+              client.me(channel, `${user} --> User ${args[1]} is permitted in #${channel}! ✅`)
+            }
+            else {
+              client.me(channel, `${user} --> User ${args[1]} is not permitted in #${channel}! ❌`)
+            }
+          })
+        }
+      }
+      else {
+        client.me(channel, `${user} --> You dont have permission to use that command! Required: Bot Developer, Broadcaster or Admin`)
+      }
+    })
   }
 
   // Countdowns
