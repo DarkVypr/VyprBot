@@ -749,11 +749,12 @@ client.on("PRIVMSG", (msg) => {
   }
 
   async function checkPermitted(user) {
-    permits = await db.get(`${channel}permits`)
+    var permits = await db.get(`${channel}permits`)
     if(`${permits}` === 'null') {
-      throw `There are no permitted users in #${channel}!`
+      await db.set(`${channel}permits`, channel)
     }
     else {
+      var permits = await db.get(`${channel}permits`)
       permitsArray = permits.split(' ')
       if(permitsArray.indexOf(user) > -1) {
         return 'true'
@@ -1547,14 +1548,14 @@ client.on("PRIVMSG", (msg) => {
   
   if(command === 'spam') {
     checkAdmin(userlow).then(function(isAdmin) {
-      checkPermitted(userlow).then(function(isPermitted) {
-        if(isPermitted === 'true' || isAdmin === 'true' || userlow === channel) {
+      checkPermitted(userlow).catch(err => { client.me(channel, `${user} --> ${err}`)}).then(function(isPermitted) {
+        if(isAdmin === 'true' || isPermitted === 'true' || userlow === channel) {
           let spamAmount = +`${args[0]}`
           if(spamAmount > 100) {
             client.me(channel, `${user} --> The max clear is 100!`)
           }
           else if(`${checkPhrase(`${args.join(' ')}`)}` === 'false') {
-            let cleanedupresponse = args.join(' ').replace(/[1-9][0-9]?|50/, '')
+            let cleanedupresponse = args.splice(1, 1).join(' ')
             for( let i=spamAmount; i--; )
               client.me(channel, cleanedupresponse)
           }
