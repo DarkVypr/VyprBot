@@ -1017,8 +1017,6 @@ client.on("PRIVMSG", (msg) => {
     client.me(channel, `${user} --> Homies: http://chatterinohomies.darkvypr.com Dankerino: http://dankerino.darkvypr.com`);
   }
 
-
-
   if(command === 'clear') {
     checkAdmin(userlow).then(function(isAdmin) {
       checkPermitted(userlow).then(function(isPermitted) {
