@@ -428,6 +428,13 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
+  // Add Hours
+
+  Date.prototype.addHours = function(h) {
+    this.setHours(this.getHours()+h);
+    return this;
+  }
+
   // Leppu Query
 
   async function getUserData(userLookup) {
@@ -479,6 +486,9 @@ client.on("PRIVMSG", (msg) => {
       }
     }
 
+    let creationDate = new Date(userData.data.createdAt).toDateString()
+    let timeSinceCreation = humanizeDuration((new Date(creationDate).addHours(-5)) - (new Date().addHours(-5)), { units: ["y", "mo", "d", "m"], round: true, largest: 3 })
+
     let rolesArray = (isAffiliate(userData.data.roles.isAffiliate) + isPartner(userData.data.roles.isPartner) + isStaff(userData.data.roles.isStaff) + isSiteAdmin(userData.data.roles.isSiteAdmin) + isBot(userData.data.bot)).trim().split(' ')
     let roles = (isAffiliate(userData.data.roles.isAffiliate) + isPartner(userData.data.roles.isPartner) + isStaff(userData.data.roles.isStaff) + isSiteAdmin(userData.data.roles.isSiteAdmin) + isBot(userData.data.bot)).trim().split(' ').join(', ')
 
@@ -490,7 +500,9 @@ client.on("PRIVMSG", (msg) => {
       colour: userData.data.chatColor,
       pfp: userData.data.logo,
       roles: roles,
-      rolesArray: rolesArray
+      rolesArray: rolesArray,
+      creationDate: creationDate,
+      timeSinceCreation: timeSinceCreation
     }
     return obj
   }
@@ -810,15 +822,10 @@ client.on("PRIVMSG", (msg) => {
   // Countdowns
 
   if(command === 'christmas') {
-    Date.prototype.addHours= function(h){
-        this.setHours(this.getHours()+h);
-        return this;
-    }
-
     today = new Date().addHours(-5)
     xmas = new Date("December 25, 2022");
 
-    let timeUntilChristmas = humanizeDuration(xmas - today, { units: ["d", "h", "m", "s"], round: true, largest: 2, delimiter: " and "})
+    let timeUntilChristmas = humanizeDuration(xmas - today, { units: ["d", "h", "m", "s"], round: true, largest: 2, delimiter: " and " })
 
     if(today.toDateString() === 'Sat Dec 25 2022') {
       client.me(channel, `YAAAY peepoSnow It's finally that time of year! Merry Christmas! peepoSnow YAAAY`);
@@ -829,11 +836,6 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === '2022' || command === 'newyears') {
-    Date.prototype.addHours= function(h){
-        this.setHours(this.getHours()+h);
-        return this;
-    }
-
     today = new Date().addHours(-5)
     newYears = new Date("January 01, 2022");
 
@@ -1323,12 +1325,12 @@ client.on("PRIVMSG", (msg) => {
   if(command === 'info') {
     if(`${args[0]}` === 'undefined') {
       getUserData(userlow).then(function(value) {
-        client.me(channel, `${user} --> Name: @${value.name} | Banned: ${value.banned} | UID: ${value.uid} | Colour: ${value.colour} | Bio: ${value.bio} | Pfp: ${value.pfp} | Roles: ${value.roles}`)
+        client.me(channel, `${user} --> Name: @${value.name} | Banned: ${value.banned} | UID: ${value.uid} | Created: ${value.creationDate} (${value.timeSinceCreation} ago) | Colour: ${value.colour} | Bio: ${value.bio} | Profile Picture: ${value.pfp} | Roles: ${value.roles}`)
       })
     }
     else {
       getUserData(`${args[0]}`).then(function(value) {
-        client.me(channel, `${user} --> Name: @${value.name} | Banned: ${value.banned} | UID: ${value.uid} | Colour: ${value.colour} | Bio: ${value.bio} | Pfp: ${value.pfp} | Roles: ${value.roles}`)
+        client.me(channel, `${user} --> Name: @${value.name} | Banned: ${value.banned} | UID: ${value.uid} | Created: ${value.creationDate} (${value.timeSinceCreation} ago) | Colour: ${value.colour} | Bio: ${value.bio} | Profile Picture: ${value.pfp} | Roles: ${value.roles}`)
       })
     }
   }
