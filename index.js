@@ -932,30 +932,16 @@ client.on("PRIVMSG", (msg) => {
       })
     }
     else {
-      let specificuser = `${args[0]}`
-      if (specificuser[0] === '@') {
-        let removedatsign = specificuser[0].replace('@', '') + specificuser.substring(1).toLowerCase()
-        getBirthdayDetails(removedatsign).then(function(value) {
-          let birthday = value
-          if (birthday === 'null') {
-            client.me(channel, `${user} --> User ${removedatsign} hasn't set their birthday! Get them to set it and retry this command!`)
-          }
-          else {
-            client.me(channel, `${user} --> User ${removedatsign} is currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
-          }
-        })
-      }
-      else {
-        getBirthdayDetails(args[0].toLowerCase()).then(function(value) {
-          let birthday = value
-          if (birthday === 'null') {
-            client.me(channel, `${user} --> User ${args[0]} hasn't set their birthday! Get them to set it and retry this command!`)
-          }
-          else {
-            client.me(channel, `${user} --> User ${args[0]} is currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
-          }
-        })
-      }
+      let userLookup = `${args[0].toLowerCase().replace('@', '').replace(' ', '')}`
+      getBirthdayDetails(userLookup).then(function(value) {
+        let birthday = value
+        if (birthday === 'null') {
+          client.me(channel, `${user} --> User ${args[0]} hasn't set their birthday! Get them to set it and retry this command!`)
+        }
+        else {
+          client.me(channel, `${user} --> User ${args[0]} is currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
+        }
+      })
     }
   }
 
