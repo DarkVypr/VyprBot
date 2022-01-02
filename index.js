@@ -1059,12 +1059,11 @@ client.on("PRIVMSG", (msg) => {
           client.me(channel, `${user} --> Before using this command, you must set your location with the vb setlocation command. Example: “vb setlocation lasalle ontario”, “vb setlocation springfield virginia” or “vb setlocation stockholm sweden”. More info: https://darkvypr.com/commands`)
         }
         else {
-          axios.get(`https://api.tomtom.com/search/2/search/${usercitycountry}.json?key=${process.env['COUNTRY_CONVERT_KEY']}`)
+          axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${usercitycountry}&apiKey=${process.env['GEOCODING_KEY']}`)
           .then((response) => {
-            let convertedcountry = response.data
-            let parsedconvertedcountry = `${convertedcountry.results[0].address.country}`
+            let userCountry = response.data.items[0].address.countryName
 
-          axios.get(`https://disease.sh/v3/covid-19/countries/${parsedconvertedcountry}`)
+          axios.get(`https://disease.sh/v3/covid-19/countries/${userCountry}`)
           .then((response) => {
             let covidusercountry = response.data
             client.me(channel, `${user} --> Stats for your country (${covidusercountry.country}): Today's Cases: ${covidusercountry.todayCases} | Today's Deaths: ${covidusercountry.todayDeaths} | Total Cases: ${covidusercountry.cases} | Total Deaths: ${covidusercountry.deaths}`)
@@ -1077,7 +1076,7 @@ client.on("PRIVMSG", (msg) => {
     else {
       let specificlocation = `${args.join(' ')}`
       if(specificlocation[0] === '@') {
-        let removedatsign = specificlocation[0].replace('@', '') + specificlocation.substring(1)
+        let removedatsign = specificlocation.replace('@', '')
         let removedatsignlow = removedatsign.toLowerCase()
 		    db.get(`${removedatsignlow}time`).then(function(value) {
 			    let lookuptime = `${value}`
@@ -1085,12 +1084,11 @@ client.on("PRIVMSG", (msg) => {
             client.me(channel, (`${user} --> That user hasen't set their location! Get them to set it and retry. PANIC`))
 		      }
           else {
-            axios.get(`https://api.tomtom.com/search/2/search/${lookuptime}.json?key=${process.env['COUNTRY_CONVERT_KEY']}`)
+            axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${lookuptime}&apiKey=${process.env['GEOCODING_KEY']}`)
             .then((response) => {
-              let convertedcountry = response.data
-              let parsedconvertedcountry = `${convertedcountry.results[0].address.country}`
+              let userCountry = response.data.items[0].address.countryName
 
-            axios.get(`https://disease.sh/v3/covid-19/countries/${parsedconvertedcountry}`)
+            axios.get(`https://disease.sh/v3/covid-19/countries/${userCountry}`)
             .then((response) => {
               let covidusercountry = response.data
               client.me(channel, `${user} --> Stats for ${specificlocation}'s country (${covidusercountry.country}): Today's Cases: ${covidusercountry.todayCases} | Today's Deaths: ${covidusercountry.todayDeaths} | Total Cases: ${covidusercountry.cases} | Total Deaths: ${covidusercountry.deaths}`)
