@@ -1755,7 +1755,8 @@ client.on("PRIVMSG", (msg) => {
     let subTier = subDetails.data.meta.tier
     let isGift = subDetails.data.meta.gift
     let totalMonths = subDetails.data.cumulative.months
-    let timeRemainingCumulative = humanizeDuration(new Date(subDetails.data.cumulative.end) - new Date(), { units: ["d", "h", "m", "s"], round: true, largest: 2,  delimiter: ' and ' })
+    let remainingOnActiveSub = humanizeDuration(new Date(subDetails.data.meta.endsAt) - new Date(), { units: ["d", "h", "m", "s"], round: true, largest: 2,  delimiter: ' and ' })
+    let timeSinceSubEnded = humanizeDuration(new Date(subDetails.data.cumulative.end) - new Date(), { units: ["d", "h", "m", "s"], round: true, largest: 2,  delimiter: ' and ' })
     let subStreak = subDetails.data.streak.months
 
     function isUserSubbed() {
@@ -1791,16 +1792,14 @@ client.on("PRIVMSG", (msg) => {
       subType: subType,
       subTier: subTier,
       totalMonths: totalMonths,
-      timeRemainingCumulative: timeRemainingCumulative,
+      remainingOnActiveSub: remainingOnActiveSub,
+      timeSinceSubEnded: timeSinceSubEnded,
       subStreak: subStreak,
     }
     return obj
   }
 
   if(command === 'subage') {
-    // getSubage('darkvypr', 'elis').then(function(subage) {
-    //   console.log(subage)
-    // })
     var userLookup = `${args[0]}`
     if(`${args[0]}` === 'undefined')
       var userLookup = userlow
@@ -1816,19 +1815,19 @@ client.on("PRIVMSG", (msg) => {
           client.me(channel, `${user} --> ${subage.subUser} has hidden their subscription status. (Psst... Another reason that this might pop up is because you are trying to check a channel that is not affiliated.)`)
         }
         else if(subage.isSubbed === false && `${subage.totalMonths}` === 'undefined') {
-          client.me(channel, `${user} --> ${subage.subUser} has never subscribed to ${subage.subChannel}.`)
+          client.me(channel, `${user} --> ${subage.subUser} has never subscribed to @${subage.subChannel}.`)
         }
         else if(subage.isSubbed === false && `${subage.totalMonths}` !== 'undefined') {
-          client.me(channel, `${user} --> ${subage.userSubbed} but previously had a subscription for ${subage.totalMonths} month(s). Their sub expired ${subage.timeRemainingCumulative} ago.`)
+          client.me(channel, `${user} --> ${subage.userSubbed} but previously had a subscription for ${subage.totalMonths} month(s). Their sub expired ${subage.timeSinceSubEnded} ago.`)
         }
         else if(subage.isSubbed === true && subage.subType === 'paid') {
-          client.me(channel, `${user} --> ${subage.userSubbed} with a tier ${subage.subTier} paid sub. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak) and their sub expires/renews in ${subage.timeRemainingCumulative}.`)
+          client.me(channel, `${user} --> ${subage.userSubbed} with a tier ${subage.subTier} paid sub. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak) and their sub expires/renews in ${subage.remainingOnActiveSub}.`)
         }
         else if(subage.isSubbed === true && subage.subType === 'prime') {
-          client.me(channel, `${user} --> ${subage.userSubbed} with a Twitch Prime sub. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak) and their sub expires/renews in ${subage.timeRemainingCumulative}.`)
+          client.me(channel, `${user} --> ${subage.userSubbed} with a Twitch Prime sub. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak) and their sub expires/renews in ${subage.remainingOnActiveSub}.`)
         }
         else if(subage.isSubbed === true && subage.subType === 'gift') {
-          client.me(channel, `${user} --> ${subage.userSubbed} ${subage.userGifted}. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak) and their sub expires/renews in ${subage.timeRemainingCumulative}.`)
+          client.me(channel, `${user} --> ${subage.userSubbed} ${subage.userGifted}. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak) and their sub expires/renews in ${subage.remainingOnActiveSub}.`)
         }
       })
   }
