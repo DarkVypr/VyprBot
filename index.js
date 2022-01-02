@@ -1100,6 +1100,7 @@ client.on("PRIVMSG", (msg) => {
 
       else {
         axios.get(`https://disease.sh/v3/covid-19/countries/${args.join(' ')}`)
+          .catch(err => { client.me(channel, `${user} --> That location does not have any COVID-19 stats. Please ensure spelling.`)})
           .then((response) => {
             let coviduserquery = response.data
             client.me(channel, `${user} --> Stats for ${coviduserquery.country}: Today's Cases: ${coviduserquery.todayCases} | Today's Deaths: ${coviduserquery.todayDeaths} | Total Cases: ${coviduserquery.cases} | Total Deaths: ${coviduserquery.deaths}`)
