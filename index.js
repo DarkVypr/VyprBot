@@ -1764,10 +1764,10 @@ client.on("PRIVMSG", (msg) => {
 
     function isUserSubbed() {
       if(`${isSubbed}` === 'false') {
-        return `${subUser} is not currently subscribed to @${subChannel},`
+        return `@${subUser} is not currently subscribed to @${subChannel},`
       }
       else {
-        return `${subUser} is currently subscribed to @${subChannel}`
+        return `@${subUser} is currently subscribed to @${subChannel}`
       }
     }
 
@@ -1778,7 +1778,7 @@ client.on("PRIVMSG", (msg) => {
         return 'null'
       }
       else {
-        return `with a tier ${subTier} gift sub by ${subDetails.data.meta.gift.name}`
+        return `with a tier ${subTier} gift sub by @${subDetails.data.meta.gift.name}`
       }
     }
     
@@ -1857,10 +1857,10 @@ client.on("PRIVMSG", (msg) => {
       .catch(err => { client.me(channel, `${user} --> There was an error getting that user's followage! Make sure that the account exists, and you have spelt the channel and username correctly!`) })
       .then(function(followage) {
         if(`${followage.followedAt}` === 'null') {
-          client.me(channel, `${user} --> ${followage.subUser} is not following ${followage.subChannel}`)
+          client.me(channel, `${user} --> @${followage.subUser} is not following @${followage.subChannel}`)
         }
         else {
-          client.me(channel, `${user} --> ${followage.subUser} followed ${followage.subChannel} on ${new Date(followage.followedAt).toDateString()} which was ${followage.timeSinceFollow} ago.`)
+          client.me(channel, `${user} --> @${followage.subUser} followed @${followage.subChannel} on ${new Date(followage.followedAt).toDateString()} which was ${followage.timeSinceFollow} ago.`)
         }
       })
   }
