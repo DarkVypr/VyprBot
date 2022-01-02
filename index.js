@@ -837,11 +837,11 @@ client.on("PRIVMSG", (msg) => {
 
   if(command === '2022' || command === 'newyears') {
     today = new Date().addHours(-5)
-    newYears = new Date("January 01, 2022");
+    newYears = new Date("January 01, 2023");
 
     let timeUntilNewYears = humanizeDuration(newYears - today, { units: ["d", "h", "m", "s"], round: true, largest: 2, delimiter: " and "})
 
-    if(today.toDateString() === 'Sat Jan 01 2022') {
+    if(today.toDateString() === 'Sat Jan 01 2023') {
       client.me(channel, `YAAAY 🎉🎈🎊 HAPPY NEW YEARS! 🎊🎈🎉YAAAY`);
     }
     else {
@@ -1743,6 +1743,94 @@ client.on("PRIVMSG", (msg) => {
       timezone: timezone
     }
     return currentTime
+  }
+
+  async function getSubage(user, channel) {
+    let subDetails = await axios.get(`https://api.ivr.fi/twitch/subage/${user}/${channel}`)
+    let isHidden = subDetails.data.hidden
+    let subUser = subDetails.data.username
+    let subChannel = subDetails.data.channel
+    let isSubbed = subDetails.data.subscribed
+    let subType = subDetails.data.meta.type
+    let subTier = subDetails.data.meta.tier
+    let isGift = subDetails.data.meta.gift
+    let totalMonths = subDetails.data.cumulative.months
+    let timeRemainingCumulative = humanizeDuration(new Date(subDetails.data.cumulative.end) - new Date(), { units: ["d", "h", "m", "s"], round: true, largest: 2,  delimiter: ' and ' })
+    let subStreak = subDetails.data.streak.months
+
+    function isUserSubbed() {
+      if(`${isSubbed}` === 'false') {
+        return `${subUser} is not currently subscribed to ${subChannel},`
+      }
+      else {
+        return `${subUser} is currently subscribed to ${subChannel}`
+      }
+    }
+
+    let userSubbed = isUserSubbed()
+
+    function isGifted() {
+      if(`${isGift}` === 'undefined' || `${isGift}` === 'null') {
+        return 'null'
+      }
+      else {
+        return `with a tier ${subTier} gift sub by ${subDetails.data.meta.gift.name}`
+      }
+    }
+    
+    let userGifted = isGifted()
+
+    
+    let obj = {
+      hidden: isHidden,
+      subUser: subUser,
+      subChannel: subChannel,
+      userGifted: userGifted,
+      userSubbed: userSubbed,
+      isSubbed: isSubbed,
+      subType: subType,
+      subTier: subTier,
+      totalMonths: totalMonths,
+      timeRemainingCumulative: timeRemainingCumulative,
+      subStreak: subStreak,
+    }
+    return obj
+  }
+
+  if(command === 'subage') {
+    // getSubage('darkvypr', 'elis').then(function(subage) {
+    //   console.log(subage)
+    // })
+    var userLookup = `${args[0]}`
+    if(`${args[0]}` === 'undefined')
+      var userLookup = userlow
+      
+    var channelLookup = `${args[1]}`
+    if(`${args[1]}` === 'undefined')
+      var channelLookup = channel
+      
+    getSubage(userLookup, channelLookup)
+      .catch(err => { client.me(channel, `${user} --> There was an error getting that users subage! Make sure that the account exists, and you have spelt the channel and username correctly!`) })
+      .then(function(subage) {
+        if(subage.hidden === true) {
+          client.me(channel, `${user} --> ${subage.subUser} has hidden their subscription status. (Psst... Another reason that this might pop up is because you are trying to check a channel that is not affiliated.)`)
+        }
+        else if(subage.isSubbed === false && `${subage.totalMonths}` === 'undefined') {
+          client.me(channel, `${user} --> ${subage.subUser} has never subscribed to ${subage.subChannel}.`)
+        }
+        else if(subage.isSubbed === false && `${subage.totalMonths}` !== 'undefined') {
+          client.me(channel, `${user} --> ${subage.userSubbed} but previously had a subscription for ${subage.totalMonths} month(s). Their sub expired ${subage.timeRemainingCumulative} ago.`)
+        }
+        else if(subage.isSubbed === true && subage.subType === 'paid') {
+          client.me(channel, `${user} --> ${subage.userSubbed} with a tier ${subage.subTier} paid sub. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak) and their sub expires/renews in ${subage.timeRemainingCumulative}.`)
+        }
+        else if(subage.isSubbed === true && subage.subType === 'prime') {
+          client.me(channel, `${user} --> ${subage.userSubbed} with a Twitch Prime sub. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak) and their sub expires/renews in ${subage.timeRemainingCumulative}.`)
+        }
+        else if(subage.isSubbed === true && subage.subType === 'gift') {
+          client.me(channel, `${user} --> ${subage.userSubbed} ${subage.userGifted}. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak) and their sub expires/renews in ${subage.timeRemainingCumulative}.`)
+        }
+      })
   }
   
   if(command === 'time') {
