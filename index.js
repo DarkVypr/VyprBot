@@ -1815,7 +1815,7 @@ client.on("PRIVMSG", (msg) => {
       var channelLookup = channel
       
     getSubage(userLookup, channelLookup)
-      .catch(err => { client.me(channel, `${user} --> There was an error getting that users subage! Make sure that the account exists, and you have spelt the channel and username correctly!`) })
+      .catch(err => { client.me(channel, `${user} --> There was an error getting that user's subage! Make sure that the account exists, and you have spelt the channel and username correctly!`) })
       .then(function(subage) {
         if(subage.hidden === true) {
           client.me(channel, `${user} --> ${subage.subUser} has hidden their subscription status. (Psst... Another reason that this might pop up is because you are trying to check a channel that is not affiliated.)`)
@@ -1854,7 +1854,7 @@ client.on("PRIVMSG", (msg) => {
       var channelLookup = channel
     
     getSubage(userLookup, channelLookup)
-      .catch(err => { client.me(channel, `${user} --> There was an error getting that users followage! Make sure that the account exists, and you have spelt the channel and username correctly!`) })
+      .catch(err => { client.me(channel, `${user} --> There was an error getting that user's followage! Make sure that the account exists, and you have spelt the channel and username correctly!`) })
       .then(function(followage) {
         if(`${followage.followedAt}` === 'null') {
           client.me(channel, `${user} --> ${followage.subUser} is not following ${followage.subChannel}`)
