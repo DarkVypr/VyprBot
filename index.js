@@ -924,7 +924,7 @@ client.on("PRIVMSG", (msg) => {
       getBirthdayDetails(userlow).then(function(value) {
         let birthday = value
         if (birthday === 'null') {
-          client.me(channel, `${user} --> Before using this command, you must set your birthday with the vb setbirthday command. Examples: "vb setbirthday 8/14/2005", "vb setbirthday 10/16/2004" or "vb setbirthday 9/11/1973".`)
+          client.me(channel, `${user} --> Before using this command, you must set your birthday with the vb setbirthday command. It must be in M/D/YYYY or MM/DD/YYYY format. Examples: "vb setbirthday 8/14/2005", "vb setbirthday 10/16/2004" or "vb setbirthday 9/11/1973".`)
         }
         else {
           client.me(channel, `${user} --> You are currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
@@ -1380,6 +1380,18 @@ client.on("PRIVMSG", (msg) => {
     client.me(channel, `${user} --> https://www.youtube.com/watch?v=IHZQ-23jrps NekoProud`);
   }
 
+  if(command === 'math') {
+    if(`${args[0]}` === 'undefined') {
+      client.me(channel, `${user} --> Please provide a problem to evaluate!`);
+    }
+    else {
+      axios.get(`https://api.mathjs.org/v4/?expr=${encodeURIComponent(args.join(''))}`)
+      .then((response) => {
+        client.me(channel, `${user} --> ${response.data}`);
+      })
+    }
+  }
+  
   if(command === 'minglee') {
     client.me(channel, `${user} --> https://www.youtube.com/watch?v=OjNpRbNdR7E`);
     client.me(channel, `MingLee 🇨🇳 GLORY TO THE CCP`);
@@ -1872,7 +1884,7 @@ client.on("PRIVMSG", (msg) => {
         let textUnsplit = `${args.join(' ')}`
         let textSplit = textUnsplit.split(" ")
         let textSend = textSplit.slice(1).toString().replace(/,/g, ' ')
-        translateText(textSend, targetLang).then(function(value){
+        translateText(encodeURIComponent(textSend), targetLang).then(function(value){
           client.me(channel, `${user} --> ${value.sourceLang} > ${value.targetLang} | Text: ${value.translatedText}`)
         })
       }
@@ -1881,7 +1893,7 @@ client.on("PRIVMSG", (msg) => {
       }
     }
     else {
-      translateText(`${args.join(' ')}`).then(function(value){
+      translateText(encodeURIComponent(args.join(' '))).then(function(value){
         client.me(channel, `${user} --> ${value.sourceLang} > EN | Text: ${value.translatedText}`)
       })
     }
