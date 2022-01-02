@@ -1761,10 +1761,10 @@ client.on("PRIVMSG", (msg) => {
 
     function isUserSubbed() {
       if(`${isSubbed}` === 'false') {
-        return `${subUser} is not currently subscribed to ${subChannel},`
+        return `${subUser} is not currently subscribed to @${subChannel},`
       }
       else {
-        return `${subUser} is currently subscribed to ${subChannel}`
+        return `${subUser} is currently subscribed to @${subChannel}`
       }
     }
 
@@ -1795,11 +1795,12 @@ client.on("PRIVMSG", (msg) => {
       remainingOnActiveSub: remainingOnActiveSub,
       timeSinceSubEnded: timeSinceSubEnded,
       subStreak: subStreak,
+      isBotPermaSub: subDetails.data.meta.endsAt
     }
     return obj
   }
 
-  if(command === 'subage') {
+  if(command === 'subage' || command === 'sa') {
     var userLookup = `${args[0]}`
     if(`${args[0]}` === 'undefined')
       var userLookup = userlow
@@ -1814,11 +1815,17 @@ client.on("PRIVMSG", (msg) => {
         if(subage.hidden === true) {
           client.me(channel, `${user} --> ${subage.subUser} has hidden their subscription status. (Psst... Another reason that this might pop up is because you are trying to check a channel that is not affiliated.)`)
         }
-        else if(subage.isSubbed === false && `${subage.totalMonths}` === 'undefined') {
+        else if(`${subage.totalMonths}` === 'undefined' || +subage.totalMonths === 0) {
           client.me(channel, `${user} --> ${subage.subUser} has never subscribed to @${subage.subChannel}.`)
         }
         else if(subage.isSubbed === false && `${subage.totalMonths}` !== 'undefined') {
           client.me(channel, `${user} --> ${subage.userSubbed} but previously had a subscription for ${subage.totalMonths} month(s). Their sub expired ${subage.timeSinceSubEnded} ago.`)
+        }
+        else if(subage.isSubbed === true && subage.subTier === 'Custom') {
+          client.me(channel, `${user} --> ${subage.userSubbed}. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak). This is a permanent subscription!`)
+        }
+        else if(subage.isSubbed === true && subage.subTier === '3' && `${subage.isBotPermaSub}` === 'null') {
+          client.me(channel, `${user} --> ${subage.userSubbed}. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak). This is a permanent subscription!`)
         }
         else if(subage.isSubbed === true && subage.subType === 'paid') {
           client.me(channel, `${user} --> ${subage.userSubbed} with a tier ${subage.subTier} paid sub. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak) and their sub expires/renews in ${subage.remainingOnActiveSub}.`)
