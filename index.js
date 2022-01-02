@@ -1759,6 +1759,9 @@ client.on("PRIVMSG", (msg) => {
     let timeSinceSubEnded = humanizeDuration(new Date(subDetails.data.cumulative.end) - new Date(), { units: ["d", "h", "m", "s"], round: true, largest: 2,  delimiter: ' and ' })
     let subStreak = subDetails.data.streak.months
 
+    let followedAt = subDetails.data.followedAt
+    let timeSinceFollow = humanizeDuration(new Date(subDetails.data.followedAt) - new Date(), { units: ["y", "mo", "d", "h", "m", "s"], round: true, largest: 3 })
+
     function isUserSubbed() {
       if(`${isSubbed}` === 'false') {
         return `${subUser} is not currently subscribed to @${subChannel},`
@@ -1795,7 +1798,9 @@ client.on("PRIVMSG", (msg) => {
       remainingOnActiveSub: remainingOnActiveSub,
       timeSinceSubEnded: timeSinceSubEnded,
       subStreak: subStreak,
-      isBotPermaSub: subDetails.data.meta.endsAt
+      isBotPermaSub: subDetails.data.meta.endsAt,
+      followedAt: followedAt,
+      timeSinceFollow: timeSinceFollow
     }
     return obj
   }
@@ -1835,6 +1840,27 @@ client.on("PRIVMSG", (msg) => {
         }
         else if(subage.isSubbed === true && subage.subType === 'gift') {
           client.me(channel, `${user} --> ${subage.userSubbed} ${subage.userGifted}. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak) and their sub expires/renews in ${subage.remainingOnActiveSub}.`)
+        }
+      })
+  }
+
+  if(command === 'followage' || command === 'fa') {
+    var userLookup = `${args[0]}`
+    if(`${args[0]}` === 'undefined')
+      var userLookup = userlow
+      
+    var channelLookup = `${args[1]}`
+    if(`${args[1]}` === 'undefined')
+      var channelLookup = channel
+    
+    getSubage(userLookup, channelLookup)
+      .catch(err => { client.me(channel, `${user} --> There was an error getting that users followage! Make sure that the account exists, and you have spelt the channel and username correctly!`) })
+      .then(function(followage) {
+        if(`${followage.followedAt}` === 'null') {
+          client.me(channel, `${user} --> ${followage.subUser} is not following ${followage.subChannel}`)
+        }
+        else {
+          client.me(channel, `${user} --> ${followage.subUser} followed ${followage.subChannel} on ${new Date(followage.followedAt).toDateString()} which was ${followage.timeSinceFollow} ago.`)
         }
       })
   }
