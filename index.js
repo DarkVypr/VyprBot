@@ -2278,7 +2278,6 @@ client.on("PRIVMSG", (msg) => {
           else { 
             let nammeramount = getRandomInt(60)
             if(`${userlow}` === 'darkvypr' || `${userlow}` === 'tyebuddha') {
-              console.log(nammeramount)
               let totalnammers = Math.round(+nammers + nammeramount * 1.3)
               db.set(`${userlow}nammers`, totalnammers)
               client.me(channel, (`${user} --> GearSmile ⛓ You caught ${Math.round(nammeramount * 1.3)} (+${Math.round((nammeramount * 1.3) - nammeramount)} EleGiggle ) nammers, and have a total of ${totalnammers} nammers! (30 min cooldown)`))
