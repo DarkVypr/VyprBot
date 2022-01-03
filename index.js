@@ -2078,22 +2078,36 @@ client.on("PRIVMSG", (msg) => {
       let userLongitude = userCoordinates.data.items[0].position.lng
       let userLocationAPI = userCoordinates.data.items[0].title
 
-      let userWeather = await axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${userLatitude}&lon=${userLongitude}&units=metric&appid=${process.env['WEATHER_KEY']}`)
-      let condition = userWeather.data.weather[0].main
-      let icon = userWeather.data.weather[0].icon
-      let description = userWeather.data.weather[0].description
+      let userWeather = await axios.get(`https://api.openweathermap.org/data/2.5/onecall?lat=${userLatitude}&lon=${userLongitude}&exclude=hourly,daily&units=metric&appid=${process.env['WEATHER_KEY']}`)
+      let condition = userWeather.data.current.weather[0].main
+      let icon = userWeather.data.current.weather[0].icon
+      let description = userWeather.data.current.weather[0].description
 
-      let userTempC = Math.round(userWeather.data.main.temp)
+      let userTempC = Math.round(userWeather.data.current.temp)
       let userTempF = Math.round(+userTempC * 1.8 + 32)
-      let userFeelsLikeC = Math.round(userWeather.data.main.feels_like)
+      let userFeelsLikeC = Math.round(userWeather.data.current.feels_like)
       let userFeelsLikeF = Math.round(+userFeelsLikeC * 1.8 + 32)
 
-      let userWindKMH = Math.round(+userWeather.data.wind.speed * 3.6)
+      let userWindKMH = Math.round(+userWeather.data.current.wind_speed * 3.6)
       let userWindMPH = Math.round(userWindKMH / 1.609)
 
-      let userHumidity = userWeather.data.main.humidity
+      let userHumidity = userWeather.data.current.humidity
 
-      let cloudCoverage = userWeather.data.clouds.all
+      let cloudCoverage = userWeather.data.current.clouds
+
+      let alerts = userWeather.data.alerts
+
+      function weatherAlert(alerts) {
+        switch(alerts) {
+          case undefined:
+            return 'None'
+            break
+          default:
+            return userWeather.data.alerts[0].event
+        }
+      }
+
+      let checkAlerts = weatherAlert(alerts)
 
       function getCondition(checkCondition) {
         switch (checkCondition) {
@@ -2122,7 +2136,7 @@ client.on("PRIVMSG", (msg) => {
 
       let conditionString = getCondition(condition)
 
-      var weatherDetails = {
+      return {
         location: userLocationAPI,
         tempC: userTempC,
         feelsLikeC: userFeelsLikeC,
@@ -2132,9 +2146,9 @@ client.on("PRIVMSG", (msg) => {
         windMPH: userWindMPH,
         humidity: userHumidity,
         condition: conditionString,
-        cloudCoverage: cloudCoverage
+        cloudCoverage: cloudCoverage,
+        weatherAlert: checkAlerts
       }
-      return weatherDetails
     }
   }
 
@@ -2146,24 +2160,37 @@ client.on("PRIVMSG", (msg) => {
     let userLatitude = userCoordinates.data.items[0].position.lat
     let userLongitude = userCoordinates.data.items[0].position.lng
     let userLocationAPI = userCoordinates.data.items[0].title
+    let userWeather = await axios.get(`https://api.openweathermap.org/data/2.5/onecall?lat=${userLatitude}&lon=${userLongitude}&exclude=hourly,daily&units=metric&appid=${process.env['WEATHER_KEY']}`)
+    let condition = userWeather.data.current.weather[0].main
+    let icon = userWeather.data.current.weather[0].icon
+    let description = userWeather.data.current.weather[0].description
 
-    let userWeather = await axios.get(`http://api.openweathermap.org/data/2.5/weather?lat=${userLatitude}&lon=${userLongitude}&units=metric&appid=${process.env['WEATHER_KEY']}`)
-    let condition = userWeather.data.weather[0].main
-    let icon = userWeather.data.weather[0].icon
-    let description = userWeather.data.weather[0].description
-
-    let userTempC = Math.round(userWeather.data.main.temp)
+    let userTempC = Math.round(userWeather.data.current.temp)
     let userTempF = Math.round(+userTempC * 1.8 + 32)
-    let userFeelsLikeC = Math.round(userWeather.data.main.feels_like)
+    let userFeelsLikeC = Math.round(userWeather.data.current.feels_like)
     let userFeelsLikeF = Math.round(+userFeelsLikeC * 1.8 + 32)
 
-    let userWindKMH = Math.round(+userWeather.data.wind.speed * 3.6)
+    let userWindKMH = Math.round(+userWeather.data.current.wind_speed * 3.6)
     let userWindMPH = Math.round(userWindKMH / 1.609)
 
-    let userHumidity = userWeather.data.main.humidity
+    let userHumidity = userWeather.data.current.humidity
 
-    let cloudCoverage = userWeather.data.clouds.all
+    let cloudCoverage = userWeather.data.current.clouds
 
+    let alerts = userWeather.data.alerts
+
+    function weatherAlert(alerts) {
+      switch(alerts) {
+        case undefined:
+          return 'None'
+          break
+        default:
+          return userWeather.data.alerts[0].event
+      }
+    }
+
+    let checkAlerts = weatherAlert(alerts)
+    
     function getCondition(checkCondition) {
       switch (checkCondition) {
         case 'Clear':
@@ -2201,7 +2228,8 @@ client.on("PRIVMSG", (msg) => {
       windMPH: userWindMPH,
       humidity: userHumidity,
       condition: conditionString,
-      cloudCoverage: cloudCoverage
+      cloudCoverage: cloudCoverage,
+      weatherAlert: checkAlerts
     }
     return weatherDetails
   }
@@ -2214,7 +2242,7 @@ client.on("PRIVMSG", (msg) => {
           client.me(channel, `${user} --> Before using this command, you must set your location with the vb setlocation command. Example: “vb setlocation lasalle ontario”, “vb setlocation springfield virginia” or “vb setlocation stockholm sweden”. More info: https://darkvypr.com/commands`)
         }
         else {
-          client.me(channel, `${user} --> The weather in ${value.location} is currently ${value.tempC}°C (${value.tempF}°F) ${value.condition} Wind speed: ${value.windKMH} km/h (${value.windMPH} mp/h) 💨 Humidity: ${value.humidity}% 💧 Cloud Coverage: ${value.cloudCoverage}% ☁️`)
+          client.me(channel, `${user} --> The weather in ${value.location} is currently ${value.tempC}°C (${value.tempF}°F) ${value.condition} Wind speed: ${value.windKMH} km/h (${value.windMPH} mp/h) 💨 Humidity: ${value.humidity}% 💧 Cloud Coverage: ${value.cloudCoverage}% ☁️ Weather Alerts: ${value.weatherAlert} ⚠️`)
         }
       })
     }
@@ -2225,13 +2253,13 @@ client.on("PRIVMSG", (msg) => {
           client.me(channel, `${user} --> That user hasn't set their location! Get them to set it and retry! PANIC`)
         }
         else {
-          client.me(channel, `${user} --> The weather in ${cleanedUpUser}'s location (${value.location}) is currently ${value.tempC}°C (${value.tempF}°F) ${value.condition} Wind speed: ${value.windKMH} km/h (${value.windMPH} mp/h) 💨 Humidity: ${value.humidity}% 💧 Cloud Coverage: ${value.cloudCoverage}% ☁️`)
+          client.me(channel, `${user} --> The weather in ${cleanedUpUser}'s location (${value.location}) is currently ${value.tempC}°C (${value.tempF}°F) ${value.condition} Wind speed: ${value.windKMH} km/h (${value.windMPH} mp/h) 💨 Humidity: ${value.humidity}% 💧 Cloud Coverage: ${value.cloudCoverage}% ☁️ Weather Alerts: ${value.weatherAlert} ⚠️`)
         }
       })
     }
     else {
       getWeatherLocation(specificLocation).then(function(value) {
-        client.me(channel, `${user} --> The weather in ${value.location} is currently ${value.tempC}°C (${value.tempF}°F) ${value.condition} Wind speed: ${value.windKMH} km/h (${value.windMPH} mp/h) 💨 Humidity: ${value.humidity}% 💧 Cloud Coverage: ${value.cloudCoverage}% ☁️`)
+        client.me(channel, `${user} --> The weather in ${value.location} is currently ${value.tempC}°C (${value.tempF}°F) ${value.condition} Wind speed: ${value.windKMH} km/h (${value.windMPH} mp/h) 💨 Humidity: ${value.humidity}% 💧 Cloud Coverage: ${value.cloudCoverage}% ☁️ Weather Alerts: ${value.weatherAlert} ⚠️`)
       })
     }
   }
