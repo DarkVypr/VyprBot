@@ -2035,9 +2035,10 @@ client.on("PRIVMSG", (msg) => {
       }
     }
     else if (urbanResult.data.list.length !== 0) {
+      spaceRegex = new RegExp('\"\r\n\r\n', 'g', 'i', 'm')
       return {
         success: true,
-        reply: `${(urbanResult.data.list[0].definition + ' | Example: ' + urbanResult.data.list[0].example).replace(/\[|\]/g, '').replace(/\r|\n|\bn:\s\b/gi, '')}`
+        reply: `${(urbanResult.data.list[0].definition + ' | Example: ' + urbanResult.data.list[0].example).replace(/\[|\]/g, '').replace(/n:/, '').replace(spaceRegex, ' ').replace(/\b\\b/g, '').replace(/(\r\n|\n|\r)/gm, "").trim()}`
       }
     }
     else {
