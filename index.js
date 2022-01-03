@@ -288,7 +288,7 @@ client.on("PRIVMSG", (msg) => {
                 db.delete(value[i])
               }
             })
-            client.me(channel, `${user} --> Succesfully transferred all of the data from "${oldName}" to "${newName}"! EZ`) 
+            client.me(channel, `${user} --> Succesfully transferred all of the data from "${oldName}" to "${newName}" vb  EZ`) 
           }
         }
         if(`${args[0]}` === 'undefined' || `${args[1]}` === 'undefined') {
@@ -631,7 +631,7 @@ client.on("PRIVMSG", (msg) => {
   
   if(command === 'suggest') {
     if(`${args[0]}` === 'undefined') {
-      client.me(channel, `${user} --> You must provide a suggestion when using this command. Example: "!suggest I would like the bot to be added to my channel."`)
+      client.me(channel, `${user} --> You must provide a suggestion when using this command. Example: "vb suggest I would like the bot to be added to my channel."`)
     }
     else {
       db.get('suggestion').then(function(value) {
@@ -652,7 +652,7 @@ client.on("PRIVMSG", (msg) => {
 
   if(command === 'unset') {
     if(`${args[0]}` === 'undefined') {
-      client.me(channel, `${user} --> You must provide a suggestion to unset when using this command. Example: "!unset 10" would unset the suggestion with the ID of '10'.`)
+      client.me(channel, `${user} --> You must provide a suggestion to unset when using this command. Example: "vb unset 10" would unset the suggestion with the ID of '10'.`)
     }
     else {
       let suggestionid = `${args[0]}`
@@ -1035,7 +1035,7 @@ client.on("PRIVMSG", (msg) => {
 
   if(command === 'code') {
     if(`${args[0]}` === 'undefined') {
-      client.me(channel, `${user} --> The code for the whole bot can be found at: http://bot.darkvypr.com/ | Input a command name to view the code for a command. Example: "!code loyalty".`);
+      client.me(channel, `${user} --> The code for the whole bot can be found at: http://bot.darkvypr.com/ | Input a command name to view the code for a command. Example: "vb code loyalty".`);
     }
     else {
       client.me(channel, `${user} --> The ${args[0]} command's code can be found at: https://code.darkvypr.com/${args[0]}.txt`);
@@ -2288,7 +2288,7 @@ client.on("PRIVMSG", (msg) => {
       db.get(`${userlow}nammers`).then(function(value) {
         let nammers = `${value}`
         if(+nammers < 20) {
-          client.me(channel, (`${user} --> GearScare ⛔ You don't have enough nammers for a reset! You have ${nammers} nammers, and need at least 20! Use "!hunt" to get more.`))
+          client.me(channel, (`${user} --> GearScare ⛔ You don't have enough nammers for a reset! You have ${nammers} nammers, and need at least 20! Use "vb hunt" to get more.`))
         }
         else {
           talkedRecently.delete(`${user}`)
@@ -2382,7 +2382,7 @@ client.on("PRIVMSG", (msg) => {
 		db.get(`${userlow}nammers`).then(function(value) {
 			let nammers = `${value}`
         if(nammers === 'null' || +nammers === 0) {
-          client.me(channel, (`${user} --> GearScare ⛔ You don't have any nammers to kill! Use "!hunt" to get more.`))
+          client.me(channel, (`${user} --> GearScare ⛔ You don't have any nammers to kill! Use "vb hunt" to get more.`))
 		    }
         else {
           if(+`${args[0]}` > +`${nammers}`) {
@@ -2415,10 +2415,10 @@ client.on("PRIVMSG", (msg) => {
       db.get(`${userlow}nammers`).then(function(value) {
         let nammers = `${value}`
           if(nammers === 'null') {
-            client.me(channel, (`${user} --> GearScare ⛔ You don't have any nammers! Get some by typing "!hunt", and kill some by typing "!kill {amount}"!`))
+            client.me(channel, (`${user} --> GearScare ⛔ You don't have any nammers! Get some by typing "vb hunt", and kill some by typing "vb kill {amount}"!`))
           }
           else {
-            client.me(channel, (`${user} --> NOTED You have ${nammers} nammer(s). Get some by typing "!hunt", and kill some by typing "!kill {amount}".`))
+            client.me(channel, (`${user} --> NOTED You have ${nammers} nammer(s). Get some by typing "vb hunt", and kill some by typing "vb kill {amount}".`))
           }
       })
     }
