@@ -622,6 +622,13 @@ client.on("PRIVMSG", (msg) => {
 
   // Suggestions
 
+  async function setReminderIfAFK(user, id, body) {
+    let checkIfAFK = await axios.get(`https://supinic.com/api/bot/afk/check?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}&userID=1093802`)
+    if(`${checkIfAFK.data.data.status}` !== 'null') {
+      await axios.post(`https://supinic.com/api/bot/reminder?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}&userID=1093802&private=true&text=[New Suggestion] A new suggestion has been made while you were AFK: User: ${user} | ID: ${id} | Suggestion: ${body}`)
+    }
+  }
+  
   if(command === 'suggest') {
     if(`${args[0]}` === 'undefined') {
       client.me(channel, `${user} --> You must provide a suggestion when using this command. Example: "!suggest I would like the bot to be added to my channel."`)
@@ -637,6 +644,7 @@ client.on("PRIVMSG", (msg) => {
 
         fs.writeFile(`suggestions/ACTIVE/${userlow}_ID:${plusone}.txt`, `User: ${user} | State: ${state} | Date: ${today} | Suggestion: ${content}`, err => {})
         client.me(channel, `${user} --> Your suggestion has been saved and will be read shortly. (ID: ${plusone})`)
+        setReminderIfAFK(userlow, plusone, content)
         client.whisper('darkvypr', `[New Suggestion] A new suggestion has been made: User: ${userlow} | ID: ${plusone} | Suggestion: ${content}`)
       })
     }
@@ -686,7 +694,7 @@ client.on("PRIVMSG", (msg) => {
             client.whisper(suggestionuser.toLowerCase(), `[Suggestion Update] Your suggestion with the ID:${suggestionid} was denied! Reason: ${suggestionreason}`)
           }
           else {
-            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !complete {user} {id} {completed|approved|denied|held}`)
+            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: vb complete {user} {id} {completed|approved|denied|held}`)
           }
         }
         else if(`${suggestionstatus.toUpperCase()}` === 'HELD' || `${suggestionstatus.toUpperCase()}` === 'ON-HOLD') {
@@ -699,7 +707,7 @@ client.on("PRIVMSG", (msg) => {
             client.whisper(suggestionuser.toLowerCase(), `[Suggestion Update] Your suggestion with the ID:${suggestionid} was put on hold! Reason: ${suggestionreason}`)
           }
           else {
-            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !complete {user} {id} {completed|approved|denied|held}`)
+            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: vb complete {user} {id} {completed|approved|denied|held}`)
           }
         }
         else {
@@ -712,7 +720,7 @@ client.on("PRIVMSG", (msg) => {
             client.whisper(suggestionuser.toLowerCase(), `[Suggestion Update] Your suggestion with the ID:${suggestionid} was approved! Reason: ${suggestionreason}`)
           }
           else {
-            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: !complete {user} {id} {completed|approved|denied|held}.`)
+            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: vb complete {user} {id} {completed|approved|denied|held}.`)
           }
         }
       }
@@ -1584,14 +1592,17 @@ client.on("PRIVMSG", (msg) => {
     checkAdmin(userlow).then(function(isAdmin) {
       checkPermitted(userlow).catch(err => { client.me(channel, `${user} --> ${err}`)}).then(function(isPermitted) {
         if(isAdmin === 'true' || isPermitted === 'true' || userlow === channel) {
-          let spamAmount = +`${args[0]}`
-          if(spamAmount > 80) {
+          let spamAmount = args[0]
+          if(isNaN(spamAmount) || `${args[1]}` === 'undefined') {
+            client.me(channel, `${user} --> Invalid Syntax! Example: "vb spam {amount} {phrase}"`)
+          }
+          else if(spamAmount > 80) {
             client.me(channel, `${user} --> The max spam is 80!`)
           }
           else if(!checkPhrase(`${args.join(' ')}`)) {
-            let cleanedupresponse = args.splice(1, 1).join(' ')
+            args.shift()
             for( let i=spamAmount; i--; )
-              client.me(channel, cleanedupresponse)
+              client.me(channel, args.join(' '))
           }
           else {
             client.me(channel, `${user} --> cmonNep ??????`)
@@ -2412,7 +2423,7 @@ client.on("PRIVMSG", (msg) => {
       })
     }
     else {
-      let checkuser = `${args[0]}`.toLowerCase()
+      let checkuser = `${args[0]}`.toLowerCase().replace("@", '')
       db.get(`${checkuser}nammers`).then(function(value) {
         let nammers = `${value}`
           if(nammers === 'null') {
@@ -2425,76 +2436,113 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
-  if(command === 'give') {
-    let giveamount = `${args[1]}`
-    const regex = new RegExp('^([1-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-9][0-9][0-9][0-9])$');
-    testForNumber = `${regex.test(giveamount)}`
-
-    let recipient = `${args[0]}`
-
-    if(recipient === 'undefined') {
-      client.me(channel, (`${user} --> Invalid Syntax. You must specify a recipient, and an amount to give away!`))
-    }
-    else if(recipient.toLowerCase() === userlow) {
-      client.me(channel, (`${user} --> Invalid Syntax. You cannot give nammers to yourself!`))
-    }
-    else if(`${testForNumber}` === 'true') {
-      db.get(`${userlow}nammers`).then(function(value) {
-        let nammers = `${value}`
-        if(nammers === 'null' || +nammers === 0) {
-          client.me(channel, (`${user} --> GearScare ⛔ You don't have any nammers to give away! Use "!hunt" to get more. ppOverheat`))
-        }
-        else if(+`${giveamount}` > +`${nammers}`) {
-          client.me(channel, (`${user} --> GearScare ⛔ You tried to give away ${giveamount} nammer(s), but you only have ${nammers} nammer(s). You keep all of your nammers for a rainy day.`))
-        }
-        else {
-          db.get(`${recipient.toLowerCase()}nammers`).then(function(valuerecipient) {
-            let recipientnammers = `${valuerecipient}`
-            if(`${recipientnammers}` === 'null') {
-              client.me(channel, `${user} --> That user dosen't exist in the database!`)
-            }
-            else {
-              let aftergive = +nammers - +giveamount
-              db.set(`${userlow}nammers`, aftergive)
-              let recipientaddednammers = +recipientnammers + +giveamount
-
-              db.set(`${recipient.toLowerCase()}nammers`, recipientaddednammers)
-              client.me(channel, `${user} --> GearSmile 👉 🚢 Successfully shipped ${giveamount} nammer(s) to ${recipient.toLowerCase()}! Your new balance is: ${aftergive} nammer(s), and ${recipient.toLowerCase()}'s new balance is: ${recipientaddednammers} nammer(s)!`)
-            }
-          })
-        }
-      })
-    }
-    else if(giveamount === 'all') {
-      db.get(`${userlow}nammers`).then(function(value) {
-        let nammers = `${value}`
-        if(nammers === 'null' || +nammers === 0) {
-          client.me(channel, (`${user} --> GearScare ⛔ It looks like you don't have any nammers to give away! Use "!hunt" to get more. ppOverheat`))
-        }
-        else if(+`${giveamount}` > +`${nammers}`) {
-          client.me(channel, (`${user} --> GearScare ⛔ You tried to give away ${giveamount} nammer(s), but you only have ${nammers} nammer(s). You keep all of your nammers for a rainy day.`))
-        }
-        else {
-          db.get(`${recipient.toLowerCase()}nammers`).then(function(valuerecipient) {
-            let recipientnammers = `${valuerecipient}`
-            if(`${recipientnammers}` === 'null') {
-              client.me(channel, `${user} --> That user dosen't exist in the database!`)
-            }
-            else {
-              let giveamount = nammers
-              db.set(`${userlow}nammers`, 0)
-              let recipientaddednammers = +recipientnammers + +giveamount
-
-              db.set(`${recipient.toLowerCase()}nammers`, recipientaddednammers)
-              client.me(channel, `${user} --> GearSmile 👉 🚢 Successfully shipped all of your nammers (${giveamount}) to ${recipient.toLowerCase()}! ${recipient.toLowerCase()}'s new balance is: ${recipientaddednammers} nammer(s)!`)
-            }
-          })
-        }
-      })
+  async function giveNammers(sender, recipient, amount) {
+    if(`${recipient}` == 'undefined' || `${amount}` == 'undefined') {
+      return {
+        success: false,
+        reason: 'syntax'
+      }
     }
     else {
-      client.me(channel, (`${user} --> Please enter a valid amount of nammers to give away!`))
+      let senderNammers = await db.get(`${sender.toLowerCase()}nammers`)
+      let recipientNammers = await db.get(`${recipient.toLowerCase().replace('@', '')}nammers`)
+      if(`${senderNammers}` == 'null') {
+        return {
+          success: false,
+          reason: "sender doesn't exist"
+        }
+      }
+      else if(`${recipientNammers}` == 'null') {
+        return {
+          success: false,
+          reason: "recipient doesn't exist"
+        }
+      }
+
+      else if(+senderNammers < +amount) {
+        return {
+          success: false,
+          balance: +senderNammers,
+          reason: 'tried to give too many'
+        }
+      }
+      else if(sender == recipient) {
+        return {
+          success: false,
+          reason: 'self give'
+        }
+      }
+      else if(isNaN(amount) && amount !== 'all') {
+        return {
+          success: false,
+          reason: 'nan'
+        }
+      }
+      else if(amount == 'all') {
+        return {
+          success: true,
+          case: 'all',
+          giveAmount: +senderNammers,
+          senderAmountAfterGive: 0,
+          recipientAmountAfterGive: +recipientNammers + +senderNammers
+        }
+      }
+      else if(!isNaN(amount)) {
+        return {
+          success: true,
+          case: 'amount',
+          giveAmount: amount,
+          senderAmountAfterGive: +senderNammers - amount,
+          recipientAmountAfterGive: +recipientNammers + +amount
+        }
+      }
+      else {
+        return {
+          success: false,
+          reason: 'unknown'
+        }
+      } 
     }
+  }
+
+  if (command === 'give') {
+    let [sender, recipient, amount] = [userlow, `${args[0]}`, args[1]]
+    giveNammers(sender, recipient, amount).then(function(giveData) {
+      if(giveData.success === false && giveData.reason === 'syntax') {
+        client.me(channel, `${user} --> Please provide an amount to give away and a user to give to. Example: "vb give darkvypr 100".`)
+      }
+      else if(giveData.success === false && giveData.reason === "sender doesn't exist") {
+        client.me(channel, `${user} --> You aren't in the database! Use "vb hunt" to get some nammers, and retry this command.`)
+      }
+      else if(giveData.success === false && giveData.reason === "recipient doesn't exist") {
+        client.me(channel, `${user} --> That user doesn't exist in the database.`)
+      }
+      else if(giveData.success === false && giveData.reason === 'tried to give too many') {
+        client.me(channel, `${user} --> You don't have enough nammers! You tried to give away ${amount} nammer(s) but only have ${giveData.balance}.`)
+      }
+      else if(giveData.success === false && giveData.reason === 'self give') {
+        client.me(channel, `${user} --> You can't give nammers to yourself!`)
+      }
+      else if(giveData.success === false && giveData.reason === 'nan') {
+        client.me(channel, `${user} --> That wasn't a valid amount to give away! Example: "vb give darkvypr 100".`)
+      }
+      else if(giveData.success === true && giveData.case === 'all') {
+        db.set(`${sender}nammers`, 0)
+        db.set(`${recipient.toLowerCase().replace('@', '')}nammers`, giveData.recipientAmountAfterGive)
+        client.me(channel, `${user} --> You successfully gave all ${giveData.giveAmount} of your nammers to ${recipient.toLowerCase()}. You now have 0 nammers, and ${recipient.toLowerCase()} now has ${giveData.recipientAmountAfterGive} nammers.`)
+      }
+      else if(giveData.success === true && giveData.case === 'amount') {
+        db.set(`${sender}nammers`, giveData.senderAmountAfterGive)
+        db.set(`${recipient.toLowerCase().replace('@', '')}nammers`, giveData.recipientAmountAfterGive)
+        client.me(channel, `${user} --> You successfully gave ${giveData.giveAmount} of your nammers to ${recipient.toLowerCase()}. You now have ${giveData.senderAmountAfterGive} nammers, and ${recipient.toLowerCase()} now has ${giveData.recipientAmountAfterGive} nammers.`)
+      }
+      else if(giveData.success === false && giveData.reason === 'unknown') {
+        client.me(channel, `${user} --> An unknown error has occurred! Please report this with the "vb suggest" command. Please include screenshots and a short description of what triggered the event so I can fix it.`)
+      }
+      else {
+        client.me(channel, `${user} --> An unknown error has occurred! Please report this with the "vb suggest" command. Please include screenshots and a short description of what triggered the event so I can fix it.`)
+      }
+    })
   }
 
   if(command === 'gamble' || command === 'roulette') {
