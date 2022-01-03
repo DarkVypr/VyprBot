@@ -2019,26 +2019,47 @@ client.on("PRIVMSG", (msg) => {
       })
     }
   }
+
+  async function urbanDictionary(term) {
+    if(term.length === 0) {
+      return {
+        success: false,
+        reply: "Please provide a term or phrase to look up!"
+      }
+    }
+    let urbanResult = await axios.get(`https://api.urbandictionary.com/v0/define?term=${term.join(' ')}`, { timeout : 10000 })
+    if(urbanResult.data.list.length == 0) {
+      return {
+        success: false,
+        reply: "Urban Dictionary does not have a definition for that word!"
+      }
+    }
+    else if (urbanResult.data.list.length !== 0) {
+      return {
+        success: true,
+        reply: `${(urbanResult.data.list[0].definition + ' | Example: ' + urbanResult.data.list[0].example).replace(/\[|\]/g, '').replace(/\r|\n|\bn:\s\b/gi, '')}`
+      }
+    }
+    else {
+      return {
+        success: false,
+        reply: `For whatever reason, Urban Dictionary could not process your request.`
+      }
+    }
+  }
   
   if(command === 'urban') {
-    axios.get(`https://api.urbandictionary.com/v0/define?term=${args.join(' ')}`, { timeout: 10000 })
-      .then((response) => {
-        let urbanresult = response.data
-        if(`${urbanresult.list[0]}` === 'undefined') {
-          client.me(channel, `${user} --> Urban Dictionary does not have a definition for that word!`)
-        }
-        else {
-          let dirtyresponse = urbanresult.list[0].definition
-          let cleanedupresponse = dirtyresponse.replace(/\[|\]/gim, '')
-          console.log(checkPhrase(cleanedupresponse))
-          if(checkPhrase(cleanedupresponse)) {
-            client.me(channel, `${user} --> cmonNep ??????`);
-          }
-          else {
-            client.me(channel, `${user} --> ${cleanedupresponse}`)
-          }
-        }
-      });
+    urbanDictionary(args).then(function(definition) {
+      if(!definition.success) {
+        client.me(channel, `${user} --> ${definition.reply}`)
+      }
+      else if(definition.success && !checkPhrase(definition.reply)) {
+        client.me(channel, `${user} --> ${definition.reply}`)
+      }
+      else {
+        client.me(channel, `${user} --> cmonNep ???`)
+      }
+    })
   }
 
   if(command === 'vanish') {
