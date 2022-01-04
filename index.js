@@ -899,6 +899,7 @@ client.on("PRIVMSG", (msg) => {
         let humanizedtime = humanizeDuration(timeuntilbday, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
         let userBirthdayYear = bday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, year + 1)
         return {
+          bday,
           differencebetweendays,
           currentage,
           turningage,
@@ -909,6 +910,7 @@ client.on("PRIVMSG", (msg) => {
       else {
         let humanizedtime = humanizeDuration(differencebetweendays, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
         return {
+          bday,
           differencebetweendays,
           currentage,
           turningage,
@@ -922,13 +924,12 @@ client.on("PRIVMSG", (msg) => {
 
   if (command === 'birthday' || command === 'bday') {
     if (`${args[0]}` === 'undefined') {
-      getBirthdayDetails(userlow).then(function(value) {
-        let birthday = value
+      getBirthdayDetails(userlow).then(function(birthday) {
         if (birthday === 'null') {
           client.me(channel, `${user} --> Before using this command, you must set your birthday with the "vb set birthday" command. It must be in M/D/YYYY or MM/DD/YYYY format. Examples: "vb set birthday 8/14/2005", "vb set birthday 10/16/2004" or "vb set birthday 9/11/1973".`)
         }
         else {
-          client.me(channel, `${user} --> You are currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
+          client.me(channel, `${user} --> You were born on ${birthday.bday}, which means you are ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
         }
       })
     }
@@ -940,7 +941,7 @@ client.on("PRIVMSG", (msg) => {
           client.me(channel, `${user} --> User ${args[0]} hasn't set their birthday! Get them to set it and retry this command! Hint: "vb set birthday".`)
         }
         else {
-          client.me(channel, `${user} --> User ${args[0]} is currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
+          client.me(channel, `${user} --> ${args[0]} was born on ${birthday.bday}, which means they are ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
         }
       })
     }
