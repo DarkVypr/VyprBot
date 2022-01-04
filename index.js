@@ -2373,34 +2373,63 @@ client.on("PRIVMSG", (msg) => {
 
   // Loyalty System
 
-  if(command === 'cdr') {
-    if(cdrcooldown.has(`${user}`)) {
-      client.me(channel, (`${user} --> Your cdr is on cooldown. Wait 2 hours in between each cdr. GearScare ⛔`))
+  async function cooldownReset(user) {
+    if(cdrcooldown.has(userlow)) {
+      return {
+        success: false,
+        case: "cdr_is_on_cooldown",
+        beforeReset: null,
+        afterReset: null,
+        reply: "Your cdr is on cooldown. Wait 2 hours in between each reset."
+      }
+    }
+    else if(!huntNammersCooldown.has(userlow)) {
+      return {
+        success: false,
+        case: "user_is_not_on_cooldown",
+        beforeReset: null,
+        afterReset: null,
+        reply: 'You are not on any cooldowns! Use "vb hunt" to get some nammers.'
+      }
+    }
+    let userNammers = await db.get(`${user}nammers`)
+    if(userNammers < 20) {
+      return {
+        success: false,
+        case: "not_enough_nammers",
+        beforeReset: +userNammers,
+        afterReset: null,
+        reply: `You need at least 20 nammers for a reset! You have ${userNammers}.`
+      }
     }
     else {
-      db.get(`${userlow}nammers`).then(function(value) {
-        let nammers = `${value}`
-        if(+nammers < 20) {
-          client.me(channel, (`${user} --> GearScare ⛔ You don't have enough nammers for a reset! You have ${nammers} nammers, and need at least 20! Use "vb hunt" to get more.`))
-        }
-        else {
-          talkedRecently.delete(`${user}`)
-          cdrcooldown.add(`${user}`);
-          setTimeout(() => {
-            cdrcooldown.delete(`${user}`);
-          }, 7200000);
-
-          let nammerscdr = +nammers - 20
-          db.set(`${userlow}nammers`, nammerscdr)
-
-          client.me(channel, (`${user} --> Your cooldown has been reset! (-20 nammers) Good luck! NekoPray (2 hr cooldown)`))
-        }
-      })
+      huntNammersCooldown.delete(user)
+      cdrcooldown.add(user)
+      setTimeout(() => { cdrcooldown.delete(userlow) }, 7200000)
+      db.set(`${user}nammers`, +userNammers - 20)
+      return {
+        success: true,
+        case: null,
+        beforeReset: +userNammers,
+        afterReset: +userNammers - 20,
+        reply: `Your cooldown has been reset! (-20 nammers) | You now have ${+userNammers - 20} nammers. | Good luck! NekoPray (2 hr cooldown).`
+      }
     }
   }
 
+  if(command === 'cdr') {
+    cooldownReset(userlow).then(cdrData => {
+      if(!cdrData.success) {
+        client.me(channel, `${user} --> ${cdrData.reply}`)
+      }
+      else {
+        client.me(channel, `${user} --> ${cdrData.reply}`)
+      }
+    })
+  }
+
   async function huntNammers(user) {
-    let [userNammers, randomInt] = [await db.get(`${user}nammers`), Math.floor(Math.random()* 61) - 25]
+    let [userNammers, randomInt] = [await db.get(`${user}nammers`), Math.floor(Math.random()* 61) - 20]
     let huntMessage = (randomInt) => {
       switch(true) {
         case (randomInt >= 50):
