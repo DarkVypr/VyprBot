@@ -3,7 +3,7 @@ const talkedRecently = new Set();
 const commandcooldown = new Set();
 const cdrcooldown = new Set();
 const fs = require('fs-extra')
-const {performance} = require('perf_hooks');
+const { performance } = require('perf_hooks');
 const Database = require("@replit/database")
 const db = new Database()
 const humanizeDuration = require("humanize-duration");
@@ -538,47 +538,40 @@ client.on("PRIVMSG", (msg) => {
   
   // Set Commands
 
-  if(command === 'setbirthday') {
+  if(command === 'set') {
+    const valueToSet = `${args[0]}`
+    let value1 = `${args[1]}`
+    let value2 = `${args[2]}`
     const regex = new RegExp('^(?!0?2/3)(?!0?2/29/.{3}[13579])(?!0?2/29/.{2}[02468][26])(?!0?2/29/.{2}[13579][048])(?!(0?[469]|11)/31)(?!0?2/29/[13579][01345789]0{2})(?!0?2/29/[02468][1235679]0{2})(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/([0-9]{4})$')
-    if(args[0] === 'undefined' || !regex.test(args[0])) {
-      client.me(channel, `${user} --> Invalid syntax! Make sure your birthday is in MM/DD/YYYY format. Examples: "vb setbirthday 8/14/2005", "vb setbirthday 10/16/2004" or "vb setbirthday 9/11/1973".`)
+    if(args.length == 0 || args[1] == undefined) {
+      client.me(channel, `${user} --> Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "vb set twitter darkvyprr", "vb set birthday 8/14/2005 (mm/dd/yyyy)" or "vb set location lasalle ontario ({city} {state, province or country})"`)
     }
-    else {
-      db.set(`${userlow}bday`, args[0])
-      .then(client.me(channel, `${user} --> Succesfully set your birthday to ${args[0]}! Make sure your birthday is in MM/DD/YYYY format.`))
+    else if(valueToSet == 'twitter') {
+      let twitterAccount = `${args[1]}`.replace('@', '').toLowerCase()
+      db.set(`${userlow}twitter`, twitterAccount)
+      client.me(channel, `${user} --> Succesfully set your Twitter account to @${twitterAccount}!`)
     }
-  }
-
-
-  if(command === 'setlocation') {
-    let location1 = `${args[0]}`
-    let location2 = `${args[1]}`
-
-    if(`${location1}`  === 'undefined') {
-      client.me(channel, `${user} --> That's not a valid location! Examples: "vb setlocation stockholm sweden" or "vb setlocation springfield virginia".`)
-    }
-    else {
-      if(`${location2}` === 'undefined') {
-        client.me(channel, `${user} --> That's not a valid location! Examples: "vb setlocation stockholm sweden" or "vb setlocation springfield virginia".`)
+    else if(valueToSet == 'location') {
+      if(value1 == 'undefined' || value2 == 'undefined') {
+        client.me(channel, `${user} --> That's not a valid location! Examples: "vb set location stockholm sweden" or "vb set location springfield virginia".`)
       }
       else {
-        let location1up = location1[0].toUpperCase() + location1.substring(1)
-        let location2up = location2[0].toUpperCase() + location2.substring(1)
-
-        let finallocation = `${location1up}, ${location2up}`
-
-        db.set(`${userlow}time`, `${finallocation}`)
-        .then(client.me(channel, `${user} --> Succesfully set your location to ${finallocation}!`))
+        let locationCorrected = (value1[0].toUpperCase() + value1.substring(1)) + ', ' + (value2[0].toUpperCase() + value2.substring(1))
+        db.set(`${userlow}time`, locationCorrected)
+        client.me(channel, `${user} --> Successfully set your location to ${locationCorrected}!`)
       }
     }
-  }
-
-  if(command === 'locationoverride') {
-    if(`${userlow}` === 'darkvypr') {
-      db.set(`pvcL777time`, `Milano, Italy`);
+    else if(valueToSet == 'bday' || valueToSet == 'birthday') {
+      if(!regex.test(args[1])) {
+        client.me(channel, `${user} --> Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "vb set twitter darkvyprr", "vb set birthday 8/14/2005 (mm/dd/yyyy)" or "vb set location lasalle ontario ({city} {state, province or country})"`)
+      }
+      else {
+        db.set(`${userlow}bday`, value1)
+        client.me(channel, `${user} --> Successfully set your birthday to ${value1}!`)
+      }
     }
     else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
+      client.me(channel, `${user} --> Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "vb set twitter darkvyprr", "vb set birthday 8/14/2005 (mm/dd/yyyy)" or "vb set location lasalle ontario ({city} {state, province or country})"`)
     }
   }
 
@@ -932,7 +925,7 @@ client.on("PRIVMSG", (msg) => {
       getBirthdayDetails(userlow).then(function(value) {
         let birthday = value
         if (birthday === 'null') {
-          client.me(channel, `${user} --> Before using this command, you must set your birthday with the vb setbirthday command. It must be in M/D/YYYY or MM/DD/YYYY format. Examples: "vb setbirthday 8/14/2005", "vb setbirthday 10/16/2004" or "vb setbirthday 9/11/1973".`)
+          client.me(channel, `${user} --> Before using this command, you must set your birthday with the "vb set birthday" command. It must be in M/D/YYYY or MM/DD/YYYY format. Examples: "vb set birthday 8/14/2005", "vb set birthday 10/16/2004" or "vb set birthday 9/11/1973".`)
         }
         else {
           client.me(channel, `${user} --> You are currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
@@ -944,7 +937,7 @@ client.on("PRIVMSG", (msg) => {
       getBirthdayDetails(userLookup).then(function(value) {
         let birthday = value
         if (birthday === 'null') {
-          client.me(channel, `${user} --> User ${args[0]} hasn't set their birthday! Get them to set it and retry this command!`)
+          client.me(channel, `${user} --> User ${args[0]} hasn't set their birthday! Get them to set it and retry this command! Hint: "vb set birthday".`)
         }
         else {
           client.me(channel, `${user} --> User ${args[0]} is currently ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
@@ -1064,7 +1057,7 @@ client.on("PRIVMSG", (msg) => {
       db.get(`${userlow}time`).then(function(value) {
         let usercitycountry = `${value}`
         if(usercitycountry === 'null') {
-          client.me(channel, `${user} --> Before using this command, you must set your location with the vb setlocation command. Example: “vb setlocation lasalle ontario”, “vb setlocation springfield virginia” or “vb setlocation stockholm sweden”. More info: https://darkvypr.com/commands`)
+          client.me(channel, `${user} --> Before using this command, you must set your location with the vb set location command. Example: “vb set location lasalle ontario”, “vb set location springfield virginia” or “vb set location stockholm sweden”. More info: https://darkvypr.com/commands`)
         }
         else {
           axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${usercitycountry}&apiKey=${process.env['GEOCODING_KEY']}`)
@@ -2261,7 +2254,7 @@ client.on("PRIVMSG", (msg) => {
     if (`${args[0]}` === 'undefined') {
       getWeatherUser(userlow).then(function(value) {
         if (value === 'null') {
-          client.me(channel, `${user} --> Before using this command, you must set your location with the vb setlocation command. Example: “vb setlocation lasalle ontario”, “vb setlocation springfield virginia” or “vb setlocation stockholm sweden”. More info: https://darkvypr.com/commands`)
+          client.me(channel, `${user} --> Before using this command, you must set your location with the vb set location command. Example: “vb set location lasalle ontario”, “vb set location springfield virginia” or “vb set location stockholm sweden”. More info: https://darkvypr.com/commands`)
         }
         else {
           client.me(channel, `${user} --> The weather in ${value.location} is currently ${value.tempC}°C (${value.tempF}°F) ${value.condition} Wind speed: ${value.windKMH} km/h (${value.windMPH} mp/h) 💨 Humidity: ${value.humidity}% 💧 Cloud Coverage: ${value.cloudCoverage}% ☁️ Weather Alerts: ${value.weatherAlert} ⚠️`)
@@ -2272,7 +2265,7 @@ client.on("PRIVMSG", (msg) => {
       cleanedUpUser = specificLocation.replace('@', '').toLowerCase()
       getWeatherUser(cleanedUpUser).then(function(value) {
         if (value === 'null') {
-          client.me(channel, `${user} --> That user hasn't set their location! Get them to set it and retry! PANIC`)
+          client.me(channel, `${user} --> That user hasn't set their location! Get them to set it and retry! Hint: "vb set location"`)
         }
         else {
           client.me(channel, `${user} --> The weather in ${cleanedUpUser}'s location (${value.location}) is currently ${value.tempC}°C (${value.tempF}°F) ${value.condition} Wind speed: ${value.windKMH} km/h (${value.windMPH} mp/h) 💨 Humidity: ${value.humidity}% 💧 Cloud Coverage: ${value.cloudCoverage}% ☁️ Weather Alerts: ${value.weatherAlert} ⚠️`)
