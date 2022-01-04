@@ -84,7 +84,7 @@ client.on("PRIVMSG", (msg) => {
     const ping12 = new RegExp(/(dark|bright)\s?diaper/)
     const ping13 = new RegExp(/(dark|bright)\s?viper|vypr/)
 
-    const blacklistedChannels = new RegExp(/visioisiv|darkvypr|vyprbottesting|vyprbot|gotiand|arkadlus|vexnade|boronics|xenoplopqb/)
+    const blacklistedChannels = new RegExp(/visioisiv|darkvypr|vyprbottesting|vyprbot|gotiand|arkadlus|vexnade|boronics/)
     const blacklistedUsers = new RegExp(/darkvypr|vyprbot|vyprbottesting|hhharrisonnnbot|apulxd|daumenbot|kuharabot|snappingbot|kaedtn|カイデン|oura_bot/)
 
     if(!blacklistedChannels.test(channelSaid) && !blacklistedUsers.test(userSaid)) {
@@ -2280,6 +2280,46 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
+  async function emoteLookup(emote) {
+    if(emote.length == 0) {
+      return {
+        success: false,
+        reply: 'Please provide an emote or emote code/id to look up.'
+      }
+    }
+    else {
+      let isEmoteID = (/^\d+$/.test(emote)) || (/emotesv2_[a-z0-9]{32}/.test(emote))
+      try { 
+        let emoteData = await axios.get(`https://api.ivr.fi/v2/twitch/emotes/${emote}?id=${isEmoteID}`)
+        return {
+          success: true,
+          reply: emoteData.data
+        }
+      }
+      catch(err) {
+        return {
+          success: false,
+          reply: 'There was an error getting the data for that emote!'
+        }
+      }
+    }
+  }
+
+  if (command === 'weit' || command === 'whatemoteisit') {
+    emoteLookup(args[0]).then(function(emoteData) {
+      console.log(emoteData)
+      if(emoteData.success && emoteData.reply.emoteType === 'GLOBALS') {
+        client.me(channel, `${user} --> The emote "${emoteData.reply.emoteCode}" (ID: ${emoteData.reply.emoteID}) is a ${emoteData.reply.emoteAssetType.toLowerCase()} Global Twitch emote. Emote Link: ${emoteData.reply.emoteURL}`)
+      }
+      else if(emoteData.success && emoteData.reply.emoteType === 'SUBSCRIPTIONS') {
+        client.me(channel, `${user} --> The emote "${emoteData.reply.emoteCode}" (ID: ${emoteData.reply.emoteID}) is a ${emoteData.reply.emoteAssetType.toLowerCase()} Tier ${emoteData.reply.emoteTier} sub emote to the channel @${emoteData.reply.channelLogin}. Emote Link: ${emoteData.reply.emoteURL}`)
+      }
+      else {
+        client.me(channel, `${user} --> ${emoteData.reply}`)
+      }
+    })
+  }
+  
   if(command === 'wyr') {
     axios.get(`https://would-you-rather-api.abaanshanid.repl.co/`)
       .then((response) => {
