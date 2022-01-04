@@ -1,4 +1,5 @@
 // require("http").createServer((_, res) => res.end("Alive!")).listen(8080)
+const huntNammersCooldown = new Set();
 const talkedRecently = new Set();
 const commandcooldown = new Set();
 const cdrcooldown = new Set();
@@ -180,6 +181,18 @@ client.on("PRIVMSG", (msg) => {
 
   function cleanSeconds(seconds) {
     return humanizeDuration(Math.round(seconds) * 1000);
+  }
+
+  // Number Validity Checker
+
+  let isNumber = (number) => {
+    return /^\d+$/.test(number)
+  }
+
+  // Random Number
+
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
   }
 
   // Owner Only Commands
@@ -1587,7 +1600,7 @@ client.on("PRIVMSG", (msg) => {
       checkPermitted(userlow).catch(err => { client.me(channel, `${user} --> ${err}`)}).then(function(isPermitted) {
         if(isAdmin === 'true' || isPermitted === 'true' || userlow === channel) {
           let spamAmount = args[0]
-          if(isNaN(spamAmount) || `${args[1]}` === 'undefined') {
+          if(!isNumber(spamAmount) || `${args[1]}` === 'undefined') {
             client.me(channel, `${user} --> Invalid Syntax! Example: "vb spam {amount} {phrase}"`)
           }
           else if(spamAmount > 80) {
@@ -2360,10 +2373,6 @@ client.on("PRIVMSG", (msg) => {
 
   // Loyalty System
 
-  function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-  }
-
   if(command === 'cdr') {
     if(cdrcooldown.has(`${user}`)) {
       client.me(channel, (`${user} --> Your cdr is on cooldown. Wait 2 hours in between each cdr. GearScare ⛔`))
@@ -2390,47 +2399,79 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
-  if(command === 'hunt') {
-    if(talkedRecently.has(`${user}`)) {
-      client.me(channel, (`${user} --> Wait 1 hour in between hunting! GearScare ⛔`))
+  async function huntNammers(user) {
+    let [userNammers, randomInt] = [await db.get(`${user}nammers`), Math.floor(Math.random()* 61) - 25]
+    let huntMessage = (randomInt) => {
+      switch(true) {
+        case (randomInt >= 50):
+          return `You take control of a city full of nammers, and send all of its citizens to your prison.🏙️`
+        case (randomInt >= 40):
+          return `You raid Chaz, a police-free autonomous zone, and return with ${randomInt} nammers.🚧`
+        case (randomInt >= 30):
+          return `You visit a village of nammers, and come out with ${randomInt}.🛖`
+        case (randomInt >= 20):
+          return `You raid a local restaurant, and find ${randomInt} nammers.🍕`
+        case (randomInt >= 10):
+          return `You enter a small hut, and find a group of ${randomInt} nammers.👥`
+        case (randomInt > 0 ):
+          return `You find and capture a small huddle of ${randomInt} nammers.👤`
+        case (randomInt == 0):
+          return `You didn't find any nammers, better luck next time. PoroSad`
+        default:
+          return `You leave the prison gates cracked open, and ${randomInt * -1} nammers unknowingly escape! PANIC`
+      }
+    }    
+    if(userNammers == null) {
+      await db.set(`${user}nammers`, 50)
+      return {
+        success: true,
+        case: 'new_user',
+        beforeHunt: null,
+        afterHunt: 50,
+        reply: "You are a new user! Here's 50 nammers to get you started."
+      }
     }
-
+    else if(+userNammers + +randomInt < 0) {
+      await db.set(`${user}nammers`, 0)
+      return {
+        success: true,
+        case: 'lost_more_than_balance',
+        beforeHunt: +userNammers,
+        afterHunt: 0,
+        reply: huntMessage(randomInt)
+      }
+    }
     else {
-      db.get(`${userlow}nammers`).then(function(value) {
-			  let nammers = `${value}`
-          if(nammers === 'null' || nammers === 'NaN') {
-            let nammeramount = Math.round(getRandomInt(30) + 20)
-            db.set(`${userlow}nammers`, nammeramount)
-            (client.me(channel, (`${user} --> KKona 👋 You caught ${nammeramount} nammers, and have a balance of: ${nammeramount} nammers. Since this is your first time hunting, you get 20 extra. GearSmile Stab`)))
+      let afterHunt = +userNammers + +randomInt
+      await db.set(`${user}nammers`, afterHunt)
+      return {
+        success: true,
+        case: 'regular',
+        beforeHunt: +userNammers,
+        afterHunt: afterHunt,
+        reply: huntMessage(randomInt)
+      }
+    }
+  }
 
-            talkedRecently.add(`${user}`);
-            setTimeout(() => {
-              talkedRecently.delete(`${user}`);
-            }, 3600000);
-		      }
-          else { 
-            let nammeramount = getRandomInt(60)
-            if(`${userlow}` === 'darkvypr' || `${userlow}` === 'tyebuddha') {
-              let totalnammers = Math.round(+nammers + nammeramount * 1.3)
-              db.set(`${userlow}nammers`, totalnammers)
-              client.me(channel, (`${user} --> GearSmile ⛓ You caught ${Math.round(nammeramount * 1.3)} (+${Math.round((nammeramount * 1.3) - nammeramount)} EleGiggle ) nammers, and have a total of ${totalnammers} nammers! (30 min cooldown)`))
-              
-              talkedRecently.add(`${user}`);
-              setTimeout(() => {
-                talkedRecently.delete(`${user}`);
-              }, 1800000);
-            }
-            else {
-              let totalnammers = +nammers + nammeramount
-              db.set(`${userlow}nammers`, totalnammers)
-              client.me(channel, (`${user} --> GearSmile ⛓ You caught ${nammeramount} nammers, and have a total of ${totalnammers} nammers! (1 hr cooldown)`))
-              
-              talkedRecently.add(`${user}`);
-              setTimeout(() => {
-                talkedRecently.delete(`${user}`);
-              }, 3600000);
-            }
-          }
+  if (command === 'hunt') {
+    if(huntNammersCooldown.has(userlow)) {
+      client.me(channel, `${user} --> Please wait 1 hour in between hunting! GearScare ⛔`)
+    }
+    else {
+      huntNammers(userlow).then(function(huntResult) {
+        if(huntResult.case == 'new_user') {
+          client.me(channel, `${user} --> ${huntResult.reply} | You now have 50 nammers | 1 hour cooldown`)
+          
+          huntNammersCooldown.add(userlow)
+          setTimeout(() => { huntNammersCooldown.delete(userlow) }, 3600000)
+        }
+        else {
+          client.me(channel, `${user} --> ${huntResult.reply} | You now have ${huntResult.afterHunt} nammers | 1 hour cooldown`)
+          
+          huntNammersCooldown.add(userlow)
+          setTimeout(() => { huntNammersCooldown.delete(userlow) }, 3600000)
+        }
       })
     }
   }
@@ -2494,28 +2535,43 @@ client.on("PRIVMSG", (msg) => {
     })
   }
 
+  async function checkNammers(user) {
+    let userNammers = await db.get(`${user}nammers`)
+    if(userNammers == null) {
+      return {
+        success: true,
+        case: 'user_not_found',
+        nammers: null
+      }
+    }
+    else {
+      return {
+        success: true,
+        case: null,
+        nammers: userNammers
+      }
+    }
+  }
+
   if(command === 'nammers') {
-    if(`${args[0]}` === 'undefined') {
-      db.get(`${userlow}nammers`).then(function(value) {
-        let nammers = `${value}`
-          if(nammers === 'null') {
-            client.me(channel, (`${user} --> GearScare ⛔ You don't have any nammers! Get some by typing "vb hunt", and kill some by typing "vb kill {amount}"!`))
-          }
-          else {
-            client.me(channel, (`${user} --> NOTED You have ${nammers} nammer(s). Get some by typing "vb hunt", and kill some by typing "vb kill {amount}".`))
-          }
+    if(args.length == 0) {
+      checkNammers(userlow).then(nammers => {
+        if(nammers.case == 'user_not_found') {
+          client.me(channel, `${user} --> You have never hunted! Use "vb hunt" to get more nammers, and retry this command.`)
+        }
+        else {
+          client.me(channel, `${user} --> You have ${nammers.nammers} nammers. Use "vb hunt" to get more.`)
+        }
       })
     }
     else {
-      let checkuser = `${args[0]}`.toLowerCase().replace("@", '')
-      db.get(`${checkuser}nammers`).then(function(value) {
-        let nammers = `${value}`
-          if(nammers === 'null') {
-            client.me(channel, (`${user} --> GearScare ⛔ That user dosent exist!`))
-          }
-          else {
-            client.me(channel, (`${user} --> NOTED ${args[0]} has ${nammers} nammer(s).`))
-          }
+      checkNammers(args[0].toLowerCase().replace('@', '')).then(nammers => {
+        if(nammers.case == 'user_not_found') {
+          client.me(channel, `${user} --> That user has never hunted!`)
+        }
+        else {
+          client.me(channel, `${user} --> That user has ${nammers.nammers} nammers.`)
+        }
       })
     }
   }
@@ -2530,6 +2586,7 @@ client.on("PRIVMSG", (msg) => {
     else {
       let senderNammers = await db.get(`${sender.toLowerCase()}nammers`)
       let recipientNammers = await db.get(`${recipient.toLowerCase().replace('@', '')}nammers`)
+      let checkIfNumber
       if(`${senderNammers}` == 'null') {
         return {
           success: false,
@@ -2550,13 +2607,13 @@ client.on("PRIVMSG", (msg) => {
           reason: 'tried to give too many'
         }
       }
-      else if(sender == recipient) {
+      else if(sender == recipient.toLowerCase()) {
         return {
           success: false,
           reason: 'self give'
         }
       }
-      else if(isNaN(amount) && amount !== 'all') {
+      else if(!isNumber(amount) && amount !== 'all') {
         return {
           success: false,
           reason: 'nan'
@@ -2571,7 +2628,7 @@ client.on("PRIVMSG", (msg) => {
           recipientAmountAfterGive: +recipientNammers + +senderNammers
         }
       }
-      else if(!isNaN(amount)) {
+      else if(isNumber(amount)) {
         return {
           success: true,
           case: 'amount',
