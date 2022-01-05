@@ -1260,20 +1260,22 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if(command === 'eval') {
-    if(userlow == 'darkvypr') {
-      let result = (code) => {
-        try {
-          return eval(code)
+    checkAdmin(userlow).then(isAdmin => {
+      if(isAdmin) {
+        let result = (code) => {
+          try {
+            return eval(code)
+          }
+          catch(err) {
+            return err
+          }
         }
-        catch(err) {
-          return err
-        }
+        client.privmsg(channel, `${user} --> ${result(args.join(' '))}`)
       }
-      client.privmsg(channel, `${user} --> ${result(args.join(' '))}`)
-    }
-    else {
-      client.me(channel, `${user} --> You dont have permission to use that command! Required: Bot Developer`);
-    }
+      else {
+        client.me(channel, `${user} --> You dont have permission to use that command! Required: Admin`);
+      }
+    })
   }
   
   if(command === 'farmer') {
