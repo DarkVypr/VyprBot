@@ -125,7 +125,14 @@ client.on("PRIVMSG", (msg) => {
     client.privmsg(channel, `okge`);
   }
 
-
+  let didAliCallMe12YearsOld = /(you(')?(r)?(e)?)\s(all)?\s(12)/i.test(message) || /(dark)?(v|b)yp(r|a)\s(is|=)\s12((year(s)?|yr(s)))?(old)?/i.test(message) || /(ur)(\sall)?\s12/i.test(message) || /(you|u)\sguys\s(are|are\sall|=)\s12/i.test(message) || /edating/i.test(message)
+  
+  if(didAliCallMe12YearsOld && userlow === 'ali2465') {
+    db.get('vypais12').then(vypais12 => {
+      db.set('vypais12', +vypais12 + 1)
+      client.me(channel, `Vypr has been called a 12 year old ${+vypais12 + 1} times. PANIC`)
+    })
+  }
   
   if(!message.startsWith('vb ') || userlow === 'vyprbot') {
     return
@@ -149,13 +156,13 @@ client.on("PRIVMSG", (msg) => {
   }
   
   const PREFIX = "vb ";
-  let [command, ...args] = msg.messageText.slice(PREFIX.length).split(/ +/g);
+  let [command, ...args] = message.slice(PREFIX.length).split(/ +/g);
 
   // Variables
 
   var defaultname = `${args[0]}`
   if(defaultname === 'undefined')
-    var defaultname = `${user}`
+    var defaultname = `${userlow}`
 
   var defaultname2 = `${args[1]}`
   if(defaultname2 === 'undefined')
@@ -2447,7 +2454,7 @@ client.on("PRIVMSG", (msg) => {
         case (randomInt == 0):
           return `You didn't find any nammers, better luck next time. PoroSad`
         default:
-          return `You leave the prison gates cracked open, and ${randomInt * -1} nammers unknowingly escape! PANIC`
+          return `You leave the prison gates cracked open, and ${randomInt * -1} nammer(s) unknowingly escape! PANIC`
       }
     }    
     if(userNammers == null) {
