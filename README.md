@@ -17,3 +17,7 @@ VyprBot is a general-purpose bot with user-based commands, a loyalty system and 
 # How can I get the bot in my chat?
 
 If you would like this bot to be added to your chat, make sure to read [the commands page](https://darkvypr.com/commands) before asking. After reading, you can use the "vb suggest command" in the bot's chat. Go to [the bots chat](https://twitch.tv/vyprbot) and use the vb suggest command. Example: "`vb suggest I would like the bot to be added to my chat!`". Once I read the suggestion, you will receive a DM on Twitch from the bot saying if you were accepted or denied. I probably wont deny any bot addition requests, but some suggestions may be.
+
+# How can I remove the bot from my chat?
+
+If you would like this bot to be removed from your chat, use the "vp part" command in your channel's chat.
