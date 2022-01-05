@@ -2328,10 +2328,10 @@ client.on("PRIVMSG", (msg) => {
   if (command === 'weit' || command === 'whatemoteisit') {
     emoteLookup(args[0]).then(function(emoteData) {
       if(emoteData.success && emoteData.reply.emoteType === 'GLOBALS') {
-        client.me(channel, `${user} --> The emote "${emoteData.reply.emoteCode}" (ID: ${emoteData.reply.emoteID}) is a ${emoteData.reply.emoteAssetType.toLowerCase()} Global Twitch emote. Emote Link: ${emoteData.reply.emoteURL.replace('dark/1.0', 'dark/4.0')}`)
+        client.me(channel, `${user} --> The emote "${emoteData.reply.emoteCode}" (ID: ${emoteData.reply.emoteID}) is a ${emoteData.reply.emoteAssetType.toLowerCase()} Global Twitch emote. Emote Link: ${emoteData.reply.emoteURL.replace('dark/1.0', 'dark/3.0')}`)
       }
       else if(emoteData.success && emoteData.reply.emoteType === 'SUBSCRIPTIONS') {
-        client.me(channel, `${user} --> The emote "${emoteData.reply.emoteCode}" (ID: ${emoteData.reply.emoteID}) is a ${emoteData.reply.emoteAssetType.toLowerCase()} Tier ${emoteData.reply.emoteTier} sub emote to the channel @${emoteData.reply.channelLogin}. Emote Link: ${emoteData.reply.emoteURL.replace('dark/1.0', 'dark/4.0')}`)
+        client.me(channel, `${user} --> The emote "${emoteData.reply.emoteCode}" (ID: ${emoteData.reply.emoteID}) is a ${emoteData.reply.emoteAssetType.toLowerCase()} Tier ${emoteData.reply.emoteTier} sub emote to the channel @${emoteData.reply.channelLogin}. Emote Link: ${emoteData.reply.emoteURL.replace('dark/1.0', 'dark/3.0')}`)
       }
       else {
         client.me(channel, `${user} --> ${emoteData.reply}`)
