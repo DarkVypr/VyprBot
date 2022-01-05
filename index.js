@@ -45,7 +45,7 @@ client.connect();
 client.joinAll(channelOptions)
 
 setInterval(function() {
-  axios.get(`https://supinic.com/api/test/auth?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}`)
+  axios.put(`https://supinic.com/api/bot-program/bot/active?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}`)
   .catch(err => { client.whisper('darkvypr', `There was an error pinging Supi's API!`)})
   .then((response) => {
     let supiresults = response.data
@@ -57,7 +57,7 @@ setInterval(function() {
       client.whisper('darkvypr', `There was an error pinging Supi's API!`)
     }
   });
-}, 20 * 60000);
+}, 10 * 60000);
 
 client.on("PRIVMSG", (msg) => {
 
@@ -1259,6 +1259,15 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
+  if(command === 'eval') {
+    if(userlow == 'darkvypr') {
+      client.privmsg(channel, `${user} --> ${eval(args.join(' '))}`);
+    }
+    else {
+      client.me(channel, `${user} --> You dont have permission to use that command! Required: Bot Developer`);
+    }
+  }
+  
   if(command === 'farmer') {
     client.me(channel, `${user} --> MrDestructoid Farmer: http://miner.darkvypr.com`);
     client.me(channel, `${user} --> Setup: https://youtu.be/0VkM7NOZkuA`);
