@@ -2437,7 +2437,7 @@ client.on("PRIVMSG", (msg) => {
         case: null,
         beforeReset: +userNammers,
         afterReset: +userNammers - 20,
-        reply: `Your cooldown has been reset! (-20 nammers) | You now have ${+userNammers - 20} nammers. | Good luck! NekoPray (2 hr cooldown).`
+        reply: `Your cooldown has been reset! (-20 nammers) | You now have ${+userNammers - 20} nammer(s). | Good luck! NekoPray (2 hr cooldown).`
       }
     }
   }
@@ -2468,7 +2468,7 @@ client.on("PRIVMSG", (msg) => {
         case (randomInt >= 10):
           return `You enter a small hut, and find a group of ${randomInt} nammers.👥`
         case (randomInt > 0 ):
-          return `You find and capture a small huddle of ${randomInt} nammers.👤`
+          return `You find and capture a small huddle of ${randomInt} nammer(s).👤`
         case (randomInt == 0):
           return `You didn't find any nammers, better luck next time. PoroSad`
         default:
@@ -2521,7 +2521,7 @@ client.on("PRIVMSG", (msg) => {
           setTimeout(() => { huntNammersCooldown.delete(userlow) }, 3600000)
         }
         else {
-          client.me(channel, `${user} --> ${huntResult.reply} | You now have ${huntResult.afterHunt} nammers | 1 hour cooldown`)
+          client.me(channel, `${user} --> ${huntResult.reply} | You now have ${huntResult.afterHunt} nammer(s) | 1 hour cooldown`)
           
           huntNammersCooldown.add(userlow)
           setTimeout(() => { huntNammersCooldown.delete(userlow) }, 3600000)
@@ -2614,7 +2614,7 @@ client.on("PRIVMSG", (msg) => {
           client.me(channel, `${user} --> You have never hunted! Use "vb hunt" to get more nammers, and retry this command.`)
         }
         else {
-          client.me(channel, `${user} --> You have ${nammers.nammers} nammers. Use "vb hunt" to get more.`)
+          client.me(channel, `${user} --> You have ${nammers.nammers} nammer(s). Use "vb hunt" to get more.`)
         }
       })
     }
@@ -2624,7 +2624,7 @@ client.on("PRIVMSG", (msg) => {
           client.me(channel, `${user} --> That user has never hunted!`)
         }
         else {
-          client.me(channel, `${user} --> That user has ${nammers.nammers} nammers.`)
+          client.me(channel, `${user} --> That user has ${nammers.nammers} nammer(s).`)
         }
       })
     }
@@ -2724,12 +2724,12 @@ client.on("PRIVMSG", (msg) => {
       else if(giveData.success === true && giveData.case === 'all') {
         db.set(`${sender}nammers`, 0)
         db.set(`${recipient.toLowerCase().replace('@', '')}nammers`, giveData.recipientAmountAfterGive)
-        client.me(channel, `${user} --> You successfully gave all ${giveData.giveAmount} of your nammers to ${recipient.toLowerCase()}. You now have 0 nammers, and ${recipient.toLowerCase()} now has ${giveData.recipientAmountAfterGive} nammers.`)
+        client.me(channel, `${user} --> You successfully gave all ${giveData.giveAmount} of your nammers to ${recipient.toLowerCase()}. You now have 0 nammers, and ${recipient.toLowerCase()} now has ${giveData.recipientAmountAfterGive} nammer(s).`)
       }
       else if(giveData.success === true && giveData.case === 'amount') {
         db.set(`${sender}nammers`, giveData.senderAmountAfterGive)
         db.set(`${recipient.toLowerCase().replace('@', '')}nammers`, giveData.recipientAmountAfterGive)
-        client.me(channel, `${user} --> You successfully gave ${giveData.giveAmount} of your nammers to ${recipient.toLowerCase()}. You now have ${giveData.senderAmountAfterGive} nammers, and ${recipient.toLowerCase()} now has ${giveData.recipientAmountAfterGive} nammers.`)
+        client.me(channel, `${user} --> You successfully gave ${giveData.giveAmount} of your nammers to ${recipient.toLowerCase()}. You now have ${giveData.senderAmountAfterGive} nammer(s), and ${recipient.toLowerCase()} now has ${giveData.recipientAmountAfterGive} nammer(s).`)
       }
       else if(giveData.success === false && giveData.reason === 'unknown') {
         client.me(channel, `${user} --> An unknown error has occurred! Please report this with the "vb suggest" command. Please include screenshots and a short description of what triggered the event so I can fix it.`)
@@ -2764,12 +2764,12 @@ client.on("PRIVMSG", (msg) => {
                 if(winloss === 1) {
                   let gamblewin = Math.round(+nammers + +gambleamount)
                   db.set(`${userlow}nammers`, `${gamblewin}`)
-                  client.me(channel, (`${user} --> You bet ${gambleamount} nammer(s) and won! You now have ${gamblewin} nammers! PagMan 💰`))
+                  client.me(channel, (`${user} --> You bet ${gambleamount} nammer(s) and won! You now have ${gamblewin} nammer(s)! PagMan 💰`))
                 }
                 else {
                   let gambleloss = Math.round(+nammers - +gambleamount)
                   db.set(`${userlow}nammers`, `${gambleloss}`)
-                  client.me(channel, (`${user} --> You bet ${gambleamount} nammer(s) and lost! You now have ${gambleloss} nammers! SadCat`))
+                  client.me(channel, (`${user} --> You bet ${gambleamount} nammer(s) and lost! You now have ${gambleloss} nammer(s)! SadCat`))
                 }
               }        
             }
@@ -2803,7 +2803,7 @@ client.on("PRIVMSG", (msg) => {
           let deductedNammers = +value - 300
           db.set(`${userlow}nammers`, deductedNammers)
           client.privmsg(channel, `/color ${args[0]}`)
-          client.me(channel, `${user} --> You successfully set my color to "${args[0]}", costing you 300 nammers. You now have ${deductedNammers} nammers. TehePelo`)
+          client.me(channel, `${user} --> You successfully set my color to "${args[0]}", costing you 300 nammers. You now have ${deductedNammers} nammer(s). TehePelo`)
         }
       })
     }
