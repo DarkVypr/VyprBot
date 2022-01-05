@@ -1261,7 +1261,15 @@ client.on("PRIVMSG", (msg) => {
 
   if(command === 'eval') {
     if(userlow == 'darkvypr') {
-      client.privmsg(channel, `${user} --> ${eval(args.join(' '))}`);
+      let result = (code) => {
+        try {
+          return eval(code)
+        }
+        catch(err) {
+          return err
+        }
+      }
+      client.privmsg(channel, `${user} --> ${result(args.join(' '))}`)
     }
     else {
       client.me(channel, `${user} --> You dont have permission to use that command! Required: Bot Developer`);
