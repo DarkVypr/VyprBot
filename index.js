@@ -2245,7 +2245,7 @@ client.on("PRIVMSG", (msg) => {
       location: location,
       temp: { c: celcius + '°C', f: fahrenheit + '°F' },
       precipitation: precipitation(),
-      wind: { speed: windSpeed + ' KM/H', gust: windGust + ' KM/H. 💨' },
+      wind: { speed: windSpeed + ' km/h', gust: windGust + ' km/h. 💨' },
       sun: sunState(),
       humidity: humidity + '% 💧',
       condition: conditionString(),
