@@ -8,6 +8,7 @@ const { performance } = require('perf_hooks');
 const Database = require("@replit/database")
 const db = new Database()
 const humanizeDuration = require("humanize-duration");
+const dateFormat = require('dateformat');
 const axios = require('axios').default;
 const { ChatClient, AlternateMessageModifier, SlowModeRateLimiter } = require("dank-twitch-irc");
 let client = new ChatClient({
@@ -56,10 +57,8 @@ setInterval(function() {
     });
 }, 10 * 60000);
 client.on("PRIVMSG", (msg) => {
-
-  // BASIC VARIABLES
-
   let [user, userlow, channel, message] = [msg.displayName, msg.senderUsername, msg.channelName, msg.messageText]
+
   console.log(`[#${channel}] ${user} (${userlow}): ${message}`)
   function globalPing(msg, userSaid, channelSaid) {
     const ping1 = new RegExp(/\b(v|b)ypa(')?(s)?\b/)
@@ -456,6 +455,19 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
+  // Capitalize Each Word In A String
+
+  let capitalizeEachWord = (str) => {
+     var splitStr = str.toLowerCase().split(' ');
+     for (var i = 0; i < splitStr.length; i++) {
+         // You do not need to check if i is larger than splitStr length, as your for does that for you
+         // Assign it back to the array
+         splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);     
+     }
+     // Directly return the joined string
+     return splitStr.join(' '); 
+  }
+  
   // Add Hours
 
   Date.prototype.addHours = function(h) {
@@ -1741,96 +1753,68 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
-  async function getUserTime(username) {
-    let userLocation = await db.get(`${username}time`)
-    if (`${userLocation}` === 'null') {
-      return 'null'
+  async function getUserTime(user, args) {
+    var isUser
+    var isSender
+    var location
+    if (args[0] == undefined) {
+      let userLocation = await db.get(`${user}time`)
+      isUser = true
+      isSender = true
+      location = userLocation
+    }
+    else if (args[0].startsWith('@')) {
+      let userLocation = await db.get(`${args[0].toLowerCase().replace('@', '')}time`)
+      isUser = true
+      isSender = false
+      location = userLocation
     }
     else {
-      let userTime = await axios.get(`https://timezone.abstractapi.com/v1/current_time/?api_key=${process.env['TIME_KEY']}&location=${userLocation}`)
-      let dateTime = userTime.data.datetime
-      let timezone = userTime.data.timezone_abbreviation
-      let yearMonthDay = dateTime[0] + dateTime[1] + dateTime[2] + dateTime[3] + dateTime[4] + dateTime[5] + dateTime[6] + dateTime[7] + dateTime[8] + dateTime[9]
-      let currentHour = dateTime[11] + dateTime[12]
-      let currentMinute = dateTime[14] + dateTime[15]
-      let currentSecond = dateTime[17] + dateTime[18]
-      function checkAMPM(currentHour) {
-        if (+currentHour < 12) {
-          return 'am'
-        }
-        else {
-          return 'pm'
-        }
+      isUser = false
+      location = encodeURIComponent(args.join(' '))
+    }
+    if (location == null && isSender) {
+      return { success: false, case: 'sender_unsetlocation', reply: `Before using this command, you must set your location with the vb set location command. Example: “vb set location lasalle ontario”, “vb set location springfield virginia” or “vb set location stockholm sweden”. More info: https://darkvypr.com/commands` }
+    }
+    if (location == null && !isSender) {
+      return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "vb set location"` }
+    }
+    let time = await axios.get(`https://timezone.abstractapi.com/v1/current_time/?api_key=${process.env['TIME_KEY']}&location=${location}`)
+    if (time.data.datetime == undefined) {
+      return { success: false, case: 'invalid_locaiton', reply: `The location provided to the API was invalid.` }
+    }
+    let dateTime = time.data.datetime
+    let [timezone, yearMonthDay] = [time.data.timezone_abbreviation, new Date(dateTime.slice(0, 10))]
+    var currentTime = {
+      date: dateFormat(yearMonthDay, "fullDate"),
+      time: dateFormat(dateTime, "h:MM:ss TT"),
+      timezone: timezone,
+      location: capitalizeEachWord(decodeURIComponent(location))
+    }
+    if (isSender) {
+      return {
+        currentTime,
+        reply: `In ${currentTime.location} (${currentTime.timezone}) It's currently ${currentTime.time}, ⌚ and the date is ${currentTime.date}.📅`
       }
-      let meridiem = checkAMPM(currentHour)
-
-      function getHour(currentHour) {
-        if (+currentHour === 00) {
-          return 12
-        }
-        else if (+currentHour < 10) {
-          return dateTime[12]
-        }
-        else if (+currentHour === 10 || +currentHour === 11 || +currentHour === 12) {
-          return currentHour
-        }
-        else {
-          return currentHour - 12
-        }
+    }
+    else if (!isSender && isUser) {
+      return {
+        currentTime,
+        reply: `At ${args[0].toLowerCase()}'s current location (${currentTime.location}, ${currentTime.timezone}) It's currently ${currentTime.time}, ⌚ and the date is ${currentTime.date}.📅`
       }
-      let hour = getHour(currentHour)
-
-      var currentTime = {
-        date: yearMonthDay,
-        time: hour + ":" + currentMinute + ":" + currentSecond + " " + meridiem,
-        timezone: timezone,
-        location: userLocation
+    }
+    else {
+      return {
+        currentTime,
+        reply: `In ${currentTime.location} (${currentTime.timezone}) It's currently ${currentTime.time}, ⌚ and the date is ${currentTime.date}.📅`
       }
-      return currentTime
     }
   }
 
-  async function getLocationTime(location) {
-    let locationTime = await axios.get(`https://timezone.abstractapi.com/v1/current_time/?api_key=${process.env['TIME_KEY']}&location=${location}`)
-    let dateTime = locationTime.data.datetime
-    if (`${dateTime}` === 'undefined') {
-      client.me(channel, `${user} --> That wasn't a valid location!`)
-    }
-    let timezone = locationTime.data.timezone_abbreviation
-    let yearMonthDay = dateTime[0] + dateTime[1] + dateTime[2] + dateTime[3] + dateTime[4] + dateTime[5] + dateTime[6] + dateTime[7] + dateTime[8] + dateTime[9]
-    let currentHour = dateTime[11] + dateTime[12]
-    let currentMinute = dateTime[14] + dateTime[15]
-    let currentSecond = dateTime[17] + dateTime[18]
-    function checkAMPM(currentHour) {
-      if (+currentHour < 12) {
-        return 'am'
-      }
-      else {
-        return 'pm'
-      }
-    }
-    let meridiem = checkAMPM(currentHour)
-    function getHour(currentHour) {
-      if (+currentHour === 00) {
-        return 12
-      }
-      else if (+currentHour < 10) {
-        return dateTime[12]
-      }
-      else if (+currentHour === 10 || +currentHour === 11 || +currentHour === 12) {
-        return currentHour
-      }
-      else {
-        return currentHour - 12
-      }
-    }
-    let hour = getHour(currentHour)
-    var currentTime = {
-      date: yearMonthDay,
-      time: hour + ":" + currentMinute + ":" + currentSecond + " " + meridiem,
-      timezone: timezone
-    }
-    return currentTime
+  if (command === 'time') {
+    getUserTime(userlow, args).then(time => {
+      client.me(channel, `${user} --> ${time.reply}`)
+    })
   }
 
   async function getSubage(user, channel) {
@@ -1920,36 +1904,6 @@ client.on("PRIVMSG", (msg) => {
           client.me(channel, `${user} --> ${subage.userSubbed} ${subage.userGifted}. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak) and their sub expires/renews in ${subage.remainingOnActiveSub}.`)
         }
       })
-  }
-
-  if (command === 'time') {
-    let lookupSpecific = `${args.join(' ')}`
-    if (lookupSpecific === '') {
-      getUserTime(userlow).then(function(value) {
-        if (value === 'null') {
-          client.me(channel, `${user} --> That user hasn't set their location! Get them to set it and retry! PANIC`)
-        }
-        else {
-          client.me(channel, `${user} --> At your location (${value.location}) (${value.timezone}) it's ${value.time} and the date is ${value.date}.`)
-        }
-      })
-    }
-    else if (lookupSpecific[0] === '@') {
-      let cleanedUserLookup = lookupSpecific.replace('@', '').toLowerCase()
-      getUserTime(cleanedUserLookup).then(function(value) {
-        if (value === 'null') {
-          client.me(channel, `${user} --> That user hasn't set their location! Get them to set it and retry! PANIC`)
-        }
-        else {
-          client.me(channel, `${user} --> ${lookupSpecific}'s current time (${value.location}) (${value.timezone}) is ${value.time} and the date is ${value.date}.`)
-        }
-      })
-    }
-    else {
-      getLocationTime(lookupSpecific).then(function(value) {
-        client.me(channel, `${user} --> The current time in ${lookupSpecific} (${value.timezone}) is ${value.time} and the date is ${value.date}.`)
-      })
-    }
   }
 
   async function translateText(text, toLanguage) {
@@ -2236,7 +2190,7 @@ client.on("PRIVMSG", (msg) => {
       location: location,
       temp: { c: celcius + '°C', f: fahrenheit + '°F' },
       precipitation: precipitation(),
-  wind: { speed: windSpeed + ' km/h', gust: windGusts() },
+      wind: { speed: windSpeed + ' km/h', gust: windGusts() },
       sun: sunState(),
       humidity: humidity + '% 💧',
       condition: conditionString(),
