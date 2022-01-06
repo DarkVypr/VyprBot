@@ -38,12 +38,9 @@ client.on("close", (error) => {
     console.error("Client closed due to error", error);
   }
 });
-
 const channelOptions = fs.readFileSync('channels.txt').toString().split(' ')
-
 client.connect();
 client.joinAll(channelOptions)
-
 setInterval(function() {
   axios.put(`https://supinic.com/api/bot-program/bot/active?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}`)
     .catch(err => { client.whisper('darkvypr', `There was an error pinging Supi's API!`) })
@@ -58,18 +55,12 @@ setInterval(function() {
       }
     });
 }, 10 * 60000);
-
 client.on("PRIVMSG", (msg) => {
 
   // BASIC VARIABLES
 
-  let user = msg.displayName
-  let userlow = msg.senderUsername
-  let channel = msg.channelName
-  let message = msg.messageText
-
+  let [user, userlow, channel, message] = [msg.displayName, msg.senderUsername, msg.channelName, msg.messageText]
   console.log(`[#${channel}] ${user} (${userlow}): ${message}`)
-
   function globalPing(msg, userSaid, channelSaid) {
     const ping1 = new RegExp(/\b(v|b)ypa(')?(s)?\b/)
     const ping2 = new RegExp(/(bright|dark)?(v|b)(y)p(e|u|o)?r/)
@@ -94,9 +85,7 @@ client.on("PRIVMSG", (msg) => {
       }
     }
   }
-
   globalPing(message, userlow, channel)
-
   if (/\bn(a|4)m(mer|ming)?\b/gi.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
     client.privmsg(channel, `NammersOut elisDance NammersOut`);
   }
@@ -124,7 +113,6 @@ client.on("PRIVMSG", (msg) => {
   if (/\bokge\b/g.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
     client.privmsg(channel, `okge`);
   }
-
   let didAliCallMe12YearsOld = /(you(')?(r)?(e)?)\s(all)?\s(12)/i.test(message) || /(dark)?(v|b)yp(r|a)\s(is|=)\s12((year(s)?|yr(s)))?(old)?/i.test(message) || /(ur)(\sall)?\s12/i.test(message) || /(you|u)\sguys\s(are|are\sall|=)\s12/i.test(message) || /edating/i.test(message)
 
   if (didAliCallMe12YearsOld && userlow === 'ali2465') {
@@ -183,12 +171,6 @@ client.on("PRIVMSG", (msg) => {
   var hugmsg = `${args[1]}`
   if (hugmsg === 'undefined')
     var hugmsg = 'HUGGIES'
-
-  // Clean Seconds
-
-  function cleanSeconds(seconds) {
-    return humanizeDuration(Math.round(seconds) * 1000);
-  }
 
   // Number Validity Checker
 
@@ -562,7 +544,7 @@ client.on("PRIVMSG", (msg) => {
   // Bot Info
 
   if (command === 'ping' || command === 'help') {
-    let Sseconds = process.uptime()
+    let uptime = process.uptime()
     let ramusage = `${Math.round(process.memoryUsage().rss / 1024 / 1024)}`
     async function pingServer() {
       const t0 = performance.now()
@@ -573,7 +555,7 @@ client.on("PRIVMSG", (msg) => {
     }
     db.get("commandusage").then(function(usage) {
       pingServer().then(function(latency) {
-        client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${cleanSeconds(Sseconds)} | Commands Used: ${usage} | RAM Usage: ${ramusage} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use "vb request" for info on requesting the bot.`))
+        client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${humanizeDuration(Math.round(uptime) * 1000)} | Commands Used: ${usage} | RAM Usage: ${ramusage} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use "vb request" for info on requesting the bot.`))
       })
     })
   }
@@ -2175,7 +2157,7 @@ client.on("PRIVMSG", (msg) => {
       return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "vb set location"` }
     }
     let coordinates = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${location}&apiKey=${process.env['GEOCODING_KEY']}`)
-    if(coordinates.data.items[0] == undefined) {
+    if (coordinates.data.items[0] == undefined) {
       return { success: false, case: 'invalid_locaiton', reply: `The location provided to the API was invalid.` }
     }
     var [latitude, longitude, location] = [coordinates.data.items[0].position.lat, coordinates.data.items[0].position.lng, coordinates.data.items[0].title]
@@ -2204,6 +2186,15 @@ client.on("PRIVMSG", (msg) => {
       }
       else {
         return `It's snowing at a rate of ${snow['1h']} mm/hr. ☔🌧️`
+      }
+    }
+    let windGusts = () => {
+      switch (windGust) {
+        case 'NaN':
+          return 'No wind gust data. 💨'
+          break
+        default:
+          return `with wind gusts of up to ${windGust} km/h. 💨`
       }
     }
     let conditionString = () => {
@@ -2245,7 +2236,7 @@ client.on("PRIVMSG", (msg) => {
       location: location,
       temp: { c: celcius + '°C', f: fahrenheit + '°F' },
       precipitation: precipitation(),
-      wind: { speed: windSpeed + ' km/h', gust: windGust + ' km/h. 💨' },
+  wind: { speed: windSpeed + ' km/h', gust: windGusts() },
       sun: sunState(),
       humidity: humidity + '% 💧',
       condition: conditionString(),
@@ -2255,19 +2246,19 @@ client.on("PRIVMSG", (msg) => {
     if (isSender) {
       return {
         weatherObj,
-        reply: `The temperature in ${weatherObj.location} is ${weatherObj.temp.c} (${weatherObj.temp.f}) ${weatherObj.condition} ${weatherObj.precipitation} The wind speed is ${weatherObj.wind.speed}, with gusts of up to ${weatherObj.wind.gust} ${weatherObj.sun} Humidity: ${weatherObj.humidity} Cloud Coverage: ${weatherObj.clouds} Alert: ${weatherObj.weatherAlert}`
+        reply: `The temperature in ${weatherObj.location} is ${weatherObj.temp.c} (${weatherObj.temp.f}) ${weatherObj.condition} ${weatherObj.precipitation} The wind speed is ${weatherObj.wind.speed}, ${weatherObj.wind.gust} ${weatherObj.sun} Humidity: ${weatherObj.humidity} Cloud Coverage: ${weatherObj.clouds} Alert: ${weatherObj.weatherAlert}`
       }
     }
     else if (!isSender && isUser) {
       return {
         weatherObj,
-        reply: `The temperature in @${args[0]}'s location (${weatherObj.location}) is ${weatherObj.temp.c} (${weatherObj.temp.f}) ${weatherObj.condition} ${weatherObj.precipitation} The wind speed is ${weatherObj.wind.speed}, with gusts of up to ${weatherObj.wind.gust} ${weatherObj.sun} Humidity: ${weatherObj.humidity} Cloud Coverage: ${weatherObj.clouds} Alert: ${weatherObj.weatherAlert}`
+        reply: `The temperature in ${args[0]}'s location (${weatherObj.location}) is ${weatherObj.temp.c} (${weatherObj.temp.f}) ${weatherObj.condition} ${weatherObj.precipitation} The wind speed is ${weatherObj.wind.speed}, ${weatherObj.wind.gust} ${weatherObj.sun} Humidity: ${weatherObj.humidity} Cloud Coverage: ${weatherObj.clouds} Alert: ${weatherObj.weatherAlert}`
       }
     }
     else {
       return {
         weatherObj,
-        reply: `The temperature in ${weatherObj.location} is ${weatherObj.temp.c} (${weatherObj.temp.f}) ${weatherObj.condition} ${weatherObj.precipitation} The wind speed is ${weatherObj.wind.speed}, with gusts of up to ${weatherObj.wind.gust} ${weatherObj.sun} Humidity: ${weatherObj.humidity} Cloud Coverage: ${weatherObj.clouds} Alert: ${weatherObj.weatherAlert}`
+        reply: `The temperature in ${weatherObj.location} is ${weatherObj.temp.c} (${weatherObj.temp.f}) ${weatherObj.condition} ${weatherObj.precipitation} The wind speed is ${weatherObj.wind.speed}, ${weatherObj.wind.gust} ${weatherObj.sun} Humidity: ${weatherObj.humidity} Cloud Coverage: ${weatherObj.clouds} Alert: ${weatherObj.weatherAlert}`
       }
     }
   }
