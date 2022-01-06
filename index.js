@@ -1661,7 +1661,7 @@ client.on("PRIVMSG", (msg) => {
           else if (!checkPhrase(`${args.join(' ')}`)) {
             args.shift()
             for (let i = spamAmount; i--;)
-              client.me(channel, args.join(' '))
+              client.privmsg(channel, ` 󠀀 ${args.join(' ')}`)
           }
           else {
             client.me(channel, `${user} --> cmonNep ??????`)
