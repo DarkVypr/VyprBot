@@ -2148,201 +2148,134 @@ client.on("PRIVMSG", (msg) => {
     client.me(channel, `${user} --> #FF7FD3`);
   }
 
-  async function getWeatherUser(name) {
-    let userLocation = await db.get(`${name}time`)
-    if (`${userLocation}` === 'null') {
-      return 'null'
+  async function getWeather(user, args) {
+    var isUser
+    var isSender
+    var location
+    if (args[0] == undefined) {
+      let userLocation = await db.get(`${user}time`)
+      isUser = true
+      isSender = true
+      location = userLocation
+    }
+    else if (args[0].startsWith('@')) {
+      let userLocation = await db.get(`${args[0].toLowerCase().replace('@', '')}time`)
+      isUser = true
+      isSender = false
+      location = userLocation
     }
     else {
-      let userCoordinates = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${userLocation}&apiKey=${process.env['GEOCODING_KEY']}`)
-      let userLatitude = userCoordinates.data.items[0].position.lat
-      let userLongitude = userCoordinates.data.items[0].position.lng
-      let userLocationAPI = userCoordinates.data.items[0].title
-
-      let userWeather = await axios.get(`https://api.openweathermap.org/data/2.5/onecall?lat=${userLatitude}&lon=${userLongitude}&exclude=hourly,daily&units=metric&appid=${process.env['WEATHER_KEY']}`)
-      let condition = userWeather.data.current.weather[0].main
-      let icon = userWeather.data.current.weather[0].icon
-      let description = userWeather.data.current.weather[0].description
-
-      let userTempC = Math.round(userWeather.data.current.temp)
-      let userTempF = Math.round(+userTempC * 1.8 + 32)
-      let userFeelsLikeC = Math.round(userWeather.data.current.feels_like)
-      let userFeelsLikeF = Math.round(+userFeelsLikeC * 1.8 + 32)
-
-      let userWindKMH = Math.round(+userWeather.data.current.wind_speed * 3.6)
-      let userWindMPH = Math.round(userWindKMH / 1.609)
-
-      let userHumidity = userWeather.data.current.humidity
-
-      let cloudCoverage = userWeather.data.current.clouds
-
-      let alerts = userWeather.data.alerts
-
-      function weatherAlert(alerts) {
-        switch (alerts) {
-          case undefined:
-            return 'None'
-            break
-          default:
-            return userWeather.data.alerts[0].event
-        }
-      }
-
-      let checkAlerts = weatherAlert(alerts)
-
-      function getCondition(checkCondition) {
-        switch (checkCondition) {
-          case 'Clear':
-            return 'with clear skies ☀️⛱️'
-            break
-          case 'Thunderstorm':
-            return `with a ${description} ⛈️☔`
-            break
-          case 'Drizzle':
-            return 'with slight rain 🌦️🌧️'
-            break
-          case 'Rain':
-            return `with ${description} 🌧️☔`
-            break
-          case 'Snow':
-            return `with ${description} 🌨️❄️`
-            break
-          case 'Clouds':
-            return `with ${description} ☁️🌥️`
-            break
-          default:
-            return `with a special weather event: ${condition} 📊🔍`
-        }
-      }
-
-      let conditionString = getCondition(condition)
-
-      return {
-        location: userLocationAPI,
-        tempC: userTempC,
-        feelsLikeC: userFeelsLikeC,
-        tempF: userTempF,
-        feelsLikeF: userFeelsLikeF,
-        windKMH: userWindKMH,
-        windMPH: userWindMPH,
-        humidity: userHumidity,
-        condition: conditionString,
-        cloudCoverage: cloudCoverage,
-        weatherAlert: checkAlerts
-      }
+      isUser = false
+      location = encodeURIComponent(args.join(' '))
     }
-  }
-
-  async function getWeatherLocation(location) {
-    let userCoordinates = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${location}&apiKey=${process.env['GEOCODING_KEY']}`)
-    if (`${userCoordinates.data.items[0]}` === 'undefined') {
-      client.me(channel, `${user} --> That wasn't a valid location!`)
+    if (location == null && isSender) {
+      return { success: false, case: 'sender_unsetlocation', reply: `Before using this command, you must set your location with the vb set location command. Example: “vb set location lasalle ontario”, “vb set location springfield virginia” or “vb set location stockholm sweden”. More info: https://darkvypr.com/commands` }
     }
-    let userLatitude = userCoordinates.data.items[0].position.lat
-    let userLongitude = userCoordinates.data.items[0].position.lng
-    let userLocationAPI = userCoordinates.data.items[0].title
-    let userWeather = await axios.get(`https://api.openweathermap.org/data/2.5/onecall?lat=${userLatitude}&lon=${userLongitude}&exclude=hourly,daily&units=metric&appid=${process.env['WEATHER_KEY']}`)
-    let condition = userWeather.data.current.weather[0].main
-    let icon = userWeather.data.current.weather[0].icon
-    let description = userWeather.data.current.weather[0].description
-
-    let userTempC = Math.round(userWeather.data.current.temp)
-    let userTempF = Math.round(+userTempC * 1.8 + 32)
-    let userFeelsLikeC = Math.round(userWeather.data.current.feels_like)
-    let userFeelsLikeF = Math.round(+userFeelsLikeC * 1.8 + 32)
-
-    let userWindKMH = Math.round(+userWeather.data.current.wind_speed * 3.6)
-    let userWindMPH = Math.round(userWindKMH / 1.609)
-
-    let userHumidity = userWeather.data.current.humidity
-
-    let cloudCoverage = userWeather.data.current.clouds
-
-    let alerts = userWeather.data.alerts
-
-    function weatherAlert(alerts) {
+    if (location == null && !isSender) {
+      return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "vb set location"` }
+    }
+    let coordinates = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${location}&apiKey=${process.env['GEOCODING_KEY']}`)
+    if(coordinates.data.items[0] == undefined) {
+      return { success: false, case: 'invalid_locaiton', reply: `The location provided to the API was invalid.` }
+    }
+    var [latitude, longitude, location] = [coordinates.data.items[0].position.lat, coordinates.data.items[0].position.lng, coordinates.data.items[0].title]
+    let weather = await axios.get(`https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&exclude=hourly,daily&units=metric&appid=${process.env['WEATHER_KEY']}`)
+    let [condition, icon, description] = [weather.data.current.weather[0].main, weather.data.current.weather[0].icon, weather.data.current.weather[0].description]
+    let [celcius, fahrenheit] = [(+weather.data.current.temp).toFixed(1), (+weather.data.current.temp * 1.8 + 32).toFixed(1)]
+    let [windSpeed, windGust] = [(+weather.data.current.wind_speed * 3.6).toFixed(1), (+weather.data.current.wind_gust * 3.6).toFixed(1)]
+    let [humidity, clouds, alerts] = [+weather.data.current.humidity, +weather.data.current.clouds, weather.data.alerts]
+    let [sunrise, sunset, currentTime] = [new Date(+weather.data.current.sunrise * 1000).addHours(-5).toISOString(), new Date(+weather.data.current.sunset * 1000).addHours(-5).toISOString(), new Date().addHours(-5).toISOString()]
+    let [rain, snow] = [weather.data.current.rain, weather.data.current.snow]
+    let weatherAlert = () => {
       switch (alerts) {
         case undefined:
           return 'None'
           break
         default:
-          return userWeather.data.alerts[0].event
+          return weather.data.alerts[0].event + '.⚠️'
       }
     }
-
-    let checkAlerts = weatherAlert(alerts)
-
-    function getCondition(checkCondition) {
-      switch (checkCondition) {
+    let precipitation = () => {
+      if (rain == undefined && snow == undefined) {
+        return ''
+      }
+      else if (rain !== undefined && snow == undefined) {
+        return `It's raining at a rate of ${rain['1h']} mm/hr. ☔🌧️`
+      }
+      else {
+        return `It's snowing at a rate of ${snow['1h']} mm/hr. ☔🌧️`
+      }
+    }
+    let conditionString = () => {
+      switch (condition) {
         case 'Clear':
-          return 'with clear skies ☀️⛱️'
+          return 'with clear skies. ☀️⛱️'
           break
         case 'Thunderstorm':
-          return `with a ${description} ⛈️☔`
+          return `with a ${description}. ⛈️☔`
           break
         case 'Drizzle':
-          return 'with slight rain 🌦️🌧️'
+          return 'with slight rain. 🌦️🌧️'
           break
         case 'Rain':
-          return `with ${description} 🌧️☔`
+          return `with ${description}. 🌧️☔`
           break
         case 'Snow':
-          return `with ${description} 🌨️❄️`
+          return `with ${description}. 🌨️❄️`
           break
         case 'Clouds':
-          return `with ${description} ☁️🌥️`
+          return `with ${description}. ☁️🌥️`
           break
         default:
-          return `with a special weather event: ${condition} 📊🔍`
+          return `with a special weather event: ${condition}. 📊🔍`
       }
     }
-
-    let conditionString = getCondition(condition)
-
-    var weatherDetails = {
-      location: userLocationAPI,
-      tempC: userTempC,
-      feelsLikeC: userFeelsLikeC,
-      tempF: userTempF,
-      feelsLikeF: userFeelsLikeF,
-      windKMH: userWindKMH,
-      windMPH: userWindMPH,
-      humidity: userHumidity,
-      condition: conditionString,
-      cloudCoverage: cloudCoverage,
-      weatherAlert: checkAlerts
+    let sunState = () => {
+      if (new Date(sunrise) > new Date(currentTime)) {
+        let sunriseIn = humanizeDuration(new Date(sunrise) - new Date(currentTime), { units: ["h", "m"], round: true, delimiter: " and " })
+        return `Sun rises in ${sunriseIn}. 🌅`
+      }
+      else {
+        let sunsetIn = humanizeDuration(new Date(sunset) - new Date(currentTime), { units: ["h", "m"], round: true, delimiter: " and " })
+        return `Sun sets in ${sunsetIn}. 🌇`
+      }
     }
-    return weatherDetails
+    let weatherObj = {
+      success: true,
+      location: location,
+      temp: { c: celcius + '°C', f: fahrenheit + '°F' },
+      precipitation: precipitation(),
+      wind: { speed: windSpeed + ' KM/H', gust: windGust + ' KM/H. 💨' },
+      sun: sunState(),
+      humidity: humidity + '% 💧',
+      condition: conditionString(),
+      clouds: clouds + '% ☁️',
+      weatherAlert: weatherAlert()
+    }
+    if (isSender) {
+      return {
+        weatherObj,
+        reply: `The temperature in ${weatherObj.location} is ${weatherObj.temp.c} (${weatherObj.temp.f}) ${weatherObj.condition} ${weatherObj.precipitation} The wind speed is ${weatherObj.wind.speed}, with gusts of up to ${weatherObj.wind.gust} ${weatherObj.sun} Humidity: ${weatherObj.humidity} Cloud Coverage: ${weatherObj.clouds} Alert: ${weatherObj.weatherAlert}`
+      }
+    }
+    else if (!isSender && isUser) {
+      return {
+        weatherObj,
+        reply: `The temperature in @${args[0]}'s location (${weatherObj.location}) is ${weatherObj.temp.c} (${weatherObj.temp.f}) ${weatherObj.condition} ${weatherObj.precipitation} The wind speed is ${weatherObj.wind.speed}, with gusts of up to ${weatherObj.wind.gust} ${weatherObj.sun} Humidity: ${weatherObj.humidity} Cloud Coverage: ${weatherObj.clouds} Alert: ${weatherObj.weatherAlert}`
+      }
+    }
+    else {
+      return {
+        weatherObj,
+        reply: `The temperature in ${weatherObj.location} is ${weatherObj.temp.c} (${weatherObj.temp.f}) ${weatherObj.condition} ${weatherObj.precipitation} The wind speed is ${weatherObj.wind.speed}, with gusts of up to ${weatherObj.wind.gust} ${weatherObj.sun} Humidity: ${weatherObj.humidity} Cloud Coverage: ${weatherObj.clouds} Alert: ${weatherObj.weatherAlert}`
+      }
+    }
   }
 
   if (command === 'weather') {
-    let specificLocation = `${args.join(' ')}`
-    if (`${args[0]}` === 'undefined') {
-      getWeatherUser(userlow).then(function(value) {
-        if (value === 'null') {
-          client.me(channel, `${user} --> Before using this command, you must set your location with the vb set location command. Example: “vb set location lasalle ontario”, “vb set location springfield virginia” or “vb set location stockholm sweden”. More info: https://darkvypr.com/commands`)
-        }
-        else {
-          client.me(channel, `${user} --> The weather in ${value.location} is currently ${value.tempC}°C (${value.tempF}°F) ${value.condition} Wind speed: ${value.windKMH} km/h (${value.windMPH} mp/h) 💨 Humidity: ${value.humidity}% 💧 Cloud Coverage: ${value.cloudCoverage}% ☁️ Weather Alerts: ${value.weatherAlert} ⚠️`)
-        }
-      })
-    }
-    else if (`${specificLocation[0]}` === "@") {
-      cleanedUpUser = specificLocation.replace('@', '').toLowerCase()
-      getWeatherUser(cleanedUpUser).then(function(value) {
-        if (value === 'null') {
-          client.me(channel, `${user} --> That user hasn't set their location! Get them to set it and retry! Hint: "vb set location"`)
-        }
-        else {
-          client.me(channel, `${user} --> The weather in ${cleanedUpUser}'s location (${value.location}) is currently ${value.tempC}°C (${value.tempF}°F) ${value.condition} Wind speed: ${value.windKMH} km/h (${value.windMPH} mp/h) 💨 Humidity: ${value.humidity}% 💧 Cloud Coverage: ${value.cloudCoverage}% ☁️ Weather Alerts: ${value.weatherAlert} ⚠️`)
-        }
-      })
-    }
-    else {
-      getWeatherLocation(specificLocation).then(function(value) {
-        client.me(channel, `${user} --> The weather in ${value.location} is currently ${value.tempC}°C (${value.tempF}°F) ${value.condition} Wind speed: ${value.windKMH} km/h (${value.windMPH} mp/h) 💨 Humidity: ${value.humidity}% 💧 Cloud Coverage: ${value.cloudCoverage}% ☁️ Weather Alerts: ${value.weatherAlert} ⚠️`)
-      })
-    }
+    getWeather(userlow, args).then(weather => {
+      client.me(channel, `${user} --> ${weather.reply}`)
+    })
   }
 
   async function emoteLookup(emote) {
