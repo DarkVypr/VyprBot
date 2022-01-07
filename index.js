@@ -1,4 +1,4 @@
-// require("http").createServer((_, res) => res.end("Alive!")).listen(8080)
+require('dotenv').config()
 const huntNammersCooldown = new Set();
 const talkedRecently = new Set();
 const commandcooldown = new Set();
@@ -6,15 +6,15 @@ const cdrcooldown = new Set();
 const fs = require('fs-extra')
 const { performance } = require('perf_hooks');
 const Database = require("@replit/database")
-const db = new Database()
+const db = new Database(process.env.DATABASE_URL)
 const humanizeDuration = require("humanize-duration");
 const dateFormat = require('dateformat');
 const axios = require('axios').default;
 const { ChatClient, AlternateMessageModifier, SlowModeRateLimiter } = require("dank-twitch-irc");
 let client = new ChatClient({
 
-  username: process.env['TWITCH_USERNAME'],
-  password: process.env['TWITCH_PASSWORD'],
+  username: process.env.TWITCH_USERNAME,
+  password: process.env.TWITCH_PASSWORD,
 
   rateLimits: "verifiedBot",
   maxChannelCountPerConnection: 100,
@@ -43,7 +43,7 @@ const channelOptions = fs.readFileSync('channels.txt').toString().split(' ')
 client.connect();
 client.joinAll(channelOptions)
 setInterval(function() {
-  axios.put(`https://supinic.com/api/bot-program/bot/active?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}`)
+  axios.put(`https://supinic.com/api/bot-program/bot/active?auth_user=${process.env.SUPI_USER_AUTH}&auth_key=${process.env.SUPI_USERKEY_AUTH}`)
     .catch(err => { client.whisper('darkvypr', `There was an error pinging Supi's API!`) })
     .then((response) => {
       let supiresults = response.data
@@ -121,18 +121,18 @@ client.on("PRIVMSG", (msg) => {
     })
   }
 
-  if (!message.startsWith('vb ') || userlow === 'vyprbot') {
+  if (!message.startsWith('vbtest ') || userlow === 'vyprbot') {
     return
   }
 
   if (userlow !== 'vyprbot' && userlow !== 'darkvypr') {
-    if (commandcooldown.has(`${user}`)) {
+    if (commandcooldown.has(userlow)) {
       return
     }
     else {
-      commandcooldown.add(`${user}`);
+      commandcooldown.add(userlow);
       setTimeout(() => {
-        commandcooldown.delete(`${user}`);
+        commandcooldown.delete(userlow);
       }, 2000);
 
       db.get("commandusage").then(function(value) {
@@ -142,7 +142,7 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
-  const PREFIX = "vb ";
+  const PREFIX = "vbtest ";
   let [command, ...args] = message.slice(PREFIX.length).split(/ +/g);
 
   // Variables
@@ -555,20 +555,25 @@ client.on("PRIVMSG", (msg) => {
 
   // Bot Info
 
-  if (command === 'ping' || command === 'help') {
-    let uptime = process.uptime()
-    let ramusage = `${Math.round(process.memoryUsage().rss / 1024 / 1024)}`
-    async function pingServer() {
-      const t0 = performance.now()
-      await client.ping()
-      const t1 = performance.now()
-      const latency = (t1 - t0).toFixed()
-      return latency
+  async function pingServer() {
+    let [uptime, ramusage, commands] = [process.uptime(), Math.round(process.memoryUsage().rss / 1024 / 1024), await db.get('commandusage')]
+    let t0 = performance.now()
+    await client.ping()
+    let t1 = performance.now()
+    let latency = Math.round((t1 - t0))
+    let pingObj = {
+      uptime: uptime,
+      ram: ramusage,
+      commands: +commands + 1,
+      latency: latency
     }
-    db.get("commandusage").then(function(usage) {
-      pingServer().then(function(latency) {
-        client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${humanizeDuration(Math.round(uptime) * 1000)} | Commands Used: ${usage} | RAM Usage: ${ramusage} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use "vb request" for info on requesting the bot.`))
-      })
+    db.set('commandusage', pingObj.commands)
+    return `PunOko 🏓 | Latency: ${pingObj.latency} ms | Bot Uptime: ${humanizeDuration(Math.round(pingObj.uptime) * 1000)} | Commands Used: ${pingObj.commands + 1} | RAM Usage: ${pingObj.ram} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use "vb request" for info on requesting the bot.`
+  }
+
+  if (command === 'ping' || command === 'help') {
+    pingServer().then(pingData => {
+      client.me(channel, `${user} --> ${pingData}`)
     })
   }
 
@@ -656,9 +661,9 @@ client.on("PRIVMSG", (msg) => {
   // Suggestions
 
   async function setReminderIfAFK(user, id, body) {
-    let checkIfAFK = await axios.get(`https://supinic.com/api/bot/afk/check?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}&userID=1093802`)
+    let checkIfAFK = await axios.get(`https://supinic.com/api/bot/afk/check?auth_user=${process.env.SUPI_USER_AUTH}&auth_key=${process.env.SUPI_USERKEY_AUTH}&userID=1093802`)
     if (`${checkIfAFK.data.data.status}` !== 'null') {
-      await axios.post(`https://supinic.com/api/bot/reminder?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}&userID=1093802&private=true&text=[New Suggestion] A new suggestion has been made while you were AFK: User: ${user} | ID: ${id} | Suggestion: ${body}`)
+      await axios.post(`https://supinic.com/api/bot/reminder?auth_user=${process.env.SUPI_USER_AUTH}&auth_key=${process.env.SUPI_USERKEY_AUTH}&userID=1093802&private=true&text=[New Suggestion] A new suggestion has been made while you were AFK: User: ${user} | ID: ${id} | Suggestion: ${body}`)
     }
   }
 
@@ -1101,7 +1106,7 @@ client.on("PRIVMSG", (msg) => {
           client.me(channel, `${user} --> Before using this command, you must set your location with the vb set location command. Example: “vb set location lasalle ontario”, “vb set location springfield virginia” or “vb set location stockholm sweden”. More info: https://darkvypr.com/commands`)
         }
         else {
-          axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${usercitycountry}&apiKey=${process.env['GEOCODING_KEY']}`)
+          axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${usercitycountry}&apiKey=${process.env.GEOCODING_KEY}`)
             .then((response) => {
               let userCountry = response.data.items[0].address.countryName
 
@@ -1126,7 +1131,7 @@ client.on("PRIVMSG", (msg) => {
             client.me(channel, (`${user} --> That user hasen't set their location! Get them to set it and retry. PANIC`))
           }
           else {
-            axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${lookuptime}&apiKey=${process.env['GEOCODING_KEY']}`)
+            axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${lookuptime}&apiKey=${process.env.GEOCODING_KEY}`)
               .then((response) => {
                 let userCountry = response.data.items[0].address.countryName
 
@@ -1167,7 +1172,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'define') {
-    axios.get(`https://dictionaryapi.com/api/v3/references/collegiate/json/${args.join(' ')}?key=${process.env['DICTIONARY_KEY']}`)
+    axios.get(`https://dictionaryapi.com/api/v3/references/collegiate/json/${args.join(' ')}?key=${process.env.DICTIONARY_KEY}`)
       .then((response) => {
         let defineresult = response.data[0]
         if (`${defineresult}` === 'undefined') {
@@ -1212,7 +1217,7 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, `${user} --> Please input a domain to lookup!`)
     }
     else {
-      axios.get(`https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${process.env['WHOIS_KEY']}&domainName=${args[0]}&outputFormat=JSON&ipWhois=1&preferFresh=1`)
+      axios.get(`https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${process.env.WHOIS_KEY}&domainName=${args[0]}&outputFormat=JSON&ipWhois=1&preferFresh=1`)
         .then((response) => {
           let whoisresults = response.data
           if (`${whoisresults.WhoisRecord.dataError}` === 'INCOMPLETE_DATA') {
@@ -1418,7 +1423,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'ip') {
-    axios.get(`http://api.ipstack.com/${args[0]}?access_key=${process.env['IP_KEY']}`)
+    axios.get(`http://api.ipstack.com/${args[0]}?access_key=${process.env.IP_KEY}`)
       .then((response) => {
         let ipresults = response.data
         client.me(channel, `${user} --> Results for "${ipresults.ip}": Type: "${ipresults.type}" | Location ( ${ipresults.location.country_flag_emoji} ): "${ipresults.city}, ${ipresults.region_name}, ${ipresults.country_name}"`);
@@ -1520,7 +1525,7 @@ client.on("PRIVMSG", (msg) => {
   // OCR Command
 
   if (command === 'ocr') {
-    axios.get(`https://api.ocr.space/parse/imageurl?apikey=${process.env['OCR_KEY']}&url=${args[0]}${ocrlangresult}`)
+    axios.get(`https://api.ocr.space/parse/imageurl?apikey=${process.env.OCR_KEY}&url=${args[0]}${ocrlangresult}`)
       .then((response) => {
         let ocrresults = response.data.ParsedResults[0].ParsedText
         if (ocrresults === 'undefined' || ocrresults === '' || ocrresults === ' ') {
@@ -1612,7 +1617,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'query') {
-    axios.get(`https://api.wolframalpha.com/v1/result?i=${args.join(' ')}&appid=${process.env['WOLFRAM_KEY']}`)
+    axios.get(`https://api.wolframalpha.com/v1/result?i=${args.join(' ')}&appid=${process.env.WOLFRAM_KEY}`)
       .catch(err => { client.me(channel, `${user} --> Wolfram|Alpha did not understand your question! PANIC`) })
       .then((response) => {
         if (checkPhrase(response.data)) {
@@ -1779,7 +1784,7 @@ client.on("PRIVMSG", (msg) => {
     if (location == null && !isSender) {
       return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "vb set location"` }
     }
-    let time = await axios.get(`https://timezone.abstractapi.com/v1/current_time/?api_key=${process.env['TIME_KEY']}&location=${location}`)
+    let time = await axios.get(`https://timezone.abstractapi.com/v1/current_time/?api_key=${process.env.TIME_KEY}&location=${location}`)
     if (time.data.datetime == undefined) {
       return { success: false, case: 'invalid_locaiton', reply: `The location provided to the API was invalid.` }
     }
@@ -1983,7 +1988,7 @@ client.on("PRIVMSG", (msg) => {
       }
     }
     let targetLang = checkTargetLang(toLanguage)
-    let translation = await axios.get(`https://api-free.deepl.com/v2/translate?auth_key=${process.env['TRANSLATE_KEY']}&text=${text}&target_lang=${targetLang}`)
+    let translation = await axios.get(`https://api-free.deepl.com/v2/translate?auth_key=${process.env.TRANSLATE_KEY}&text=${text}&target_lang=${targetLang}`)
 
     var translationDetails = {
       translatedText: translation.data.translations[0].text,
@@ -2110,12 +2115,12 @@ client.on("PRIVMSG", (msg) => {
     if (location == null && !isSender) {
       return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "vb set location"` }
     }
-    let coordinates = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${location}&apiKey=${process.env['GEOCODING_KEY']}`)
+    let coordinates = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${location}&apiKey=${process.env.GEOCODING_KEY}`)
     if (coordinates.data.items[0] == undefined) {
       return { success: false, case: 'invalid_locaiton', reply: `The location provided to the API was invalid.` }
     }
     var [latitude, longitude, location] = [coordinates.data.items[0].position.lat, coordinates.data.items[0].position.lng, coordinates.data.items[0].title]
-    let weather = await axios.get(`https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&exclude=hourly,daily&units=metric&appid=${process.env['WEATHER_KEY']}`)
+    let weather = await axios.get(`https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&exclude=hourly,daily&units=metric&appid=${process.env.WEATHER_KEY}`)
     let [condition, icon, description] = [weather.data.current.weather[0].main, weather.data.current.weather[0].icon, weather.data.current.weather[0].description]
     let [celcius, fahrenheit] = [(+weather.data.current.temp).toFixed(1), (+weather.data.current.temp * 1.8 + 32).toFixed(1)]
     let [windSpeed, windGust] = [(+weather.data.current.wind_speed * 3.6).toFixed(1), (+weather.data.current.wind_gust * 3.6).toFixed(1)]
