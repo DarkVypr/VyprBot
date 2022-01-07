@@ -1,0 +1,1 @@
+User: DarkVypr | State: ACTIVE | Date: 2021-12-15 | Suggestion: make the cooldown handling a function // YOU LEFT OFF RIGHT NEAR THE SET COMMANDS SECTION.
