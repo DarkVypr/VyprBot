@@ -222,7 +222,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'admin') {
-    if (`${args[0]}` === 'undefined' || `${args[1]}` === 'undefined' || !/add|remove|delete|check/i.test(`${args[0]}`) && userlow === 'darkvypr') {
+    if (args[0] === undefined || `${args[1]}` === 'undefined' || !/add|remove|delete|check/i.test(`${args[0]}`) && userlow === 'darkvypr') {
       client.me(channel, `DarkVypr --> Invalid Syntax! Example: "vb admin {add|delete|remove|check} {user}".`)
     }
     else if (`${args[0]}` === 'add' && userlow === 'darkvypr') {
