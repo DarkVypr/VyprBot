@@ -1,1 +1,0 @@
-User: DarkVypr | State: ACTIVE | Date: 2021-12-10 | Suggestion: fix emojis on responses for chatsen | Reason: the emojis dont show on the bot due to some error. if the bot says 💧 it wil just say :droplet: instead of the emoji. might be a /me issue but when i tested it it showed the emoji when typing :droplet: and /me. weird bug

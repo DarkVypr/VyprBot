@@ -1,1 +1,0 @@
-User: カイデン | State: ACTIVE | Date: 2021-12-27 | Suggestion: have a timer how much time left until the next hunt when u do "vb nammers" like what with the "!cookies" command on positivebot | Reason: cant do that with the way that the bot stores timeouts

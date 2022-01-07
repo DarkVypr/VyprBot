@@ -1,1 +1,0 @@
-User: DarkVypr | State: ACTIVE | Date: 2021-12-18 | Suggestion: (?!(red|blue|red\s|blue\s|((blue|red)\s(blue|red))[a-zA-Z]))\b(red|blue|green|firebrick|coral|yellow_green|orange_red|sea_green|goldenrod|chocolate|cadet_blue|dodger_blue|hot_pink|blue_violet|spring_green)\b

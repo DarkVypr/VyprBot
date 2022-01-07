@@ -1,1 +1,0 @@
-User: DarkVypr | State: ACTIVE | Date: 2021-12-14 | Suggestion: make admin system that u gave up on baka with the arrays for users so it dosent bug | Reason: arrays don’t write properly
