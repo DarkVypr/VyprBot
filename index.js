@@ -180,7 +180,7 @@ client.on("PRIVMSG", (msg) => {
   // Random Number
 
   function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
+    return Math.floor(Math.random() * max + 1);
   }
 
   // Owner Only Commands
@@ -421,7 +421,7 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
     }
   }
-  
+
   if (command === 'setnammers') {
     if (`${userlow}` === 'darkvypr') {
       db.set(`${args[0].toLowerCase()}nammers`, `${args[1]}`)
@@ -458,16 +458,16 @@ client.on("PRIVMSG", (msg) => {
   // Capitalize Each Word In A String
 
   let capitalizeEachWord = (str) => {
-     var splitStr = str.toLowerCase().split(' ');
-     for (var i = 0; i < splitStr.length; i++) {
-         // You do not need to check if i is larger than splitStr length, as your for does that for you
-         // Assign it back to the array
-         splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);     
-     }
-     // Directly return the joined string
-     return splitStr.join(' '); 
+    var splitStr = str.toLowerCase().split(' ');
+    for (var i = 0; i < splitStr.length; i++) {
+      // You do not need to check if i is larger than splitStr length, as your for does that for you
+      // Assign it back to the array
+      splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
+    }
+    // Directly return the joined string
+    return splitStr.join(' ');
   }
-  
+
   // Add Hours
 
   Date.prototype.addHours = function(h) {
@@ -1517,8 +1517,6 @@ client.on("PRIVMSG", (msg) => {
     var ocrlangresult = '&language=eng'
   }
 
-  // OCR Command
-
   if (command === 'ocr') {
     axios.get(`https://api.ocr.space/parse/imageurl?apikey=${process.env['OCR_KEY']}&url=${args[0]}${ocrlangresult}`)
       .then((response) => {
@@ -1530,6 +1528,21 @@ client.on("PRIVMSG", (msg) => {
           client.me(channel, `${user} --> OCR Results: ${ocrresults.replace('\r\n', '')}`);
         }
       })
+  }
+
+  async function rPFP() {
+    let chatter = await axios.get(`http://decapi.me/twitch/random_user/${channel}`)
+    let randomChatterData = await axios.get(`https://api.ivr.fi/twitch/resolve/${chatter.data}`)
+    if (args.indexOf('user:true') > -1) {
+      return { chatter: chatter.data, pfp: randomChatterData.data.logo, reply: `User: ${chatter.data} | Profile Picture: ${randomChatterData.data.logo}` }
+    }
+    return { chatter: chatter.data, pfp: randomChatterData.data.logo, reply: `Random Profile Picture: ${randomChatterData.data.logo}` }
+  }
+
+  if (command === 'rpfp') {
+    rPFP().then(pfp => {
+      client.me(channel, `${user} --> ${pfp.reply}`)
+    })
   }
 
   if (command === 'pfp') {
@@ -1545,6 +1558,19 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
+  async function pickRamdom(args) {
+    if(args.length < 2) {
+      return { randomElement: null, reply: `Please specify at least 2 items to pick from!` }
+    }
+    return { randomElement: args[+getRandomInt(args.length) - 1], reply: args[+getRandomInt(args.length) - 1] }
+  }
+
+  if (command === 'pick') {
+    pickRamdom(args).then(pickData => {
+      client.me(channel, `${user} --> ${pickData.reply}`)
+    })
+  }
+
   if (command === 'picsbeforedisaster') {
     client.me(channel, `${user} --> https://i.imgur.com/1hKKEx0.png`);
   }
@@ -1553,14 +1579,14 @@ client.on("PRIVMSG", (msg) => {
     client.me(channel, `${user} --> DinkDonk https://darkvypr.com/pings`);
   }
 
-  let plopArray = ["jfVieNQ.png", "PAjqrhD.png", "dwMMtSD.png", "EMixIJq.png", "BX5GXFO.png", "4PUBRLf.png", "g7vIKbC.png", "gBoJaoD.png", 
-                   "vKyWwTE.png", "tPNuJ4r.png", "McBKJwY.png"]
+  let plopArray = ["jfVieNQ.png", "PAjqrhD.png", "dwMMtSD.png", "EMixIJq.png", "BX5GXFO.png", "4PUBRLf.png", "g7vIKbC.png", "gBoJaoD.png",
+    "vKyWwTE.png", "tPNuJ4r.png", "McBKJwY.png"]
 
-  if(/^plop[\d+]$/.test(command)) {
+  if (/^plop[\d+]$/.test(command)) {
     client.me(channel, `${user} --> https://i.imgur.com/${plopArray[+command.replace('plop', '') - 1]}`)
   }
-  
-  if(command == 'plop') {
+
+  if (command == 'plop') {
     client.me(channel, `${user} --> Random Plop message: https://i.imgur.com/${plopArray[getRandomInt(plopArray.length)]}`)
   }
 
