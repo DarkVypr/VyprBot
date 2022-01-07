@@ -421,7 +421,7 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
     }
   }
-
+  
   if (command === 'setnammers') {
     if (`${userlow}` === 'darkvypr') {
       db.set(`${args[0].toLowerCase()}nammers`, `${args[1]}`)
@@ -1553,48 +1553,15 @@ client.on("PRIVMSG", (msg) => {
     client.me(channel, `${user} --> DinkDonk https://darkvypr.com/pings`);
   }
 
-  if (command === 'plop1') {
-    client.me(channel, `${user} --> https://i.imgur.com/jfVieNQ.png`);
-  }
+  let plopArray = ["jfVieNQ.png", "PAjqrhD.png", "dwMMtSD.png", "EMixIJq.png", "BX5GXFO.png", "4PUBRLf.png", "g7vIKbC.png", "gBoJaoD.png", 
+                   "vKyWwTE.png", "tPNuJ4r.png", "McBKJwY.png"]
 
-  if (command === 'plop2') {
-    client.me(channel, `${user} --> https://i.imgur.com/PAjqrhD.png`);
+  if(/^plop[\d+]$/.test(command)) {
+    client.me(channel, `${user} --> https://i.imgur.com/${plopArray[+command.replace('plop', '') - 1]}`)
   }
-
-  if (command === 'plop3') {
-    client.me(channel, `${user} --> https://i.imgur.com/dwMMtSD.png`);
-  }
-
-  if (command === 'plop4') {
-    client.me(channel, `${user} --> https://i.imgur.com/EMixIJq.png`);
-  }
-
-  if (command === 'plop5') {
-    client.me(channel, `${user} --> https://i.imgur.com/BX5GXFO.png`);
-  }
-
-  if (command === 'plop6') {
-    client.me(channel, `${user} --> https://i.imgur.com/4PUBRLf.png`);
-  }
-
-  if (command === 'plop7') {
-    client.me(channel, `${user} --> https://i.imgur.com/g7vIKbC.png`);
-  }
-
-  if (command === 'plop8') {
-    client.me(channel, `${user} --> https://i.imgur.com/gBoJaoD.png`);
-  }
-
-  if (command === 'plop9') {
-    client.me(channel, `${user} --> https://i.imgur.com/vKyWwTE.png`);
-  }
-
-  if (command === 'plop10') {
-    client.me(channel, `${user} --> https://i.imgur.com/tPNuJ4r.png`);
-  }
-
-  if (command === 'plop11') {
-    client.me(channel, `${user} --> https://i.imgur.com/McBKJwY.png`);
+  
+  if(command == 'plop') {
+    client.me(channel, `${user} --> Random Plop message: https://i.imgur.com/${plopArray[getRandomInt(plopArray.length)]}`)
   }
 
   if (command === 'plopcolour') {
