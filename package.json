@@ -1,0 +1,29 @@
+{
+  "name": "VyprBot",
+  "version": "1.0.0",
+  "description": "Owner: `DarkVypr`",
+  "main": "index.js",
+  "dependencies": {
+    "@replit/database": "^2.0.1",
+    "axios": "^0.24.0",
+    "dank-twitch-irc": "^4.3.0",
+    "dateformat": "^4.6.3",
+    "fs-extra": "^10.0.0",
+    "humanize-duration": "^3.27.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DarkVypr/VyprBot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DarkVypr/VyprBot/issues"
+  },
+  "homepage": "https://github.com/DarkVypr/VyprBot#readme"
+}
