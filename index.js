@@ -478,7 +478,7 @@ client.on("PRIVMSG", (msg) => {
   // Leppu Query
 
   async function getUserData(userLookup) {
-    let userData = await axios.get(`https://api.ivr.fi/twitch/resolve/${userLookup}`)
+    let userData = await axios.get(`https://api.ivr.fi/twitch/resolve/${userLookup.replace('@', '')}`)
       .catch(err => { client.me(channel, `${user} --> That user doesn't exist!`) })
 
     function isAffiliate(data) {
@@ -1411,7 +1411,7 @@ client.on("PRIVMSG", (msg) => {
       })
     }
     else {
-      getUserData(`${args[0]}`).then(function(value) {
+      getUserData(args[0]).then(function(value) {
         client.me(channel, `${user} --> Name: @${value.name} | Banned: ${value.banned} | UID: ${value.uid} | Created: ${value.creationDate} (${value.timeSinceCreation} ago) | Colour: ${value.colour} | Bio: ${value.bio} | Profile Picture: ${value.pfp} | Roles: ${value.roles}`)
       })
     }
