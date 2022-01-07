@@ -1,2 +1,2 @@
-suggestions/
-status/
+node-modules
+.env

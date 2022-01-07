@@ -1,0 +1,1 @@
+User: DarkVypr | State: ACTIVE | Date: 2022-01-02 | Suggestion: make setstatus and all set commands use one central thing like vb set instead of vb setbirthday | Reason: all done YESIDOTHINKSO

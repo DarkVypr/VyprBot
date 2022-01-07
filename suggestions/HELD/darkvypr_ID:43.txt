@@ -1,0 +1,1 @@
+User: DarkVypr | State: ACTIVE | Date: 2021-12-14 | Suggestion: make the vbcomplete command into functions and make the syntax get checked | Reason: ties in with the admin system

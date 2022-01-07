@@ -1,0 +1,1 @@
+User: DarkVypr | State: ACTIVE | Date: 2021-12-12 | Suggestion: add new RegExp(/(?:(?:\b(?<![-=\.])|monka)(?:[Nnñ]|[Ii7]V)|[\/|]\\[\/|])[\s\.]*?[liI1y!j\/|]+[\s\.]*?(?:[GgbB6934Q 🅱 qğĜƃ၅5\*][\s\.]*?){2,}(?!arcS|l|Ktlw|ylul|ie217|64|\d? ?times)/); AND new RegExp(/[█▄▀░▒▓\u2802-\u28ff]/g); TO !SAY AND SHIT
