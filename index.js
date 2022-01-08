@@ -57,7 +57,7 @@ setInterval(function() {
     });
 }, 10 * 60000);
 client.on("PRIVMSG", (msg) => {
-  let [user, userlow, channel, message] = [msg.displayName, msg.senderUsername, msg.channelName, msg.messageText]
+  let [user, userlow, channel, message] = [msg.displayName, msg.senderUsername, msg.channelName, msg.messageText.replace(' 󠀀', '')]
 
   console.log(`[#${channel}] ${user} (${userlow}): ${message}`)
   function globalPing(msg, userSaid, channelSaid) {
@@ -477,11 +477,12 @@ client.on("PRIVMSG", (msg) => {
 
   // Leppu Query
 
-  async function getUserData(userLookup) {
-    let userData = await axios.get(`https://api.ivr.fi/twitch/resolve/${userLookup.replace('@', '')}`)
-      .catch(err => { client.me(channel, `${user} --> That user doesn't exist!`) })
-
-    function isAffiliate(data) {
+  async function getUserData(args) {
+    var user = userlow
+    if(args[0] !== undefined) { user = args[0] }
+    let userData = await axios.get(`https://api.ivr.fi/twitch/resolve/${user.replace('@', '')}`)
+    .catch(err => { client.me(channel, `${user} --> That user doesn't exist!`) })
+    let isAffiliate = (data) => {
       if (`${data}` == 'true') {
         return 'Affiliate '
       }
@@ -489,8 +490,7 @@ client.on("PRIVMSG", (msg) => {
         return ''
       }
     }
-
-    function isPartner(data) {
+    let isPartner = (data) => {
       if (`${data}` == 'true') {
         return 'Partner '
       }
@@ -498,8 +498,7 @@ client.on("PRIVMSG", (msg) => {
         return ''
       }
     }
-
-    function isStaff(data) {
+    let isStaff = (data) => {
       if (`${data}` == 'true') {
         return 'Staff '
       }
@@ -507,8 +506,7 @@ client.on("PRIVMSG", (msg) => {
         return ''
       }
     }
-
-    function isSiteAdmin(data) {
+    let isSiteAdmin = (data) => {
       if (`${data}` == 'true') {
         return 'Admin '
       }
@@ -516,13 +514,20 @@ client.on("PRIVMSG", (msg) => {
         return ''
       }
     }
-
-    function isBot(data) {
+    let isBot = (data) => {
       if (`${data}` == 'true') {
         return 'Verified_Bot '
       }
       else {
         return ''
+      }
+    }
+    let uid = (data) => {
+      if (!userData.data.banned) {
+        return `${userData.data.id}`
+      }
+      else {
+        return `${userData.data.id} (Banned User⛔)`
       }
     }
 
@@ -535,7 +540,7 @@ client.on("PRIVMSG", (msg) => {
     var obj = {
       banned: userData.data.banned,
       name: userData.data.displayName,
-      uid: userData.data.id,
+      uid: uid(),
       bio: userData.data.bio,
       colour: userData.data.chatColor,
       pfp: userData.data.logo,
@@ -1405,16 +1410,9 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'info') {
-    if (`${args[0]}` === 'undefined') {
-      getUserData(userlow).then(function(value) {
-        client.me(channel, `${user} --> Name: @${value.name} | Banned: ${value.banned} | UID: ${value.uid} | Created: ${value.creationDate} (${value.timeSinceCreation} ago) | Colour: ${value.colour} | Bio: ${value.bio} | Profile Picture: ${value.pfp} | Roles: ${value.roles}`)
-      })
-    }
-    else {
-      getUserData(args[0]).then(function(value) {
-        client.me(channel, `${user} --> Name: @${value.name} | Banned: ${value.banned} | UID: ${value.uid} | Created: ${value.creationDate} (${value.timeSinceCreation} ago) | Colour: ${value.colour} | Bio: ${value.bio} | Profile Picture: ${value.pfp} | Roles: ${value.roles}`)
-      })
-    }
+    getUserData(args).then(value => {
+      client.me(channel, `${user} --> Name: @${value.name} | Banned: ${value.banned} | UID: ${value.uid} | Created: ${value.creationDate} (${value.timeSinceCreation} ago) | Colour: ${value.colour} | Bio: ${value.bio} | Profile Picture: ${value.pfp} | Roles: ${value.roles}`)
+    })
   }
 
   if (command === 'ip') {
@@ -1546,16 +1544,9 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'pfp') {
-    if (`${args[0]}` === 'undefined') {
-      getUserData(userlow).then(function(value) {
-        client.me(channel, `${user} --> Your profile picture: ${value.pfp}`)
-      })
-    }
-    else {
-      getUserData(`${args[0]}`).then(function(value) {
-        client.me(channel, `${user} --> ${value.name}'s profile picture: ${value.pfp}`)
-      })
-    }
+    getUserData(args).then(value => {
+      client.me(channel, `${user} --> ${value.pfp}`)
+    })
   }
 
   async function pickRamdom(args) {
@@ -2037,6 +2028,12 @@ client.on("PRIVMSG", (msg) => {
     }
   }
 
+  if (command === 'uid') {
+    getUserData(args).then(userData => {
+      client.me(channel, `${user} --> UID: ${userData.uid}`)
+    })
+  }
+
   if (command === 'urban') {
     urbanDictionary(args).then(function(definition) {
       if (!definition.success) {
@@ -2113,7 +2110,7 @@ client.on("PRIVMSG", (msg) => {
     let [celcius, fahrenheit] = [(+weather.data.current.temp).toFixed(1), (+weather.data.current.temp * 1.8 + 32).toFixed(1)]
     let [windSpeed, windGust] = [(+weather.data.current.wind_speed * 3.6).toFixed(1), (+weather.data.current.wind_gust * 3.6).toFixed(1)]
     let [humidity, clouds, alerts] = [+weather.data.current.humidity, +weather.data.current.clouds, weather.data.alerts]
-    let [sunrise, sunset, currentTime] = [new Date(+weather.data.current.sunrise * 1000).addHours(-5).toISOString(), new Date(+weather.data.current.sunset * 1000).addHours(-5).toISOString(), new Date().addHours(-5).toISOString()]
+    let [sunrise, sunset, currentTime] = [new Date(+weather.data.current.sunrise * 1000), new Date(+weather.data.current.sunset * 1000), new Date()]
     let [rain, snow] = [weather.data.current.rain, weather.data.current.snow]
     let weatherAlert = () => {
       switch (alerts) {
