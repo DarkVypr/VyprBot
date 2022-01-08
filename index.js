@@ -479,9 +479,9 @@ client.on("PRIVMSG", (msg) => {
 
   async function getUserData(args) {
     var user = userlow
-    if(args[0] !== undefined) { user = args[0] }
+    if (args[0] !== undefined) { user = args[0] }
     let userData = await axios.get(`https://api.ivr.fi/twitch/resolve/${user.replace('@', '')}`)
-    .catch(err => { client.me(channel, `${user} --> That user doesn't exist!`) })
+      .catch(err => { client.me(channel, `${user} --> That user doesn't exist!`) })
     let isAffiliate = (data) => {
       if (`${data}` == 'true') {
         return 'Affiliate '
@@ -1550,7 +1550,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   async function pickRamdom(args) {
-    if(args.length < 2) {
+    if (args.length < 2) {
       return { randomElement: null, reply: `Please specify at least 2 items to pick from!` }
     }
     return { randomElement: args[+getRandomInt(args.length) - 1], reply: args[+getRandomInt(args.length) - 1] }
@@ -2110,7 +2110,7 @@ client.on("PRIVMSG", (msg) => {
     let [celcius, fahrenheit] = [(+weather.data.current.temp).toFixed(1), (+weather.data.current.temp * 1.8 + 32).toFixed(1)]
     let [windSpeed, windGust] = [(+weather.data.current.wind_speed * 3.6).toFixed(1), (+weather.data.current.wind_gust * 3.6).toFixed(1)]
     let [humidity, clouds, alerts] = [+weather.data.current.humidity, +weather.data.current.clouds, weather.data.alerts]
-    let [sunrise, sunset, currentTime] = [new Date(+weather.data.current.sunrise * 1000), new Date(+weather.data.current.sunset * 1000), new Date()]
+    let [sunrise, sunset, currentTime] = [new Date(+weather.data.current.sunrise * 1000).addHours(-5), new Date(+weather.data.current.sunset * 1000).addHours(-5), new Date().addHours(-5)]
     let [rain, snow] = [weather.data.current.rain, weather.data.current.snow]
     let weatherAlert = () => {
       switch (alerts) {
@@ -2166,12 +2166,12 @@ client.on("PRIVMSG", (msg) => {
       }
     }
     let sunState = () => {
-      if (new Date(sunrise) > new Date(currentTime)) {
-        let sunriseIn = humanizeDuration(new Date(sunrise) - new Date(currentTime), { units: ["h", "m"], round: true, delimiter: " and " })
+      if (sunrise > currentTime) {
+        let sunriseIn = humanizeDuration(sunrise - currentTime, { units: ["h", "m"], round: true, delimiter: " and " })
         return `Sun rises in ${sunriseIn}. 🌅`
       }
       else {
-        let sunsetIn = humanizeDuration(new Date(sunset) - new Date(currentTime), { units: ["h", "m"], round: true, delimiter: " and " })
+        let sunsetIn = humanizeDuration(sunset - currentTime, { units: ["h", "m"], round: true, delimiter: " and " })
         return `Sun sets in ${sunsetIn}. 🌇`
       }
     }
@@ -2425,61 +2425,61 @@ client.on("PRIVMSG", (msg) => {
   }
 
   function killMessage(amount) {
-    if (+amount >= 1 && +amount < 20) {
+    if(+amount >= 1 && +amount < 20) {
       return `You line ${amount} nammer(s) up in front of a firing squad,`
     }
-    else if (+amount >= 20 && +amount < 50) {
+    else if(+amount >= 20 && +amount < 50) {
       return `You send ${amount} nammer(s) off to "training" (a volcano),`
     }
-    else if (+amount >= 50 && +amount < 80) {
+    else if(+amount >= 50 && +amount < 80) {
       return `You drop a car on ${amount} nammer(s) killing them,`
     }
-    else if (+amount >= 80 && +amount < 120) {
+    else if(+amount >= 80 && +amount < 120) {
       return `You stare ${amount} nammer(s) in the eyes as you stab them one-by-one,`
     }
-    else if (+amount >= 120 && +amount < 200) {
+    else if(+amount >= 120 && +amount < 200) {
       return `You lethally inject ${amount} nammer(s) with rat poison,`
     }
-    else if (+amount >= 200 && +amount < 250) {
+    else if(+amount >= 200 && +amount < 250) {
       return `You fatally electrocute ${amount} nammer(s) one-by-one, make the others watch,`
     }
-    else if (+amount >= 250 && +amount < 1000) {
+    else if(+amount >= 250 && +amount < 1000) {
       return `You make ${amount} nammer(s) jump off of a building in a single file line,`
     }
     else {
       return `You enlist ${amount} nammer(s) into the VietNaM war,`
     }
   }
-
-  if (command === 'kill') {
-    db.get(`${userlow}nammers`).then(function(value) {
-      let nammers = `${value}`
-      if (nammers === 'null' || +nammers === 0) {
-        client.me(channel, (`${user} --> GearScare ⛔ You don't have any nammers to kill! Use "vb hunt" to get more.`))
-      }
-      else {
-        if (+`${args[0]}` > +`${nammers}`) {
-          client.me(channel, (`${user} --> MenheraCry You try to kill ${args[0]} nammer(s), but realize that you only have ${nammers} nammer(s), and give up.`))
-        }
+  
+  if(command === 'kill') {
+		db.get(`${userlow}nammers`).then(function(value) {
+			let nammers = `${value}`
+        if(nammers === 'null' || +nammers === 0) {
+          client.me(channel, (`${user} --> GearScare ⛔ You don't have any nammers to kill! Use "vb hunt" to get more.`))
+		    }
         else {
-          let killamount = `${args[0]}`
-          const regex = new RegExp('^([1-9]|[1-9][0-9]{1,6})$');
-          testForNumber = `${regex.test(killamount)}`
-
-          if (testForNumber === 'true') {
-            let afterkill = +nammers - +killamount
-            db.set(`${userlow}nammers`, afterkill)
-            client.me(channel, (`${user} --> NekoProud 🔪 ${killMessage(killamount)} and are left with ${afterkill} nammer(s).`))
-          }
-          else if (`${args[0]}` === 'all') {
-            db.set(`${userlow}nammers`, 0)
-            client.me(channel, (`${user} --> GearScare 🔪 ${killMessage(nammers)} and now have nothing.`))
+          if(+`${args[0]}` > +`${nammers}`) {
+            client.me(channel, (`${user} --> MenheraCry You try to kill ${args[0]} nammer(s), but realize that you only have ${nammers} nammer(s), and give up.`))
           }
           else {
-            client.me(channel, (`${user} --> Please enter a valid amount of nammers to kill KannaSip`))
+            let killamount = `${args[0]}`
+            const regex = new RegExp('^([1-9]|[1-9][0-9]{1,6})$');
+            testForNumber = `${regex.test(killamount)}`
+
+            if(testForNumber === 'true') {
+              let afterkill = +nammers - +killamount
+              db.set(`${userlow}nammers`, afterkill)
+              client.me(channel, (`${user} --> NekoProud 🔪 ${killMessage(killamount)} and are left with ${afterkill} nammer(s).`))
+            }
+            else if(`${args[0]}` === 'all') {
+              db.set(`${userlow}nammers`, 0)
+              client.me(channel, (`${user} --> GearScare 🔪 ${killMessage(nammers)} and now have nothing.`))
+            }
+            else {
+              client.me(channel, (`${user} --> Please enter a valid amount of nammers to kill KannaSip`))
+            }
           }
         }
-      }
     })
   }
 
