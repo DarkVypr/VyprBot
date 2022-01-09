@@ -122,7 +122,9 @@ client.on("PRIVMSG", (msg) => {
     })
   }
 
-  if (!message.startsWith('vb ') || userlow === 'vyprbot') {
+  let prefix = 'vb '
+  
+  if (!message.startsWith(prefix) || userlow === 'vyprbot') {
     return
   }
 
@@ -142,9 +144,8 @@ client.on("PRIVMSG", (msg) => {
       })
     }
   }
-
-  const PREFIX = "vb ";
-  let [command, ...args] = message.slice(PREFIX.length).split(/ +/g);
+  
+  let [command, ...args] = message.slice(prefix.length).split(/ +/g);
 
   // Variables
 
