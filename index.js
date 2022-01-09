@@ -148,28 +148,28 @@ client.on("PRIVMSG", (msg) => {
 
   // Variables
 
-  var defaultname = `${args[0]}`
-  if (defaultname === 'undefined')
+  var defaultname = args[0]
+  if (!defaultname)
     var defaultname = `${userlow}`
 
-  var defaultname2 = `${args[1]}`
-  if (defaultname2 === 'undefined')
+  var defaultname2 = args[1]
+  if (!defaultname2)
     var defaultname2 = `${channel}`
 
-  var gnkissmsg = `${args[1]}`
-  if (gnkissmsg === 'undefined')
+  var gnkissmsg = args[1]
+  if (!gnkissmsg)
     var gnkissmsg = 'catKISS 💖'
 
-  var kissmsg = `${args[1]}`
-  if (kissmsg === 'undefined')
+  var kissmsg = args[1]
+  if (!kissmsg)
     var kissmsg = 'peepoShy'
 
-  var logschannel = `${args[1]}`
-  if (logschannel === 'undefined')
+  var logschannel = args[1]
+  if (!logschannel)
     var logschannel = 'xqcow'
 
-  var hugmsg = `${args[1]}`
-  if (hugmsg === 'undefined')
+  var hugmsg = args[1]
+  if (!hugmsg)
     var hugmsg = 'HUGGIES'
 
   // Number Validity Checker
@@ -223,12 +223,12 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'admin') {
-    if (`${args[0]}` === 'undefined' || `${args[1]}` === 'undefined' || !/add|remove|delete|check/i.test(`${args[0]}`) && userlow === 'darkvypr') {
+    if (!args[0] || !args[1] || !/add|remove|delete|check/i.test(args[0]) && userlow === 'darkvypr') {
       client.me(channel, `DarkVypr --> Invalid Syntax! Example: "vb admin {add|delete|remove|check} {user}".`)
     }
-    else if (`${args[0]}` === 'add' && userlow === 'darkvypr') {
-      addAdmin(`${args[1].toLowerCase()}`).then(function(value) {
-        if (`${value}` !== 'undefined') {
+    else if (args[0] === 'add' && userlow === 'darkvypr') {
+      addAdmin(args[1].toLowerCase()).then(function(value) {
+        if (value) {
           client.me(channel, `DarkVypr --> There was an error with that command. Reason: ${value}`)
         }
         else {
@@ -238,7 +238,7 @@ client.on("PRIVMSG", (msg) => {
     }
     else if (`${args[0]}` === 'delete' || `${args[0]}` === 'remove' && userlow === 'darkvypr') {
       deleteAdmin(`${args[1].toLowerCase()}`).then(function(value) {
-        if (`${value}` !== 'undefined') {
+        if (value) {
           client.me(channel, `DarkVypr --> There was an error with that command. Reason: ${value}`)
         }
         else {
@@ -269,19 +269,19 @@ client.on("PRIVMSG", (msg) => {
           let location = await db.get(`${oldName}time`)
           let twitter = await db.get(`${oldName}twitter`)
           let nammers = await db.get(`${oldName}nammers`)
-          if (`${bday}` !== 'null') {
+          if (bday !== null) {
             db.set(`${newName}bday`, bday)
           }
-          if (`${location}` !== 'null') {
+          if (location !== null) {
             db.set(`${newName}time`, location)
           }
-          if (`${twitter}` !== 'null') {
+          if (twitter !== null) {
             db.set(`${newName}twitter`, twitter)
           }
-          if (`${nammers}` !== 'null') {
+          if (nammers !== null) {
             db.set(`${newName}nammers`, nammers)
           }
-          if (`${nammers}` === 'null' && `${twitter}` === 'null' && `${location}` === 'null' && `${bday}` === 'null') {
+          if (nammers === null && twitter === null && location === null && bday === null) {
             client.me(channel, `${user} --> That user dosen't have any data associated with their account!`)
           }
           else {
@@ -293,7 +293,7 @@ client.on("PRIVMSG", (msg) => {
             client.me(channel, `${user} --> Succesfully transferred all of the data from "${oldName}" to "${newName}" EZ`)
           }
         }
-        if (`${args[0]}` === 'undefined' || `${args[1]}` === 'undefined') {
+        if (!args[0] || !args[1]) {
           client.me(channel, `${user} --> Provide an old and new account.`)
         }
         else {
@@ -336,7 +336,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   async function partChannel(channel, admin) {
-    if (channel == undefined && admin) {
+    if (!channel && admin) {
       return { success: false, case: 'no_channel_given', channelLeft: null, reply: "Please provide a channel to leave." }
     }
     else if (channelOptions.indexOf(channel.toLowerCase()) == -1 && admin) {
@@ -404,8 +404,8 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'datalist') {
-    if (`${userlow}` === 'darkvypr') {
-      if (`${args[0]}` === 'undefined') {
+    if (userlow === 'darkvypr') {
+      if (!args[0]) {
         db.list().then(keys => console.log(keys))
       }
       else if (`${args[1]}` === 'chat:true' || `${args[1]}` === 'public:true') {
@@ -486,7 +486,7 @@ client.on("PRIVMSG", (msg) => {
 
   async function getUserData(args) {
     var user = userlow
-    if (args[0] !== undefined) { user = args[0] }
+    if (args[0]) { user = args[0] }
     let userData = await axios.get(`https://api.ivr.fi/twitch/resolve/${user.replace('@', '')}`)
       .catch(err => { client.me(channel, `${user} --> That user doesn't exist!`) })
     let isAffiliate = (data) => {
@@ -595,7 +595,7 @@ client.on("PRIVMSG", (msg) => {
     let value1 = `${args[1]}`
     let value2 = `${args[2]}`
     const regex = new RegExp('^(?!0?2/3)(?!0?2/29/.{3}[13579])(?!0?2/29/.{2}[02468][26])(?!0?2/29/.{2}[13579][048])(?!(0?[469]|11)/31)(?!0?2/29/[13579][01345789]0{2})(?!0?2/29/[02468][1235679]0{2})(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/([0-9]{4})$')
-    if (args.length == 0 || args[1] == undefined) {
+    if (args.length == 0 || !args[1]) {
       client.me(channel, `${user} --> Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "vb set twitter darkvyprr", "vb set birthday 8/14/2005 (mm/dd/yyyy)" or "vb set location lasalle ontario ({city} {state, province or country})"`)
     }
     else if (valueToSet == 'twitter') {
@@ -604,7 +604,7 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, `${user} --> Succesfully set your Twitter account to @${twitterAccount}!`)
     }
     else if (valueToSet == 'location') {
-      if (value1 == 'undefined' || value2 == 'undefined') {
+      if (!value1 || !value2) {
         client.me(channel, `${user} --> That's not a valid location! Examples: "vb set location stockholm sweden" or "vb set location springfield virginia".`)
       }
       else {
@@ -800,7 +800,7 @@ client.on("PRIVMSG", (msg) => {
 
   async function permitUser(user) {
     var existingPermits = await db.get(`${channel}permits`)
-    if (`${existingPermits}` === 'null') {
+    if (existingPermits === null) {
       await db.set(`${channel}permits`, channel)
     }
     var existingPermits = await db.get(`${channel}permits`)
@@ -817,7 +817,7 @@ client.on("PRIVMSG", (msg) => {
 
   async function unpermitUser(user) {
     var existingPermits = await db.get(`${channel}permits`)
-    if (`${existingPermits}` === 'null') {
+    if (existingPermits === null) {
       await db.set(`${channel}permits`, channel)
     }
     var existingPermits = await db.get(`${channel}permits`)
@@ -835,7 +835,7 @@ client.on("PRIVMSG", (msg) => {
 
   async function checkPermitted(user) {
     var permits = await db.get(`${channel}permits`)
-    if (`${permits}` === 'null') {
+    if (permits === null) {
       await db.set(`${channel}permits`, channel)
     }
     else {
@@ -853,7 +853,7 @@ client.on("PRIVMSG", (msg) => {
   if (command === 'permit') {
     checkAdmin(userlow).then(function(isAdmin) {
       if (userlow === 'darkvypr' || userlow === channel || isAdmin) {
-        if (!/^add$|^remove$|^delete$|^check$/i.test(`${args[0]}`) || `${args[1]}` === 'undefined') {
+        if (!/^add$|^remove$|^delete$|^check$/i.test(args[0]) || !args[1]) {
           client.me(channel, `${user} --> Invalid Syntax! Example: "vb permit {add|delete|remove|check} {user}".`)
         }
         else if (`${args[0]}` === 'add') {
@@ -958,8 +958,8 @@ client.on("PRIVMSG", (msg) => {
 
   async function getBirthdayDetails(name) {
     let bday = await db.get(`${name}bday`)
-    if (`${bday}` === 'null') {
-      return 'null'
+    if (bday === null) {
+      return null
     }
     else {
       let d = new Date()
@@ -1002,9 +1002,9 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'birthday' || command === 'bday') {
-    if (`${args[0]}` === 'undefined') {
+    if (!args[0]) {
       getBirthdayDetails(userlow).then(function(birthday) {
-        if (birthday === 'null') {
+        if (birthday === null) {
           client.me(channel, `${user} --> Before using this command, you must set your birthday with the "vb set birthday" command. It must be in M/D/YYYY or MM/DD/YYYY format. Examples: "vb set birthday 8/14/2005", "vb set birthday 10/16/2004" or "vb set birthday 9/11/1973".`)
         }
         else {
@@ -1016,7 +1016,7 @@ client.on("PRIVMSG", (msg) => {
       let userLookup = `${args[0].toLowerCase().replace('@', '').replace(' ', '')}`
       getBirthdayDetails(userLookup).then(function(value) {
         let birthday = value
-        if (birthday === 'null') {
+        if (birthday === null) {
           client.me(channel, `${user} --> User ${args[0]} hasn't set their birthday! Get them to set it and retry this command! Hint: "vb set birthday".`)
         }
         else {
@@ -1107,7 +1107,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'code') {
-    if (`${args[0]}` === 'undefined') {
+    if (!args[0]) {
       client.me(channel, `${user} --> The code for the whole bot can be found at: http://bot.darkvypr.com/ | Input a command name to view the code for a command. Example: "vb code loyalty".`);
     }
     else {
@@ -1133,10 +1133,10 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'covid') {
-    if (`${args[0]}` === 'undefined') {
+    if (!args[0]) {
       db.get(`${userlow}time`).then(function(value) {
         let usercitycountry = `${value}`
-        if (usercitycountry === 'null') {
+        if (usercitycountry === null) {
           client.me(channel, `${user} --> Before using this command, you must set your location with the vb set location command. Example: “vb set location lasalle ontario”, “vb set location springfield virginia” or “vb set location stockholm sweden”. More info: https://darkvypr.com/commands`)
         }
         else {
@@ -1161,7 +1161,7 @@ client.on("PRIVMSG", (msg) => {
         let removedatsignlow = removedatsign.toLowerCase()
         db.get(`${removedatsignlow}time`).then(function(value) {
           let lookuptime = `${value}`
-          if (lookuptime === 'null') {
+          if (lookuptime === null) {
             client.me(channel, (`${user} --> That user hasen't set their location! Get them to set it and retry. PANIC`))
           }
           else {
@@ -1209,12 +1209,12 @@ client.on("PRIVMSG", (msg) => {
     axios.get(`https://dictionaryapi.com/api/v3/references/collegiate/json/${args.join(' ')}?key=${process.env['DICTIONARY_KEY']}`)
       .then((response) => {
         let defineresult = response.data[0]
-        if (`${defineresult}` === 'undefined') {
+        if (!defineresult) {
           client.me(channel, `${user} --> No definition available for that string or word!`)
         }
         else {
           let shortanswer = `${defineresult.shortdef}`
-          if (`${shortanswer}` === 'undefined') {
+          if (!shortanswer) {
             client.me(channel, `${user} --> No definition available for that string or word!`)
           }
           else {
@@ -1247,7 +1247,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'domain') {
-    if (`${args[0]}` === 'undefined') {
+    if (!args[0]) {
       client.me(channel, `${user} --> Please input a domain to lookup!`)
     }
     else {
@@ -1301,7 +1301,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'emotes') {
-    if (`${args[0]}` === 'undefined') {
+    if (!args[0]) {
       axios.get(`https://api.ivr.fi/twitch/resolve/${user}`)
         .then((response) => {
           let userdata = response.data
@@ -1380,17 +1380,17 @@ client.on("PRIVMSG", (msg) => {
 
   if (command === 'followage' || command === 'fa') {
     var userLookup = `${args[0]}`
-    if (`${args[0]}` === 'undefined')
+    if (!args[0])
       var userLookup = userlow
 
     var channelLookup = `${args[1]}`
-    if (`${args[1]}` === 'undefined')
+    if (!args[1])
       var channelLookup = channel
 
     getFollowage(userLookup, channelLookup)
       .catch(err => { client.me(channel, `${user} --> There was an error getting that user's followage! Make sure that the account exists, and you have spelt the channel and username correctly!`) })
       .then(function(followage) {
-        if (`${followage.followedAt}` === 'null') {
+        if (followage.followedAt === null) {
           client.me(channel, `${user} --> @${followage.followUser} is not following @${followage.followChannel}`)
         }
         else {
@@ -1495,7 +1495,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'math') {
-    if (`${args[0]}` === 'undefined') {
+    if (!args[0]) {
       client.me(channel, `${user} --> Please provide a problem to evaluate!`);
     }
     else {
@@ -1541,7 +1541,7 @@ client.on("PRIVMSG", (msg) => {
 
   let ocrlang = `${args[1]}`
 
-  if (`${ocrlang}` !== 'undefined') {
+  if (ocrlang) {
     var ocrlangresult = `&language=${args[1]}`
   }
 
@@ -1553,7 +1553,7 @@ client.on("PRIVMSG", (msg) => {
     axios.get(`https://api.ocr.space/parse/imageurl?apikey=${process.env['OCR_KEY']}&url=${args[0]}${ocrlangresult}`)
       .then((response) => {
         let ocrresults = response.data.ParsedResults[0].ParsedText
-        if (ocrresults === 'undefined' || ocrresults === '' || ocrresults === ' ') {
+        if (!ocrresults || ocrresults === '' || ocrresults === ' ') {
           client.me(channel, `${user} --> OCR.space was unable to find the text in that image. Make sure that the image's text is clearly visible with no pictures or items that may confuse the API.`);
         }
         else {
@@ -1663,7 +1663,7 @@ client.on("PRIVMSG", (msg) => {
       checkPermitted(userlow).catch(err => { client.me(channel, `${user} --> ${err}`) }).then(function(isPermitted) {
         if (isAdmin || isPermitted === 'true' || userlow === channel) {
           let spamAmount = args[0]
-          if (!isNumber(spamAmount) || `${args[1]}` === 'undefined') {
+          if (!isNumber(spamAmount) || !args[1]) {
             client.me(channel, `${user} --> Invalid Syntax! Example: "vb spam {amount} {phrase}"`)
           }
           else if (spamAmount > 80) {
@@ -1720,7 +1720,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'status') {
-    if (`${args[0]}` === 'undefined') {
+    if (!args[0]) {
       let doesUserExist = fs.existsSync(`status/${userlow}.json`)
       if (doesUserExist === true) {
         function addZero(i) {
@@ -1774,7 +1774,7 @@ client.on("PRIVMSG", (msg) => {
     var isUser
     var isSender
     var location
-    if (args[0] == undefined) {
+    if (!args[0]) {
       let userLocation = await db.get(`${user}time`)
       isUser = true
       isSender = true
@@ -1797,7 +1797,7 @@ client.on("PRIVMSG", (msg) => {
       return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "vb set location"` }
     }
     let coordinates = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${location}&apiKey=${process.env['GEOCODING_KEY']}`)
-    if (coordinates.data.items[0] == undefined) {
+    if (!coordinates.data.items[0]) {
       return { success: false, case: 'invalid_locaiton', reply: `The location provided to the API was invalid.` }
     }
     var [latitude, longitude, location] = [coordinates.data.items[0].position.lat, coordinates.data.items[0].position.lng, coordinates.data.items[0].title]
@@ -1857,8 +1857,8 @@ client.on("PRIVMSG", (msg) => {
     let userSubbed = isUserSubbed()
 
     function isGifted() {
-      if (`${isGift}` === 'undefined' || `${isGift}` === 'null') {
-        return 'null'
+      if (!isGift || isGift == null) {
+        return null
       }
       else {
         return `with a tier ${subTier} gift sub by @${subDetails.data.meta.gift.name}`
@@ -1885,11 +1885,11 @@ client.on("PRIVMSG", (msg) => {
 
   if (command === 'subage' || command === 'sa') {
     var userLookup = `${args[0]}`
-    if (`${args[0]}` === 'undefined')
+    if (!args[0])
       var userLookup = userlow
 
     var channelLookup = `${args[1]}`
-    if (`${args[1]}` === 'undefined')
+    if (!args[1])
       var channelLookup = channel
 
     getSubage(userLookup, channelLookup)
@@ -1898,16 +1898,16 @@ client.on("PRIVMSG", (msg) => {
         if (subage.hidden === true) {
           client.me(channel, `${user} --> ${subage.subUser} has hidden their subscription status. (Psst... Another reason that this might pop up is because you are trying to check a channel that is not affiliated.)`)
         }
-        else if (`${subage.totalMonths}` === 'undefined' || +subage.totalMonths === 0) {
+        else if (!subage.totalMonths || +subage.totalMonths === 0) {
           client.me(channel, `${user} --> ${subage.subUser} has never subscribed to @${subage.subChannel}.`)
         }
-        else if (subage.isSubbed === false && `${subage.totalMonths}` !== 'undefined') {
+        else if (subage.isSubbed === false && subage.totalMonths) {
           client.me(channel, `${user} --> ${subage.userSubbed} but previously had a subscription for ${subage.totalMonths} month(s). Their sub expired ${subage.timeSinceSubEnded} ago.`)
         }
         else if (subage.isSubbed === true && subage.subTier === 'Custom') {
           client.me(channel, `${user} --> ${subage.userSubbed}. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak). This is a permanent subscription!`)
         }
-        else if (subage.isSubbed === true && subage.subTier === '3' && `${subage.isBotPermaSub}` === 'null') {
+        else if (subage.isSubbed === true && subage.subTier === '3' && subage.isBotPermaSub == null) {
           client.me(channel, `${user} --> ${subage.userSubbed}. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak). This is a permanent subscription!`)
         }
         else if (subage.isSubbed === true && subage.subType === 'paid') {
@@ -2101,7 +2101,7 @@ client.on("PRIVMSG", (msg) => {
       )
     })
   }
-
+  
   if (command === 'vyprcolour') {
     client.me(channel, `${user} --> #FF7FD3`);
   }
@@ -2110,7 +2110,7 @@ client.on("PRIVMSG", (msg) => {
     var isUser
     var isSender
     var location
-    if (args[0] == undefined) {
+    if (!args[0]) {
       let userLocation = await db.get(`${user}time`)
       isUser = true
       isSender = true
@@ -2133,7 +2133,7 @@ client.on("PRIVMSG", (msg) => {
       return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "vb set location"` }
     }
     let coordinates = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${location}&apiKey=${process.env['GEOCODING_KEY']}`)
-    if (coordinates.data.items[0] == undefined) {
+    if (!coordinates.data.items[0]) {
       return { success: false, case: 'invalid_locaiton', reply: `The location provided to the API was invalid.` }
     }
     var [latitude, longitude, location] = [coordinates.data.items[0].position.lat, coordinates.data.items[0].position.lng, coordinates.data.items[0].title]
@@ -2154,10 +2154,13 @@ client.on("PRIVMSG", (msg) => {
       }
     }
     let precipitation = () => {
-      if (rain == undefined && snow == undefined) {
+      if (!rain && !snow) {
         return ''
       }
-      else if (rain !== undefined && snow == undefined) {
+      else if (rain && snow) {
+        return `It's raining at a rate of ${rain['1h']} mm/hr, and snowing at a rate of ${snow['1h']} mm/hr. 🌧️🌨️`
+      }
+      else if (rain && !snow) {
         return `It's raining at a rate of ${rain['1h']} mm/hr. ☔🌧️`
       }
       else {
@@ -2491,7 +2494,7 @@ client.on("PRIVMSG", (msg) => {
   if (command === 'kill') {
     db.get(`${userlow}nammers`).then(function(value) {
       let nammers = `${value}`
-      if (nammers === 'null' || +nammers === 0) {
+      if (nammers === null || +nammers === 0) {
         client.me(channel, (`${user} --> GearScare ⛔ You don't have any nammers to kill! Use "vb hunt" to get more.`))
       }
       else {
@@ -2562,7 +2565,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   async function giveNammers(sender, recipient, amount) {
-    if (`${recipient}` == 'undefined' || `${amount}` == 'undefined') {
+    if (!recipient || !amount) {
       return {
         success: false,
         reason: 'syntax'
@@ -2572,13 +2575,13 @@ client.on("PRIVMSG", (msg) => {
       let senderNammers = await db.get(`${sender.toLowerCase()}nammers`)
       let recipientNammers = await db.get(`${recipient.toLowerCase().replace('@', '')}nammers`)
       let checkIfNumber
-      if (`${senderNammers}` == 'null') {
+      if (senderNammers == null) {
         return {
           success: false,
           reason: "sender doesn't exist"
         }
       }
-      else if (`${recipientNammers}` == 'null') {
+      else if (recipientNammers == null) {
         return {
           success: false,
           reason: "recipient doesn't exist"
@@ -2672,13 +2675,13 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'gamble' || command === 'roulette') {
-    if (`${args[0]}` === 'undefined') {
+    if (!args[0]) {
       client.me(channel, (`${user} --> PANIC Please enter an amount of nammers to gamble with!`))
     }
     else {
       db.get(`${userlow}nammers`).then(function(value) {
         let nammers = `${value}`
-        if (nammers === 'null' || +nammers === 0) {
+        if (nammers === null || +nammers === 0) {
           client.me(channel, (`${user} --> You don't have any nammers to gamble with! Type !hunt to get more.`))
         }
         else {
