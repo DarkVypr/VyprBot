@@ -1,5 +1,5 @@
 // require("http").createServer((_, res) => res.end("Alive!")).listen(8080)
-// MAKE CHECK COMMAND CHECK ALL DIRECTORIES
+// MAKE CHECK COMMAND CHECK ALL DIRECTORIES AND SEND THE STATE
 const huntNammersCooldown = new Set();
 const talkedRecently = new Set();
 const commandcooldown = new Set();
@@ -290,7 +290,7 @@ client.on("PRIVMSG", (msg) => {
                 db.delete(value[i])
               }
             })
-            client.me(channel, `${user} --> Succesfully transferred all of the data from "${oldName}" to "${newName}" vb  EZ`)
+            client.me(channel, `${user} --> Succesfully transferred all of the data from "${oldName}" to "${newName}" EZ`)
           }
         }
         if (`${args[0]}` === 'undefined' || `${args[1]}` === 'undefined') {
@@ -1796,34 +1796,33 @@ client.on("PRIVMSG", (msg) => {
     if (location == null && !isSender) {
       return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "vb set location"` }
     }
-    let time = await axios.get(`https://timezone.abstractapi.com/v1/current_time/?api_key=${process.env['TIME_KEY']}&location=${location}`)
-    if (time.data.datetime == undefined) {
+    let coordinates = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${location}&apiKey=${process.env['GEOCODING_KEY']}`)
+    if (coordinates.data.items[0] == undefined) {
       return { success: false, case: 'invalid_locaiton', reply: `The location provided to the API was invalid.` }
     }
-    let dateTime = time.data.datetime
-    let [timezone, yearMonthDay] = [time.data.timezone_abbreviation, new Date(dateTime.slice(0, 10))]
+    var [latitude, longitude, location] = [coordinates.data.items[0].position.lat, coordinates.data.items[0].position.lng, coordinates.data.items[0].title]
+    let time = await axios.get(`https://api.bigdatacloud.net/data/timezone-by-location?latitude=${latitude}&longitude=${longitude}&key=${process.env['TIME_KEY']}`)
+    let [dateTime, timeZone, utcOffset, fullTimeZone] = [new Date(time.data.localTime).toISOString(), time.data.effectiveTimeZoneShort, time.data.utcOffset, time.data.displayName]
     var currentTime = {
-      date: dateFormat(yearMonthDay, "fullDate"),
+      date: dateFormat(dateTime, "fullDate"),
       time: dateFormat(dateTime, "h:MM:ss TT"),
-      timezone: timezone,
-      location: capitalizeEachWord(decodeURIComponent(location))
     }
     if (isSender) {
       return {
         currentTime,
-        reply: `In ${currentTime.location} (${currentTime.timezone}) It's currently ${currentTime.time}, ⌚ and the date is ${currentTime.date}.📅`
+        reply: `${location} is in ${fullTimeZone}. It's currently ${currentTime.time}, ⌚ and the date is ${currentTime.date}.📅`
       }
     }
     else if (!isSender && isUser) {
       return {
         currentTime,
-        reply: `At ${args[0].toLowerCase()}'s current location (${currentTime.location}, ${currentTime.timezone}) It's currently ${currentTime.time}, ⌚ and the date is ${currentTime.date}.📅`
+        reply: `${args[0].toLowerCase()} is in ${fullTimeZone} (${location}). It's currently ${currentTime.time}, ⌚ and the date is ${currentTime.date}.📅`
       }
     }
     else {
       return {
         currentTime,
-        reply: `In ${currentTime.location} (${currentTime.timezone}) It's currently ${currentTime.time}, ⌚ and the date is ${currentTime.date}.📅`
+        reply: `${location} is in ${timeZone}. It's currently ${currentTime.time}, ⌚ and the date is ${currentTime.date}.📅`
       }
     }
   }
