@@ -1,4 +1,5 @@
 // require("http").createServer((_, res) => res.end("Alive!")).listen(8080)
+// MAKE CHECK COMMAND CHECK ALL DIRECTORIES
 const huntNammersCooldown = new Set();
 const talkedRecently = new Set();
 const commandcooldown = new Set();
@@ -259,7 +260,7 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, `${user} --> You dont have permission to use that command! Required: Bot Developer`)
     }
   }
-  
+
   if (command === 'rename') {
     checkAdmin(userlow).then(function(isAdmin) {
       if (isAdmin) {
@@ -468,6 +469,12 @@ client.on("PRIVMSG", (msg) => {
     return splitStr.join(' ');
   }
 
+  // Capitalize Each Word In A String
+
+  let timeDelta = (date) => {
+    return new Date(date) - new Date().addHours(-5)
+  }
+
   // Add Hours
 
   Date.prototype.addHours = function(h) {
@@ -531,7 +538,7 @@ client.on("PRIVMSG", (msg) => {
       }
     }
 
-    let creationDate = new Date(userData.data.createdAt).toDateString()
+    let creationDate = dateFormat(userData.data.createdAt, "fullDate")
     let timeSinceCreation = humanizeDuration((new Date(creationDate).addHours(-5)) - (new Date().addHours(-5)), { units: ["y", "mo", "d", "m"], round: true, largest: 3 })
 
     let rolesArray = (isAffiliate(userData.data.roles.isAffiliate) + isPartner(userData.data.roles.isPartner) + isStaff(userData.data.roles.isStaff) + isSiteAdmin(userData.data.roles.isSiteAdmin) + isBot(userData.data.bot)).trim().split(' ')
@@ -660,112 +667,133 @@ client.on("PRIVMSG", (msg) => {
 
   // Suggestions
 
-  async function setReminderIfAFK(user, id, body) {
+  async function newSuggestion(args) {
+    if (args.length = 0) {
+      return { success: false, reply: `Please provide a suggestion. Make the suggestion as descriptive as possible.` }
+    }
+    let [id, content, today] = [+(await db.get('suggestion')) + 1, args.join(' '), new Date().addHours(-5).toISOString()]
+    db.set('suggestion', id)
+    await fs.writeJson(`suggestions/active/${id}.json`, { user: userlow, id: id, date: today, state: 'active', suggestion: content })
+    client.whisper('darkvypr', `[New Suggestion] User: ${userlow} | ID: ${id} | Body: ${content}`)
     let checkIfAFK = await axios.get(`https://supinic.com/api/bot/afk/check?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}&userID=1093802`)
-    if (`${checkIfAFK.data.data.status}` !== 'null') {
-      await axios.post(`https://supinic.com/api/bot/reminder?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}&userID=1093802&private=true&text=[New Suggestion] A new suggestion has been made while you were AFK: User: ${user} | ID: ${id} | Suggestion: ${body}`)
+    if (checkIfAFK.data.data.status !== null) {
+      await axios.post(`https://supinic.com/api/bot/reminder?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}&userID=1093802&private=true&text=[New Suggestion] A new suggestion has been made while you were AFK: User: ${userlow} | ID: ${id} | Body: ${content}`)
+    }
+    client.whisper(userlow, `You created a suggestion with the ID: ${id}`)
+    return { success: true, reply: `Your suggestion has been saved. ID: ${id}` }
+  }
+
+  async function unsetSuggestion(args) {
+    if (args.length == 0 || !/^\d+$/.test(args[0])) {
+      return { success: false, reply: `Please provide a valid suggestion ID to unset.` }
+    }
+    let id = +args[0]
+    if (!(await fs.exists(`suggestions/active/${id}.json`))) {
+      return { success: false, reply: `There is no suggestion with that id!` }
+    }
+    let suggestionDetails = await fs.readJson(`suggestions/active/${id}.json`)
+    if (suggestionDetails.user !== userlow) {
+      return { success: false, reply: `You don't own that suggestion!` }
+    }
+    await fs.writeJson(`suggestions/active/${id}.json`, { user: userlow, id: id, date: suggestionDetails.date, dateDismissed: new Date().addHours(-5).toISOString(), state: 'dismissed by author', suggestion: suggestionDetails.suggestion })
+    await fs.rename(`suggestions/active/${id}.json`, `suggestions/author-dismissed/${id}.json`)
+    return { success: true, reply: `Your suggestion with the ID ${id} was successfully unset.` }
+  }
+
+  async function checkSuggestion(args) {
+    if (args.length == 0 || !/^\d+$/.test(args[0])) {
+      return { success: false, reply: `Please provide a valid suggestion ID to unset.` }
+    }
+    let id = +args[0]
+    if (!(await fs.exists(`suggestions/active/${id}.json`))) {
+      return { success: false, reply: `There is no suggestion with that id!` }
+    }
+    let suggestionDetails = await fs.readJson(`suggestions/active/${id}.json`)
+    if (suggestionDetails.user !== userlow) {
+      return { success: false, reply: `You don't own that suggestion!` }
+    }
+    let suggestionObj = {
+      user: suggestionDetails.user,
+      id: suggestionDetails.id,
+      date: suggestionDetails.date,
+      state: suggestionDetails.state,
+      body: suggestionDetails.suggestion
+    }
+    return { success: true, suggestionObj, reply: `ID: ${id} | Date Created: ${dateFormat(suggestionObj.date, "mmmm dS, yyyy ' at ' h:MM TT")} (${humanizeDuration(timeDelta(suggestionObj.date), { largest: 2, round: true, delimiter: " and " })} ago) | Suggestion: ${suggestionObj.body}` }
+  }
+
+  async function completeSuggestion(args) {
+    if (args.length < 2 || !/^\d+$/.test(args[0]) || !/^approved|denied|completed|declined$/.test(args[1])) {
+      return { success: false, reply: `Invalid Syntax! Example: "vb complete {id} {action} {reason}"` }
+    }
+    let [id, action] = [+args[0], args[1].toLowerCase()]
+    let reason = () => {
+      switch (args.slice(2).join(' ')) {
+        case '':
+          return '(No Message Provided)'
+        default:
+          return args.slice(2).join(' ')
+      }
+    }
+    if (!(await fs.exists(`suggestions/active/${id}.json`))) {
+      return { success: false, reply: `There is no suggestion with that id!` }
+    }
+    let suggestionDetails = await fs.readJson(`suggestions/active/${id}.json`)
+    let suggestionObj = {
+      user: suggestionDetails.user,
+      id: suggestionDetails.id,
+      date: suggestionDetails.date,
+      state: suggestionDetails.state,
+      body: suggestionDetails.suggestion
+    }
+    if (action == 'approved' || action == 'completed') {
+      await fs.writeJson(`suggestions/active/${id}.json`, { user: suggestionDetails.user, approvedBy: userlow, id: id, date: suggestionDetails.date, dateApproved: new Date().addHours(-5).toISOString(), state: action, suggestion: suggestionDetails.suggestion, reason: reason() })
+      await fs.rename(`suggestions/active/${id}.json`, `suggestions/approved/${id}.json`)
+      client.whisper(suggestionObj.user, `[Suggestion Update] Your suggestion with the ID ${suggestionDetails.id} was ${action}! Notes: ${reason()}`)
+      await axios.post(`https://supinic.com/api/bot/reminder?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}&username=${suggestionDetails.user}&private=true&text=[VyprBot Update] Your suggestion on VyprBot with the ID ${suggestionDetails.id} was ${action}! Notes: ${reason()}`)
+      return { success: true, reply: `Successfully notified @${suggestionDetails.user} and ${action} suggestion ${suggestionDetails.id}.` }
+    }
+    else if (action == 'denied' || action == 'declined') {
+      await fs.writeJson(`suggestions/active/${id}.json`, { user: suggestionDetails.user, deniedBy: userlow, id: id, date: suggestionDetails.date, dateApproved: new Date().addHours(-5).toISOString(), state: action, suggestion: suggestionDetails.suggestion, reason: reason() })
+      await fs.rename(`suggestions/active/${id}.json`, `suggestions/denied/${id}.json`)
+      client.whisper(suggestionObj.user, `[Suggestion Update] Your suggestion with the ID ${suggestionDetails.id} was ${action}! Notes: ${reason()}`)
+      await axios.post(`https://supinic.com/api/bot/reminder?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}&username=${suggestionDetails.user}&private=true&text=[VyprBot Update] Your suggestion on VyprBot with the ID ${suggestionDetails.id} was ${action}! Notes: ${reason()}`)
+      return { success: true, reply: `Successfully notified @${suggestionDetails.user} and ${action} suggestion ${suggestionDetails.id}.` }
+    }
+    else {
+      return { success: false, reply: `There was an error somewhere in that command!` }
     }
   }
 
   if (command === 'suggest') {
-    if (`${args[0]}` === 'undefined') {
-      client.me(channel, `${user} --> You must provide a suggestion when using this command. Example: "vb suggest I would like the bot to be added to my channel."`)
-    }
-    else {
-      db.get('suggestion').then(function(value) {
-        let plusone = +value + 1
-        db.set("suggestion", plusone);
-
-        let content = `${args.join(' ')}`
-        let today = new Date().toISOString().slice(0, 10)
-        let state = 'ACTIVE'
-
-        fs.writeFile(`suggestions/ACTIVE/${userlow}_ID:${plusone}.txt`, `User: ${user} | State: ${state} | Date: ${today} | Suggestion: ${content}`, err => { })
-        client.me(channel, `${user} --> Your suggestion has been saved and will be read shortly. (ID: ${plusone})`)
-        setReminderIfAFK(userlow, plusone, content)
-        client.whisper('darkvypr', `[New Suggestion] A new suggestion has been made: User: ${userlow} | ID: ${plusone} | Suggestion: ${content}`)
-      })
-    }
+    newSuggestion(args).then(suggestionData => {
+      client.me(channel, `${user} --> ${suggestionData.reply}`)
+    })
   }
 
   if (command === 'unset') {
-    if (`${args[0]}` === 'undefined') {
-      client.me(channel, `${user} --> You must provide a suggestion to unset when using this command. Example: "vb unset 10" would unset the suggestion with the ID of '10'.`)
-    }
-    else {
-      let suggestionid = `${args[0]}`
-      let state = 'DISMISSED BY AUTHOR'
-      let checkfile = fs.existsSync(`suggestions/ACTIVE/${userlow}_ID:${suggestionid}.txt`)
-
-      if (`${checkfile}` === 'true') {
-        fs.rename(`suggestions/ACTIVE/${userlow}_ID:${suggestionid}.txt`, `suggestions/DISMISSED/${userlow}_ID:${suggestionid}.txt`, function(err) {
-          if (err) throw err
-        })
-        client.me(channel, `${user} --> Successfully unset suggestion: ${suggestionid}`)
-      }
-      else {
-        client.me(channel, `${user} --> Invalid Command. You either didn't make this suggestion or it dosen't exist!`)
-      }
-    }
+    unsetSuggestion(args).then(suggestionData => {
+      client.me(channel, `${user} --> ${suggestionData.reply}`)
+    })
   }
 
   if (command === 'complete') {
-    let suggestionuser = `${args[0]}`
-    let suggestionid = `${args[1]}`
-    let suggestionstatus = `${args[2]}`
-    let suggestionreasonunsplit = `${args.join(' ')}`
-    let suggestionreasonsplit = suggestionreasonunsplit.split(" ")
-    let suggestionreason = suggestionreasonsplit.slice(3).toString().replace(/,/g, ' ')
-    if (userlow === 'darkvypr') {
-      if (`${suggestionuser.toLowerCase()}` === 'undefined') {
-        client.me(channel, `This guy dosen't even know how to use his own command LULW --> DarkVypr`)
+    checkAdmin(userlow).then(isAdmin => {
+      if (isAdmin) {
+        completeSuggestion(args).then(suggestionData => {
+          client.me(channel, `${user} --> ${suggestionData.reply}`)
+        })
       }
       else {
-        let checkfile = fs.existsSync(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`)
-        if (`${suggestionstatus.toUpperCase()}` === 'DENIED') {
-          if (`${checkfile}` === 'true') {
-            fs.writeFile(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, ` | Reason: ${suggestionreason}`, { flag: 'a+' }, err => { })
-            fs.rename(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, `suggestions/DENIED-CLOSED/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, function(err) {
-              if (err) throw err
-            })
-            client.me(channel, `${user} --> Successfully denied suggestion ${suggestionid}, and whispered the user.`)
-            client.whisper(suggestionuser.toLowerCase(), `[Suggestion Update] Your suggestion with the ID:${suggestionid} was denied! Reason: ${suggestionreason}`)
-          }
-          else {
-            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: vb complete {user} {id} {completed|approved|denied|held}`)
-          }
-        }
-        else if (`${suggestionstatus.toUpperCase()}` === 'HELD' || `${suggestionstatus.toUpperCase()}` === 'ON-HOLD') {
-          if (`${checkfile}` === 'true') {
-            fs.writeFile(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, ` | Reason: ${suggestionreason}`, { flag: 'a+' }, err => { })
-            fs.rename(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, `suggestions/HELD/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, function(err) {
-              if (err) throw err
-            })
-            client.me(channel, `${user} --> Successfully held suggestion ${suggestionid}, and whispered the user.`)
-            client.whisper(suggestionuser.toLowerCase(), `[Suggestion Update] Your suggestion with the ID:${suggestionid} was put on hold! Reason: ${suggestionreason}`)
-          }
-          else {
-            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: vb complete {user} {id} {completed|approved|denied|held}`)
-          }
-        }
-        else {
-          if (`${checkfile}` === 'true') {
-            fs.writeFile(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, ` | Reason: ${suggestionreason}`, { flag: 'a+' }, err => { })
-            fs.rename(`suggestions/ACTIVE/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, `suggestions/COMPLETED/${suggestionuser.toLowerCase()}_ID:${suggestionid}.txt`, function(err) {
-              if (err) throw err
-            })
-            client.me(channel, `${user} --> Successfully approved suggestion ${suggestionid}, and whispered the user.`)
-            client.whisper(suggestionuser.toLowerCase(), `[Suggestion Update] Your suggestion with the ID:${suggestionid} was approved! Reason: ${suggestionreason}`)
-          }
-          else {
-            client.me(channel, `${user} --> Suggestion dosen't exist or invalid syntax! ⛔ Usage: vb complete {user} {id} {completed|approved|denied|held}.`)
-          }
-        }
+        client.me(channel, `${user} --> You don't have the required permission to use that command! Required: Admin.`)
       }
-    }
-    else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
-    }
+    })
+  }
+
+  if (command === 'check') {
+    checkSuggestion(args).then(suggestionData => {
+      client.me(channel, `${user} --> ${suggestionData.reply}`)
+    })
   }
 
   // Permission System
@@ -918,7 +946,7 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, `${user} --> Date: ${userData.creationDate} | Time since then: ${userData.timeSinceCreation}.`)
     })
   }
-  
+
   if (command === 'adblock') {
     client.me(channel, `${user} --> TriHard UBLOCK FILTERS: https://bit.ly/3j36lKB CHROME STORE: https://bit.ly/30hvkTF`);
   }
@@ -2115,7 +2143,7 @@ client.on("PRIVMSG", (msg) => {
     let [celcius, fahrenheit] = [(+weather.data.current.temp).toFixed(1), (+weather.data.current.temp * 1.8 + 32).toFixed(1)]
     let [windSpeed, windGust] = [(+weather.data.current.wind_speed * 3.6).toFixed(1), (+weather.data.current.wind_gust * 3.6).toFixed(1)]
     let [humidity, clouds, alerts] = [+weather.data.current.humidity, +weather.data.current.clouds, weather.data.alerts]
-    let [sunrise, sunset, currentTime] = [new Date(+weather.data.current.sunrise * 1000).addHours(-5), new Date(+weather.data.current.sunset * 1000).addHours(-5), new Date().addHours(-5)]
+    let [sunrise, sunset, currentTime] = [new Date(+weather.data.current.sunrise * 1000), new Date(+weather.data.current.sunset * 1000), new Date()]
     let [rain, snow] = [weather.data.current.rain, weather.data.current.snow]
     let weatherAlert = () => {
       switch (alerts) {
@@ -2171,14 +2199,19 @@ client.on("PRIVMSG", (msg) => {
       }
     }
     let sunState = () => {
-      if (sunrise > currentTime) {
+      if (currentTime < sunrise) {
         let sunriseIn = humanizeDuration(sunrise - currentTime, { units: ["h", "m"], round: true, delimiter: " and " })
         return `Sun rises in ${sunriseIn}. 🌅`
       }
-      else {
+      else if (currentTime < sunset) {
         let sunsetIn = humanizeDuration(sunset - currentTime, { units: ["h", "m"], round: true, delimiter: " and " })
         return `Sun sets in ${sunsetIn}. 🌇`
       }
+      else {
+        let sunriseIn = humanizeDuration(sunrise.addHours(24) - currentTime, { units: ["h", "m"], round: true, delimiter: " and " })
+        return `Sun rises in ${sunriseIn}. 🌅`
+      }
+
     }
     let weatherObj = {
       success: true,
@@ -2430,61 +2463,61 @@ client.on("PRIVMSG", (msg) => {
   }
 
   function killMessage(amount) {
-    if(+amount >= 1 && +amount < 20) {
+    if (+amount >= 1 && +amount < 20) {
       return `You line ${amount} nammer(s) up in front of a firing squad,`
     }
-    else if(+amount >= 20 && +amount < 50) {
+    else if (+amount >= 20 && +amount < 50) {
       return `You send ${amount} nammer(s) off to "training" (a volcano),`
     }
-    else if(+amount >= 50 && +amount < 80) {
+    else if (+amount >= 50 && +amount < 80) {
       return `You drop a car on ${amount} nammer(s) killing them,`
     }
-    else if(+amount >= 80 && +amount < 120) {
+    else if (+amount >= 80 && +amount < 120) {
       return `You stare ${amount} nammer(s) in the eyes as you stab them one-by-one,`
     }
-    else if(+amount >= 120 && +amount < 200) {
+    else if (+amount >= 120 && +amount < 200) {
       return `You lethally inject ${amount} nammer(s) with rat poison,`
     }
-    else if(+amount >= 200 && +amount < 250) {
+    else if (+amount >= 200 && +amount < 250) {
       return `You fatally electrocute ${amount} nammer(s) one-by-one, make the others watch,`
     }
-    else if(+amount >= 250 && +amount < 1000) {
+    else if (+amount >= 250 && +amount < 1000) {
       return `You make ${amount} nammer(s) jump off of a building in a single file line,`
     }
     else {
       return `You enlist ${amount} nammer(s) into the VietNaM war,`
     }
   }
-  
-  if(command === 'kill') {
-		db.get(`${userlow}nammers`).then(function(value) {
-			let nammers = `${value}`
-        if(nammers === 'null' || +nammers === 0) {
-          client.me(channel, (`${user} --> GearScare ⛔ You don't have any nammers to kill! Use "vb hunt" to get more.`))
-		    }
+
+  if (command === 'kill') {
+    db.get(`${userlow}nammers`).then(function(value) {
+      let nammers = `${value}`
+      if (nammers === 'null' || +nammers === 0) {
+        client.me(channel, (`${user} --> GearScare ⛔ You don't have any nammers to kill! Use "vb hunt" to get more.`))
+      }
+      else {
+        if (+`${args[0]}` > +`${nammers}`) {
+          client.me(channel, (`${user} --> MenheraCry You try to kill ${args[0]} nammer(s), but realize that you only have ${nammers} nammer(s), and give up.`))
+        }
         else {
-          if(+`${args[0]}` > +`${nammers}`) {
-            client.me(channel, (`${user} --> MenheraCry You try to kill ${args[0]} nammer(s), but realize that you only have ${nammers} nammer(s), and give up.`))
+          let killamount = `${args[0]}`
+          const regex = new RegExp('^([1-9]|[1-9][0-9]{1,6})$');
+          testForNumber = `${regex.test(killamount)}`
+
+          if (testForNumber === 'true') {
+            let afterkill = +nammers - +killamount
+            db.set(`${userlow}nammers`, afterkill)
+            client.me(channel, (`${user} --> NekoProud 🔪 ${killMessage(killamount)} and are left with ${afterkill} nammer(s).`))
+          }
+          else if (`${args[0]}` === 'all') {
+            db.set(`${userlow}nammers`, 0)
+            client.me(channel, (`${user} --> GearScare 🔪 ${killMessage(nammers)} and now have nothing.`))
           }
           else {
-            let killamount = `${args[0]}`
-            const regex = new RegExp('^([1-9]|[1-9][0-9]{1,6})$');
-            testForNumber = `${regex.test(killamount)}`
-
-            if(testForNumber === 'true') {
-              let afterkill = +nammers - +killamount
-              db.set(`${userlow}nammers`, afterkill)
-              client.me(channel, (`${user} --> NekoProud 🔪 ${killMessage(killamount)} and are left with ${afterkill} nammer(s).`))
-            }
-            else if(`${args[0]}` === 'all') {
-              db.set(`${userlow}nammers`, 0)
-              client.me(channel, (`${user} --> GearScare 🔪 ${killMessage(nammers)} and now have nothing.`))
-            }
-            else {
-              client.me(channel, (`${user} --> Please enter a valid amount of nammers to kill KannaSip`))
-            }
+            client.me(channel, (`${user} --> Please enter a valid amount of nammers to kill KannaSip`))
           }
         }
+      }
     })
   }
 
