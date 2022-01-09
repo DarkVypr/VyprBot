@@ -1,16 +1,17 @@
 // require("http").createServer((_, res) => res.end("Alive!")).listen(8080)
 // MAKE CHECK COMMAND CHECK ALL DIRECTORIES AND SEND THE STATE
-const huntNammersCooldown = new Set();
-const talkedRecently = new Set();
-const commandcooldown = new Set();
-const cdrcooldown = new Set();
+const huntNammersCooldown = new Set()
+const talkedRecently = new Set()
+const commandcooldown = new Set()
+const cdrcooldown = new Set()
 const fs = require('fs-extra')
-const { performance } = require('perf_hooks');
+const si = require('systeminformation')
+const { performance } = require('perf_hooks')
 const Database = require("@replit/database")
 const db = new Database()
-const humanizeDuration = require("humanize-duration");
-const dateFormat = require('dateformat');
-const axios = require('axios').default;
+const humanizeDuration = require("humanize-duration")
+const dateFormat = require('dateformat')
+const axios = require('axios').default
 const { ChatClient, AlternateMessageModifier, SlowModeRateLimiter } = require("dank-twitch-irc");
 let client = new ChatClient({
 
@@ -568,20 +569,24 @@ client.on("PRIVMSG", (msg) => {
 
   // Bot Info
 
-  if (command === 'ping' || command === 'help') {
-    let uptime = process.uptime()
-    let ramusage = `${Math.round(process.memoryUsage().rss / 1024 / 1024)}`
-    async function pingServer() {
-      const t0 = performance.now()
-      await client.ping()
-      const t1 = performance.now()
-      const latency = (t1 - t0).toFixed()
-      return latency
+  async function pingServer() {
+    let [ramusage, commands] = [Math.round(process.memoryUsage().rss / 1024 / 1024), await db.get('commandusage')]
+    let t0 = performance.now()
+    await client.ping()
+    let t1 = performance.now()
+    let pingObj = {
+      uptime: process.uptime(),
+      ram: ramusage,
+      commands: +commands + 1,
+      latency: Math.round((t1 - t0)),
     }
-    db.get("commandusage").then(function(usage) {
-      pingServer().then(function(latency) {
-        client.me(channel, (`PunOko 🏓 ${user} --> | Latency: ${latency} ms | Bot Uptime: ${humanizeDuration(Math.round(uptime) * 1000)} | Commands Used: ${usage} | RAM Usage: ${ramusage} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use "vb request" for info on requesting the bot.`))
-      })
+    db.set('commandusage', pingObj.commands)
+    return `PunOko 🏓 | Latency: ${pingObj.latency} ms | Bot Uptime: ${humanizeDuration(Math.round(pingObj.uptime) * 1000)} | Commands Used: ${pingObj.commands + 1} | RAM Usage: ${pingObj.ram} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use "vb request" for info on requesting the bot.`
+  }
+
+  if (command === 'ping' || command === 'help') {
+    pingServer().then(pingData => {
+      client.me(channel, `${user} --> ${pingData}`)
     })
   }
 

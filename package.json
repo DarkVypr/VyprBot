@@ -9,7 +9,8 @@
     "dank-twitch-irc": "^4.3.0",
     "dateformat": "^4.6.3",
     "fs-extra": "^10.0.0",
-    "humanize-duration": "^3.27.1"
+    "humanize-duration": "^3.27.1",
+    "systeminformation": "^5.10.0"
   },
   "devDependencies": {},
   "scripts": {
