@@ -259,7 +259,7 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, `${user} --> You dont have permission to use that command! Required: Bot Developer`)
     }
   }
-
+  
   if (command === 'rename') {
     checkAdmin(userlow).then(function(isAdmin) {
       if (isAdmin) {
@@ -913,6 +913,12 @@ client.on("PRIVMSG", (msg) => {
       });
   }
 
+  if (command === 'acctage' || command === 'accountage') {
+    getUserData(args).then(userData => {
+      client.me(channel, `${user} --> Date: ${userData.creationDate} | Time since then: ${userData.timeSinceCreation}.`)
+    })
+  }
+  
   if (command === 'adblock') {
     client.me(channel, `${user} --> TriHard UBLOCK FILTERS: https://bit.ly/3j36lKB CHROME STORE: https://bit.ly/30hvkTF`);
   }
@@ -1570,8 +1576,7 @@ client.on("PRIVMSG", (msg) => {
     client.me(channel, `${user} --> DinkDonk https://darkvypr.com/pings`);
   }
 
-  let plopArray = ["jfVieNQ.png", "PAjqrhD.png", "dwMMtSD.png", "EMixIJq.png", "BX5GXFO.png", "4PUBRLf.png", "g7vIKbC.png", "gBoJaoD.png",
-    "vKyWwTE.png", "tPNuJ4r.png", "McBKJwY.png"]
+  var plopArray = ["jfVieNQ.png", "PAjqrhD.png", "dwMMtSD.png", "EMixIJq.png", "BX5GXFO.png", "4PUBRLf.png", "g7vIKbC.png", "gBoJaoD.png", "vKyWwTE.png", "tPNuJ4r.png", "McBKJwY.png"]
 
   if (/^plop[\d+]$/.test(command)) {
     client.me(channel, `${user} --> https://i.imgur.com/${plopArray[+command.replace('plop', '') - 1]}`)
@@ -2312,7 +2317,7 @@ client.on("PRIVMSG", (msg) => {
       }
     }
     let userNammers = await db.get(`${user}nammers`)
-    if (userNammers < 20) {
+    if (userNammers < 10) {
       return {
         success: false,
         case: "not_enough_nammers",
@@ -2325,13 +2330,13 @@ client.on("PRIVMSG", (msg) => {
       huntNammersCooldown.delete(user)
       cdrcooldown.add(user)
       setTimeout(() => { cdrcooldown.delete(userlow) }, 7200000)
-      db.set(`${user}nammers`, +userNammers - 20)
+      db.set(`${user}nammers`, +userNammers - 10)
       return {
         success: true,
         case: null,
         beforeReset: +userNammers,
-        afterReset: +userNammers - 20,
-        reply: `Your cooldown has been reset! (-20 nammers) | You now have ${+userNammers - 20} nammer(s). | Good luck! NekoPray (2 hr cooldown).`
+        afterReset: +userNammers - 10,
+        reply: `Your cooldown has been reset! (-10 nammers) | You now have ${+userNammers - 10} nammer(s). | Good luck! NekoPray (2 hr cooldown).`
       }
     }
   }
