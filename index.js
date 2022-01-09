@@ -61,7 +61,7 @@ client.on("PRIVMSG", (msg) => {
   let [user, userlow, channel, message] = [msg.displayName, msg.senderUsername, msg.channelName, msg.messageText.replace(' 󠀀', '')]
 
   console.log(`[#${channel}] ${user} (${userlow}): ${message}`)
-  function globalPing(msg, userSaid, channelSaid) {
+  function globalPing(msg, user) {
     const ping1 = new RegExp(/\b(v|b)ypa(')?(s)?\b/)
     const ping2 = new RegExp(/(bright|dark)?(v|b)(y)p(e|u|o)?r/)
     const ping3 = new RegExp(/\b(dv(')?(s)?)\b/)
@@ -76,16 +76,16 @@ client.on("PRIVMSG", (msg) => {
     const ping12 = new RegExp(/(dark|bright)\s?diaper/)
     const ping13 = new RegExp(/(dark|bright)\s?viper|vypr/)
 
-    const blacklistedChannels = new RegExp(/visioisiv|darkvypr|vyprbottesting|vyprbot|gotiand|arkadlus|vexnade|boronics/)
-    const blacklistedUsers = new RegExp(/darkvypr|vyprbot|vyprbottesting|hhharrisonnnbot|apulxd|daumenbot|kuharabot|snappingbot|kaedtn|カイデン|oura_bot/)
+    const blacklistedChannels = new RegExp(/visioisiv|darkvypr|vyprbottesting|vyprbot/)
+    const blacklistedUsers = new RegExp(/darkvypr|vyprbot|vyprbottesting|hhharrisonnnbot|apulxd|daumenbot|kuharabot|snappingbot|oura_bot/)
 
-    if (!blacklistedChannels.test(channelSaid) && !blacklistedUsers.test(userSaid)) {
+    if (!blacklistedChannels.test(channel) && !blacklistedUsers.test(user)) {
       if (ping1.test(msg) || ping2.test(msg) || ping3.test(msg) || ping4.test(msg) || ping5.test(msg) || ping6.test(msg) || ping7.test(msg) || ping8.test(msg) || ping9.test(msg) || ping10.test(msg) || ping11.test(msg) || ping12.test(msg) || ping13.test(msg)) {
-        client.whisper('darkvypr', `Channel: #${channel} | User: ${user} | Message: ${message}`)
+        client.whisper('darkvypr', `Channel: #${channel} | User: ${user} | Message: ${msg}`)
       }
     }
   }
-  globalPing(message, userlow, channel)
+  globalPing(message, userlow)
   if (/\bn(a|4)m(mer|ming)?\b/gi.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
     client.privmsg(channel, `NammersOut elisDance NammersOut`);
   }
