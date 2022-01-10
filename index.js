@@ -58,7 +58,7 @@ setInterval(function() {
       }
     });
 }, 10 * 60000);
-client.on("PRIVMSG", (msg) => {
+client.on("PRIVMSG", async (msg) => {
   let [user, userlow, channel, message] = [msg.displayName, msg.senderUsername, msg.channelName, msg.messageText.replace(' 󠀀', '')]
 
   console.log(`[#${channel}] ${user} (${userlow}): ${message}`)
@@ -91,6 +91,11 @@ client.on("PRIVMSG", (msg) => {
     client.privmsg(channel, `NammersOut elisDance NammersOut`);
   }
 
+  let prefix = await db.get(`${channel}Prefix`)
+  if (!prefix) {
+    prefix = 'vb '
+  }
+
   if (userlow === 'thepositivebot' && message.includes('this command has been removed') && channel === 'darkvypr') {
     client.privmsg(channel, `SHUT THE FUCK UP THEPOSITIVEBOT LAUGH`);
   }
@@ -111,6 +116,10 @@ client.on("PRIVMSG", (msg) => {
     client.privmsg(channel, `js`);
   }
 
+  if (/@?vyprbot\sprefix/i.test(message)) {
+    client.me(channel, `${user} --> The prefix for this channel is: "${prefix.trim()}"`);
+  }
+
   if (/\bokge\b/g.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
     client.privmsg(channel, `okge`);
   }
@@ -123,20 +132,18 @@ client.on("PRIVMSG", (msg) => {
     })
   }
 
-  let prefix = 'vb '
-
   if (!message.startsWith(prefix) || userlow === 'vyprbot') {
     return
   }
 
   if (userlow !== 'vyprbot' && userlow !== 'darkvypr') {
-    if (commandcooldown.has(`${user}`)) {
+    if (commandcooldown.has(userlow)) {
       return
     }
     else {
-      commandcooldown.add(`${user}`);
+      commandcooldown.add(userlow);
       setTimeout(() => {
-        commandcooldown.delete(`${user}`);
+        commandcooldown.delete(userlow);
       }, 2000);
 
       db.get("commandusage").then(function(value) {
@@ -581,7 +588,7 @@ client.on("PRIVMSG", (msg) => {
       latency: Math.round((t1 - t0)),
     }
     db.set('commandusage', pingObj.commands)
-    return `PunOko 🏓 | Latency: ${pingObj.latency} ms | Bot Uptime: ${humanizeDuration(Math.round(pingObj.uptime) * 1000)} | Commands Used: ${pingObj.commands + 1} | RAM Usage: ${pingObj.ram} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use "${prefix}request" for info on requesting the bot.`
+    return `PunOko 🏓 | Latency: ${pingObj.latency} ms | Bot Uptime: ${humanizeDuration(Math.round(pingObj.uptime) * 1000)} | Commands Used: ${pingObj.commands + 1} | RAM Usage: ${pingObj.ram} MB | Prefix: "${prefix.trim()}" | Commands: https://darkvypr.com/commands | Use "${prefix}request" for info on requesting the bot.`
   }
 
   if (command === 'ping' || command === 'help') {
@@ -626,6 +633,21 @@ client.on("PRIVMSG", (msg) => {
       else {
         db.set(`${userlow}bday`, value1)
         client.me(channel, `${user} --> Successfully set your birthday to ${value1}!`)
+      }
+    }
+    else if (valueToSet == 'prefix') {
+      if (msg.isMod || await checkAdmin(userlow) || channel == userlow) {
+        if (/^\w+$/.test(args[1])) {
+          db.set(`${channel}Prefix`, `${value1} `)
+          client.me(channel, `${user} --> Successfully set the prefix for this channel to: "${value1}"`)
+        }
+        else {
+          db.set(`${channel}Prefix`, value1)
+          client.me(channel, `${user} --> Successfully set the prefix for this channel to: "${value1}"`)
+        }
+      }
+      else {
+        client.me(channel, `${user} --> You don't have the required permission to use that command! Required: Moderator or above.`)
       }
     }
     else {
