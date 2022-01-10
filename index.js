@@ -1522,16 +1522,20 @@ client.on("PRIVMSG", async (msg) => {
     client.me(channel, `${user} --> https://www.youtube.com/watch?v=IHZQ-23jrps NekoProud`);
   }
 
+  async function mathCommand(args) {
+    if(args.length == 0) {
+      return {success: false, reply: 'Please provide an equation to evaluate.'}
+    }
+    try {
+      let answer = await axios.get(`https://api.mathjs.org/v4/?expr=${encodeURIComponent(args.join(''))}`)
+      return { success: true, reply: `Solution: ${answer.data}` }
+    }catch(err) { return { success: false, reply: `There was an error evaluating that problem. ${err}` } }
+  }
+
   if (command === 'math') {
-    if (!args[0]) {
-      client.me(channel, `${user} --> Please provide a problem to evaluate!`);
-    }
-    else {
-      axios.get(`https://api.mathjs.org/v4/?expr=${encodeURIComponent(args.join(''))}`)
-        .then((response) => {
-          client.me(channel, `${user} --> ${response.data}`);
-        })
-    }
+    mathCommand(args).then(answer => {
+      client.me(channel, `${user} --> ${answer.reply} `)
+    })
   }
 
   if (command === 'minglee') {
