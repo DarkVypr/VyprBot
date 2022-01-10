@@ -124,7 +124,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   let prefix = 'vb '
-  
+
   if (!message.startsWith(prefix) || userlow === 'vyprbot') {
     return
   }
@@ -145,7 +145,7 @@ client.on("PRIVMSG", (msg) => {
       })
     }
   }
-  
+
   let [command, ...args] = message.slice(prefix.length).split(/ +/g);
 
   // Variables
@@ -226,7 +226,7 @@ client.on("PRIVMSG", (msg) => {
 
   if (command === 'admin') {
     if (!args[0] || !args[1] || !/add|remove|delete|check/i.test(args[0]) && userlow === 'darkvypr') {
-      client.me(channel, `DarkVypr --> Invalid Syntax! Example: "vb admin {add|delete|remove|check} {user}".`)
+      client.me(channel, `DarkVypr --> Invalid Syntax! Example: "${prefix}admin {add|delete|remove|check} {user}".`)
     }
     else if (args[0] === 'add' && userlow === 'darkvypr') {
       addAdmin(args[1].toLowerCase()).then(function(value) {
@@ -303,7 +303,7 @@ client.on("PRIVMSG", (msg) => {
         }
       }
       else {
-        client.me(channel, `${user} --> You don't have the required permission to use that command! If you would like to have all of your data moved over to a new name, use "vb suggest" and I will get to it. Required: Bot Developer`)
+        client.me(channel, `${user} --> You don't have the required permission to use that command! If you would like to have all of your data moved over to a new name, use "${prefix}suggest" and I will get to it. Required: Bot Developer`)
       }
     })
   }
@@ -332,7 +332,7 @@ client.on("PRIVMSG", (msg) => {
         })
       }
       else {
-        client.me(channel, `${user} --> You don't have the required permission to use that command! If you'd like the bot in your channel, use "vb suggest". Required: Admin`)
+        client.me(channel, `${user} --> You don't have the required permission to use that command! If you'd like the bot in your channel, use "${prefix}suggest". Required: Admin`)
       }
     })
   }
@@ -581,7 +581,7 @@ client.on("PRIVMSG", (msg) => {
       latency: Math.round((t1 - t0)),
     }
     db.set('commandusage', pingObj.commands)
-    return `PunOko 🏓 | Latency: ${pingObj.latency} ms | Bot Uptime: ${humanizeDuration(Math.round(pingObj.uptime) * 1000)} | Commands Used: ${pingObj.commands + 1} | RAM Usage: ${pingObj.ram} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use "vb request" for info on requesting the bot.`
+    return `PunOko 🏓 | Latency: ${pingObj.latency} ms | Bot Uptime: ${humanizeDuration(Math.round(pingObj.uptime) * 1000)} | Commands Used: ${pingObj.commands + 1} | RAM Usage: ${pingObj.ram} MB | Prefix: "vb" | Commands: https://darkvypr.com/commands | Use "${prefix}request" for info on requesting the bot.`
   }
 
   if (command === 'ping' || command === 'help') {
@@ -602,7 +602,7 @@ client.on("PRIVMSG", (msg) => {
     let value2 = `${args[2]}`
     const regex = new RegExp('^(?!0?2/3)(?!0?2/29/.{3}[13579])(?!0?2/29/.{2}[02468][26])(?!0?2/29/.{2}[13579][048])(?!(0?[469]|11)/31)(?!0?2/29/[13579][01345789]0{2})(?!0?2/29/[02468][1235679]0{2})(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/([0-9]{4})$')
     if (args.length == 0 || !args[1]) {
-      client.me(channel, `${user} --> Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "vb set twitter darkvyprr", "vb set birthday 8/14/2005 (mm/dd/yyyy)" or "vb set location lasalle ontario ({city} {state, province or country})"`)
+      client.me(channel, `${user} --> Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "${prefix}set twitter darkvyprr", "${prefix}set birthday 8/14/2005 (mm/dd/yyyy)" or "${prefix}set location lasalle ontario ({city} {state, province or country})"`)
     }
     else if (valueToSet == 'twitter') {
       let twitterAccount = `${args[1]}`.replace('@', '').toLowerCase()
@@ -611,7 +611,7 @@ client.on("PRIVMSG", (msg) => {
     }
     else if (valueToSet == 'location') {
       if (!value1 || !value2) {
-        client.me(channel, `${user} --> That's not a valid location! Examples: "vb set location stockholm sweden" or "vb set location springfield virginia".`)
+        client.me(channel, `${user} --> That's not a valid location! Examples: "${prefix}set location stockholm sweden" or "${prefix}set location springfield virginia".`)
       }
       else {
         let locationCorrected = (value1[0].toUpperCase() + value1.substring(1)) + ', ' + (value2[0].toUpperCase() + value2.substring(1))
@@ -621,7 +621,7 @@ client.on("PRIVMSG", (msg) => {
     }
     else if (valueToSet == 'bday' || valueToSet == 'birthday') {
       if (!regex.test(args[1])) {
-        client.me(channel, `${user} --> Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "vb set twitter darkvyprr", "vb set birthday 8/14/2005 (mm/dd/yyyy)" or "vb set location lasalle ontario ({city} {state, province or country})"`)
+        client.me(channel, `${user} --> Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "${prefix}set twitter darkvyprr", "${prefix}set birthday 8/14/2005 (mm/dd/yyyy)" or "${prefix}set location lasalle ontario ({city} {state, province or country})"`)
       }
       else {
         db.set(`${userlow}bday`, value1)
@@ -629,7 +629,7 @@ client.on("PRIVMSG", (msg) => {
       }
     }
     else {
-      client.me(channel, `${user} --> Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "vb set twitter darkvyprr", "vb set birthday 8/14/2005 (mm/dd/yyyy)" or "vb set location lasalle ontario ({city} {state, province or country})"`)
+      client.me(channel, `${user} --> Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "${prefix}set twitter darkvyprr", "${prefix}set birthday 8/14/2005 (mm/dd/yyyy)" or "${prefix}set location lasalle ontario ({city} {state, province or country})"`)
     }
   }
 
@@ -674,7 +674,7 @@ client.on("PRIVMSG", (msg) => {
   // Suggestions
 
   async function newSuggestion(args) {
-    if (args.length = 0) {
+    if (args.length == 0) {
       return { success: false, reply: `Please provide a suggestion. Make the suggestion as descriptive as possible.` }
     }
     let [id, content, today] = [+(await db.get('suggestion')) + 1, args.join(' '), new Date().addHours(-5).toISOString()]
@@ -730,7 +730,7 @@ client.on("PRIVMSG", (msg) => {
 
   async function completeSuggestion(args) {
     if (args.length < 2 || !/^\d+$/.test(args[0]) || !/^approved|denied|completed|declined$/.test(args[1])) {
-      return { success: false, reply: `Invalid Syntax! Example: "vb complete {id} {action} {reason}"` }
+      return { success: false, reply: `Invalid Syntax! Example: "${prefix}complete {id} {action} {reason}"` }
     }
     let [id, action] = [+args[0], args[1].toLowerCase()]
     let reason = () => {
@@ -860,7 +860,7 @@ client.on("PRIVMSG", (msg) => {
     checkAdmin(userlow).then(function(isAdmin) {
       if (userlow === 'darkvypr' || userlow === channel || isAdmin) {
         if (!/^add$|^remove$|^delete$|^check$/i.test(args[0]) || !args[1]) {
-          client.me(channel, `${user} --> Invalid Syntax! Example: "vb permit {add|delete|remove|check} {user}".`)
+          client.me(channel, `${user} --> Invalid Syntax! Example: "${prefix}permit {add|delete|remove|check} {user}".`)
         }
         else if (`${args[0]}` === 'add') {
           permitUser(`${args[1].toLowerCase()}`).then(function(value) {
@@ -1011,7 +1011,7 @@ client.on("PRIVMSG", (msg) => {
     if (!args[0]) {
       getBirthdayDetails(userlow).then(function(birthday) {
         if (birthday === null) {
-          client.me(channel, `${user} --> Before using this command, you must set your birthday with the "vb set birthday" command. It must be in M/D/YYYY or MM/DD/YYYY format. Examples: "vb set birthday 8/14/2005", "vb set birthday 10/16/2004" or "vb set birthday 9/11/1973".`)
+          client.me(channel, `${user} --> Before using this command, you must set your birthday with the "${prefix}set birthday" command. It must be in M/D/YYYY or MM/DD/YYYY format. Examples: "${prefix}set birthday 8/14/2005", "${prefix}set birthday 10/16/2004" or "${prefix}set birthday 9/11/1973".`)
         }
         else {
           client.me(channel, `${user} --> You were born on ${birthday.bday}, which means you are ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
@@ -1023,7 +1023,7 @@ client.on("PRIVMSG", (msg) => {
       getBirthdayDetails(userLookup).then(function(value) {
         let birthday = value
         if (birthday === null) {
-          client.me(channel, `${user} --> User ${args[0]} hasn't set their birthday! Get them to set it and retry this command! Hint: "vb set birthday".`)
+          client.me(channel, `${user} --> User ${args[0]} hasn't set their birthday! Get them to set it and retry this command! Hint: "${prefix}set birthday".`)
         }
         else {
           client.me(channel, `${user} --> ${args[0]} was born on ${birthday.bday}, which means they are ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
@@ -1085,7 +1085,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'channels') {
-    client.me(channel, `${user} --> A list of the channels I am in are available here: http://channels.darkvypr.com/ | Use !request for info on how to get the bot in your chat!`);
+    client.me(channel, `${user} --> A list of the channels I am in are available here: http://channels.darkvypr.com/ | Use "${prefix}request" for help on getting the bot in your chat!`);
   }
 
   if (command === 'chatterino') {
@@ -1114,7 +1114,7 @@ client.on("PRIVMSG", (msg) => {
 
   if (command === 'code') {
     if (!args[0]) {
-      client.me(channel, `${user} --> The code for the whole bot can be found at: http://bot.darkvypr.com/ | Input a command name to view the code for a command. Example: "vb code loyalty".`);
+      client.me(channel, `${user} --> The code for the whole bot can be found at: http://bot.darkvypr.com/ | Input a command name to view the code for a command. Example: "${prefix}code loyalty".`);
     }
     else {
       client.me(channel, `${user} --> The ${args[0]} command's code can be found at: https://code.darkvypr.com/${args[0]}.txt`);
@@ -1143,7 +1143,7 @@ client.on("PRIVMSG", (msg) => {
       db.get(`${userlow}time`).then(function(value) {
         let usercitycountry = `${value}`
         if (usercitycountry === null) {
-          client.me(channel, `${user} --> Before using this command, you must set your location with the vb set location command. Example: “vb set location lasalle ontario”, “vb set location springfield virginia” or “vb set location stockholm sweden”. More info: https://darkvypr.com/commands`)
+          client.me(channel, `${user} --> Before using this command, you must set your location with the ${prefix}set location command. Example: “${prefix}set location lasalle ontario”, “${prefix}set location springfield virginia” or “${prefix}set location stockholm sweden”. More info: https://darkvypr.com/commands`)
         }
         else {
           axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${usercitycountry}&apiKey=${process.env['GEOCODING_KEY']}`)
@@ -1648,7 +1648,7 @@ client.on("PRIVMSG", (msg) => {
   }
 
   if (command === 'request') {
-    client.me(channel, `${user} --> If you would like the bot in your chat, you can use the "vb suggest" command. Example: "vb suggest I would like the bot in my channel."`);
+    client.me(channel, `${user} --> If you would like the bot in your chat, you can use the "${prefix}suggest" command. Example: "${prefix}suggest I would like the bot in my channel."`);
   }
 
   if (command === 'say') {
@@ -1670,7 +1670,7 @@ client.on("PRIVMSG", (msg) => {
         if (isAdmin || isPermitted === 'true' || userlow === channel) {
           let spamAmount = args[0]
           if (!isNumber(spamAmount) || !args[1]) {
-            client.me(channel, `${user} --> Invalid Syntax! Example: "vb spam {amount} {phrase}"`)
+            client.me(channel, `${user} --> Invalid Syntax! Example: "${prefix}spam {amount} {phrase}"`)
           }
           else if (spamAmount > 80) {
             client.me(channel, `${user} --> The max spam is 80!`)
@@ -1712,7 +1712,7 @@ client.on("PRIVMSG", (msg) => {
       client.me(channel, `${user} --> Successfully cleared your status.`);
     }
     else if (`${args.join(' ')}` === '') {
-      client.me(channel, `${user} --> This command gives you a status that people can check. Example: "vb setstatus learning javascript". To clear your status, use: "vb setstatus none" "vb setstatus clear".`)
+      client.me(channel, `${user} --> This command gives you a status that people can check. Example: "${prefix}setstatus learning javascript". To clear your status, use: "${prefix}setstatus none" "${prefix}setstatus clear".`)
     }
     else {
       let newStatus = JSON.stringify({ status: `${args.join(' ')}`, dateOfStatus: `${new Date()}` })
@@ -1736,18 +1736,18 @@ client.on("PRIVMSG", (msg) => {
         let status = fs.readJsonSync(`status/${userlow}.json`)
         let currentStatus = status.status
         if (currentStatus === 'noActiveStatus') {
-          client.me(channel, `${user} --> You have not set your status. Example: "vb setstatus learning javascript"`)
+          client.me(channel, `${user} --> You have not set your status. Example: "${prefix}setstatus learning javascript"`)
         }
         else {
           let dateSetDateObj = new Date(status.dateOfStatus)
           let sinceDateSet = humanizeDuration(new Date(dateSetDateObj) - new Date(), { units: ["d", "h", "m", "s"], round: true, largest: 2 })
           let dateSetFormatted = (dateSetDateObj.getMonth() + 1) + '/' + dateSetDateObj.getDate() + '/' + dateSetDateObj.getFullYear() + ' at ' + (+dateSetDateObj.getHours() - 5) + ':' + addZero(dateSetDateObj.getMinutes())
 
-          client.me(channel, `${user} --> Your current status is: ${currentStatus} | Set on ${dateSetFormatted} (${sinceDateSet} ago) (EST-5). To clear your status, use: "vb setstatus none" or "vb setstatus clear".`)
+          client.me(channel, `${user} --> Your current status is: ${currentStatus} | Set on ${dateSetFormatted} (${sinceDateSet} ago) (EST-5). To clear your status, use: "${prefix}setstatus none" or "${prefix}setstatus clear".`)
         }
       }
       else {
-        client.me(channel, `${user} --> You have not set your status. Example: "vb setstatus learning javascript"`)
+        client.me(channel, `${user} --> You have not set your status. Example: "${prefix}setstatus learning javascript"`)
       }
     }
     else {
@@ -1797,10 +1797,10 @@ client.on("PRIVMSG", (msg) => {
       location = encodeURIComponent(args.join(' '))
     }
     if (location == null && isSender) {
-      return { success: false, case: 'sender_unsetlocation', reply: `Before using this command, you must set your location with the vb set location command. Example: “vb set location lasalle ontario”, “vb set location springfield virginia” or “vb set location stockholm sweden”. More info: https://darkvypr.com/commands` }
+      return { success: false, case: 'sender_unsetlocation', reply: `Before using this command, you must set your location with the ${prefix}set location command. Example: “${prefix}set location lasalle ontario”, “${prefix}set location springfield virginia” or “${prefix}set location stockholm sweden”. More info: https://darkvypr.com/commands` }
     }
     if (location == null && !isSender) {
-      return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "vb set location"` }
+      return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "${prefix}set location"` }
     }
     let coordinates = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${location}&apiKey=${process.env['GEOCODING_KEY']}`)
     if (!coordinates.data.items[0]) {
@@ -2107,7 +2107,7 @@ client.on("PRIVMSG", (msg) => {
       )
     })
   }
-  
+
   if (command === 'vyprcolour') {
     client.me(channel, `${user} --> #FF7FD3`);
   }
@@ -2133,10 +2133,10 @@ client.on("PRIVMSG", (msg) => {
       location = encodeURIComponent(args.join(' '))
     }
     if (location == null && isSender) {
-      return { success: false, case: 'sender_unsetlocation', reply: `Before using this command, you must set your location with the vb set location command. Example: “vb set location lasalle ontario”, “vb set location springfield virginia” or “vb set location stockholm sweden”. More info: https://darkvypr.com/commands` }
+      return { success: false, case: 'sender_unsetlocation', reply: `Before using this command, you must set your location with the ${prefix}set location command. Example: “${prefix}set location lasalle ontario”, “${prefix}set location springfield virginia” or “${prefix}set location stockholm sweden”. More info: https://darkvypr.com/commands` }
     }
     if (location == null && !isSender) {
-      return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "vb set location"` }
+      return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "${prefix}set location"` }
     }
     let coordinates = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${location}&apiKey=${process.env['GEOCODING_KEY']}`)
     if (!coordinates.data.items[0]) {
@@ -2259,27 +2259,25 @@ client.on("PRIVMSG", (msg) => {
     })
   }
 
-  async function emoteLookup(emote) {
-    if (emote.length == 0) {
+  async function emoteLookup(args) {
+    if (args.length == 0) {
       return {
         success: false,
         reply: 'Please provide an emote or emote code/id to look up.'
       }
     }
-    else {
-      let isEmoteID = (/^\d+$/.test(emote)) || (/emotesv2_[a-z0-9]{32}/.test(emote))
-      try {
-        let emoteData = await axios.get(`https://api.ivr.fi/v2/twitch/emotes/${emote}?id=${isEmoteID}`)
-        return {
-          success: true,
-          reply: emoteData.data
-        }
+    let isEmoteID = (/^\d+$/.test(args[0])) || (/emotesv2_[a-z0-9]{32}/.test(args[0]))
+    try {
+      let emoteData = await axios.get(`https://api.ivr.fi/v2/twitch/emotes/${args[0]}?id=${isEmoteID}`)
+      return {
+        success: true,
+        reply: emoteData.data
       }
-      catch (err) {
-        return {
-          success: false,
-          reply: 'There was an error getting the data for that emote!'
-        }
+    }
+    catch (err) {
+      return {
+        success: false,
+        reply: 'There was an error getting the data for that emote!'
       }
     }
   }
@@ -2354,7 +2352,7 @@ client.on("PRIVMSG", (msg) => {
         case: "user_is_not_on_cooldown",
         beforeReset: null,
         afterReset: null,
-        reply: 'You are not on any cooldowns! Use "vb hunt" to get some nammers.'
+        reply: 'You are not on any cooldowns! Use "${prefix}hunt" to get some nammers.'
       }
     }
     let userNammers = await db.get(`${user}nammers`)
@@ -2501,7 +2499,7 @@ client.on("PRIVMSG", (msg) => {
     db.get(`${userlow}nammers`).then(function(value) {
       let nammers = `${value}`
       if (nammers === null || +nammers === 0) {
-        client.me(channel, (`${user} --> GearScare ⛔ You don't have any nammers to kill! Use "vb hunt" to get more.`))
+        client.me(channel, (`${user} --> GearScare ⛔ You don't have any nammers to kill! Use "${prefix}hunt" to get more.`))
       }
       else {
         if (+`${args[0]}` > +`${nammers}`) {
@@ -2551,10 +2549,10 @@ client.on("PRIVMSG", (msg) => {
     if (args.length == 0) {
       checkNammers(userlow).then(nammers => {
         if (nammers.case == 'user_not_found') {
-          client.me(channel, `${user} --> You have never hunted! Use "vb hunt" to get more nammers, and retry this command.`)
+          client.me(channel, `${user} --> You have never hunted! Use "${prefix}hunt" to get more nammers, and retry this command.`)
         }
         else {
-          client.me(channel, `${user} --> You have ${nammers.nammers} nammer(s). Use "vb hunt" to get more.`)
+          client.me(channel, `${user} --> You have ${nammers.nammers} nammer(s). Use "${prefix}hunt" to get more.`)
         }
       })
     }
@@ -2644,10 +2642,10 @@ client.on("PRIVMSG", (msg) => {
     let [sender, recipient, amount] = [userlow, `${args[0]}`, args[1]]
     giveNammers(sender, recipient, amount).then(function(giveData) {
       if (giveData.success === false && giveData.reason === 'syntax') {
-        client.me(channel, `${user} --> Please provide an amount to give away and a user to give to. Example: "vb give darkvypr 100".`)
+        client.me(channel, `${user} --> Please provide an amount to give away and a user to give to. Example: "${prefix}give darkvypr 100".`)
       }
       else if (giveData.success === false && giveData.reason === "sender doesn't exist") {
-        client.me(channel, `${user} --> You aren't in the database! Use "vb hunt" to get some nammers, and retry this command.`)
+        client.me(channel, `${user} --> You aren't in the database! Use "${prefix}hunt" to get some nammers, and retry this command.`)
       }
       else if (giveData.success === false && giveData.reason === "recipient doesn't exist") {
         client.me(channel, `${user} --> That user doesn't exist in the database.`)
@@ -2659,7 +2657,7 @@ client.on("PRIVMSG", (msg) => {
         client.me(channel, `${user} --> You can't give nammers to yourself!`)
       }
       else if (giveData.success === false && giveData.reason === 'nan') {
-        client.me(channel, `${user} --> That wasn't a valid amount to give away! Example: "vb give darkvypr 100".`)
+        client.me(channel, `${user} --> That wasn't a valid amount to give away! Example: "${prefix}give darkvypr 100".`)
       }
       else if (giveData.success === true && giveData.case === 'all') {
         db.set(`${sender}nammers`, 0)
@@ -2672,10 +2670,10 @@ client.on("PRIVMSG", (msg) => {
         client.me(channel, `${user} --> You successfully gave ${giveData.giveAmount} of your nammers to ${recipient.toLowerCase()}. You now have ${giveData.senderAmountAfterGive} nammer(s), and ${recipient.toLowerCase()} now has ${giveData.recipientAmountAfterGive} nammer(s).`)
       }
       else if (giveData.success === false && giveData.reason === 'unknown') {
-        client.me(channel, `${user} --> An unknown error has occurred! Please report this with the "vb suggest" command. Please include screenshots and a short description of what triggered the event so I can fix it.`)
+        client.me(channel, `${user} --> An unknown error has occurred! Please report this with the "${prefix}suggest" command. Please include screenshots and a short description of what triggered the event so I can fix it.`)
       }
       else {
-        client.me(channel, `${user} --> An unknown error has occurred! Please report this with the "vb suggest" command. Please include screenshots and a short description of what triggered the event so I can fix it.`)
+        client.me(channel, `${user} --> An unknown error has occurred! Please report this with the "${prefix}suggest" command. Please include screenshots and a short description of what triggered the event so I can fix it.`)
       }
     })
   }
