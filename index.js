@@ -11,7 +11,7 @@ const db = new Database()
 const humanizeDuration = require("humanize-duration")
 const dateFormat = require('dateformat')
 const axios = require('axios').default
-const { ChatClient, AlternateMessageModifier, SlowModeRateLimiter } = require("dank-twitch-irc");
+const { ChatClient, AlternateMessageModifier, SlowModeRateLimiter } = require("dank-twitch-irc")
 let client = new ChatClient({
 
   username: process.env['TWITCH_USERNAME'],
@@ -34,10 +34,10 @@ let client = new ChatClient({
 client.use(new SlowModeRateLimiter(client))
 client.use(new AlternateMessageModifier(client))
 
-client.on("ready", () => console.log("Successfully connected to chat"));
+client.on("ready", () => console.log("Successfully connected to chat"))
 client.on("close", (error) => {
   if (error != null) {
-    console.error("Client closed due to error", error);
+    console.error("Client closed due to error", error)
   }
 });
 const channelOptions = fs.readFileSync('channels.txt').toString().split(' ')
@@ -61,31 +61,15 @@ client.on("PRIVMSG", async (msg) => {
   let [user, userlow, channel, message] = [msg.displayName, msg.senderUsername, msg.channelName, msg.messageText.replace(' 󠀀', '')]
 
   console.log(`[#${channel}] ${user} (${userlow}): ${message}`)
-  function globalPing(msg, user) {
-    const ping1 = new RegExp(/\b(v|b)ypa(')?(s)?\b/)
-    const ping2 = new RegExp(/(bright|dark)?(v|b)(y)p(e|u|o)?r/)
-    const ping3 = new RegExp(/\b(dv(')?(s)?)\b/)
-    const ping4 = new RegExp(/vpyr/)
-    const ping5 = new RegExp(/\b(b|v)o?ip(o*|u)r\b/)
-    const ping6 = new RegExp(/\b(bright|dark)vip(e|u|o)r\b/)
-    const ping7 = new RegExp(/\b(b|v)ip(o|u)r\b/)
-    const ping8 = new RegExp(/\b(b|v)pe?r\b/)
-    const ping9 = new RegExp(/darkv/)
-    const ping10 = new RegExp(/\b(dark|bright)?\s?dype?(r|a)\b/)
-    const ping11 = new RegExp(/\b(b|v)ooper\b/)
-    const ping12 = new RegExp(/(dark|bright)\s?diaper/)
-    const ping13 = new RegExp(/(dark|bright)\s?viper|vypr/)
 
-    const blacklistedChannels = new RegExp(/visioisiv|darkvypr|vyprbottesting|vyprbot/)
-    const blacklistedUsers = new RegExp(/darkvypr|vyprbot|vyprbottesting|hhharrisonnnbot|apulxd|daumenbot|kuharabot|snappingbot|oura_bot/)
+  let globalPing = /\b(v|b)ypa(')?(s)?\b/i.test(message) || /(bright|dark)?(v|b)(y)p(e|u|o)?r/i.test(message) || /\b(dv(')?(s)?)\b/i.test(message) || /vpyr/i.test(message) || /\b(b|v)o?ip(o*|u)r\b/i.test(message) || /\b(bright|dark)vip(e|u|o)r\b/i.test(message) || /\b(b|v)ip(o|u)r\b/i.test(message) || /\b(b|v)pe?r\b/i.test(message) || /darkv/i.test(message) || /\b(dark|bright)?\s?dype?(r|a)\b/i.test(message) || /\b(b|v)ooper\b/i.test(message) || /(dark|bright)\s?diaper/i.test(message) || /(dark|bright)\s?viper|vypr/i.test(message)
+  const blacklistedChannels = new RegExp(/visioisiv|darkvypr|vyprbottesting|vyprbot/)
+  const blacklistedUsers = new RegExp(/darkvypr|vyprbot|vyprbottesting|hhharrisonnnbot|apulxd|daumenbot|kuharabot|snappingbot|oura_bot/)
 
-    if (!blacklistedChannels.test(channel) && !blacklistedUsers.test(user)) {
-      if (ping1.test(msg) || ping2.test(msg) || ping3.test(msg) || ping4.test(msg) || ping5.test(msg) || ping6.test(msg) || ping7.test(msg) || ping8.test(msg) || ping9.test(msg) || ping10.test(msg) || ping11.test(msg) || ping12.test(msg) || ping13.test(msg)) {
-        client.whisper('darkvypr', `Channel: #${channel} | User: ${user} | Message: ${msg}`)
-      }
-    }
+  if (globalPing && !blacklistedChannels.test(channel) && !blacklistedUsers.test(userlow)) {
+    client.whisper('darkvypr', `Channel: #${channel} | User: ${userlow} | Message: ${message}`)
   }
-  globalPing(message, userlow)
+
   if (/\bn(a|4)m(mer|ming)?\b/gi.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
     client.privmsg(channel, `NammersOut elisDance NammersOut`);
   }
@@ -95,33 +79,26 @@ client.on("PRIVMSG", async (msg) => {
     prefix = 'vb '
   }
 
-  if (userlow === 'thepositivebot' && message.includes('this command has been removed') && channel === 'darkvypr') {
-    client.privmsg(channel, `SHUT THE FUCK UP THEPOSITIVEBOT LAUGH`);
-  }
-
   if (userlow === 'xenoplopqb' && message.includes('modCheck') && channel === 'darkvypr') {
-    client.privmsg(channel, `modCheck`);
+    client.privmsg(channel, `modCheck`)
   }
 
   if (/\bn(a|4)m(mer|ming)?\b/gi.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
-    client.privmsg(channel, `NammersOut elisDance NammersOut`);
+    client.privmsg(channel, `NammersOut elisDance NammersOut`)
   }
 
   if (/NaN/.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
-    client.privmsg(channel, `NaN`);
+    client.privmsg(channel, `NaN`)
   }
 
   if (/\bunhandled\s?promise\s?rejection\b/i.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
-    client.privmsg(channel, `js`);
+    client.privmsg(channel, `js`)
   }
 
   if (/@?vyprbot\sprefix/i.test(message)) {
-    client.me(channel, `${user} --> The prefix for this channel is: "${prefix.trim()}"`);
+    client.me(channel, `${user} --> The prefix for this channel is: "${prefix.trim()}"`)
   }
 
-  if (/\bokge\b/g.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
-    client.privmsg(channel, `okge`);
-  }
   let didAliCallMe12YearsOld = /(you(')?(r)?(e)?)\s(all)?\s(12)/i.test(message) || /(dark)?(v|b)yp(r|a)\s(is|=)\s12((year(s)?|yr(s)))?(old)?/i.test(message) || /(ur)(\sall)?\s12/i.test(message) || /(you|u)\sguys\s(are|are\sall|=)\s12/i.test(message)
 
   if (didAliCallMe12YearsOld && userlow === 'ali2465') {
@@ -691,7 +668,7 @@ client.on("PRIVMSG", async (msg) => {
     let [id, content, today] = [+(await db.get('suggestion')) + 1, args.join(' '), new Date().addHours(-5).toISOString()]
     db.set('suggestion', id)
     await fs.writeJson(`suggestions/active/${id}.json`, { user: userlow, id: id, date: today, state: 'Active/Being Worked On', suggestion: content })
-    client.whisper('darkvypr', `[New Suggestion] User: ${userlow} | ID: ${id} | Body: ${content}`)
+    client.whisper('darkvypr', `[New Suggestion] User: ${userlow} | Channel: ${channel} | ID: ${id} | Body: ${content}`)
     let checkIfAFK = await axios.get(`https://supinic.com/api/bot/afk/check?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}&userID=1093802`)
     if (checkIfAFK.data.data.status !== null) {
       await axios.post(`https://supinic.com/api/bot/reminder?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}&userID=1093802&private=true&text=[New Suggestion] A new suggestion has been made while you were AFK: User: ${userlow} | ID: ${id} | Body: ${content}`)
@@ -720,23 +697,23 @@ client.on("PRIVMSG", async (msg) => {
   async function checkSuggestion(args) {
     if (args[0] == 'all' && await checkAdmin(userlow)) {
       let suggestions = fs.readdirSync('suggestions/active').join(', ')
-      return { success: true, reply:`Active Suggestions: ${suggestions.replace(/.json/g, '')}` }
+      return { success: true, reply: `Active Suggestions: ${suggestions.replace(/.json/g, '')}` }
     }
     if (args.length == 0 || !/^\d+$/.test(args[0])) {
       return { success: false, reply: `Please provide a valid suggestion ID to check.` }
     }
     let id = +args[0]
     let location = () => {
-      if(fs.existsSync(`suggestions/active/${id}.json`)) {
+      if (fs.existsSync(`suggestions/active/${id}.json`)) {
         return { success: true, location: 'active' }
       }
-      else if(fs.existsSync(`suggestions/approved/${id}.json`)) {
+      else if (fs.existsSync(`suggestions/approved/${id}.json`)) {
         return { success: true, location: 'approved' }
       }
-      else if(fs.existsSync(`suggestions/author-dismissed/${id}.json`)) {
+      else if (fs.existsSync(`suggestions/author-dismissed/${id}.json`)) {
         return { success: true, location: 'author-dismissed' }
       }
-      else if(fs.existsSync(`suggestions/denied/${id}.json`)) {
+      else if (fs.existsSync(`suggestions/denied/${id}.json`)) {
         return { success: true, location: 'denied' }
       }
       else {
@@ -759,8 +736,8 @@ client.on("PRIVMSG", async (msg) => {
       body: suggestionDetails.suggestion
     }
     let reasonsAndMoreInfo = () => {
-      if(locationOfSuggestion.location == 'denied' || locationOfSuggestion.location == 'approved') {
-        if(suggestionDetails.reason == '') {
+      if (locationOfSuggestion.location == 'denied' || locationOfSuggestion.location == 'approved') {
+        if (suggestionDetails.reason == '') {
           return `| No reason provided | Action By: ${suggestionDetails.actionBy} |`
         }
         return `| Reason: ${suggestionDetails.reason} | Action By: ${suggestionDetails.actionBy} |`
@@ -1545,13 +1522,13 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   async function mathCommand(args) {
-    if(args.length == 0) {
-      return {success: false, reply: 'Please provide an equation to evaluate.'}
+    if (args.length == 0) {
+      return { success: false, reply: 'Please provide an equation to evaluate.' }
     }
     try {
       let answer = await axios.get(`https://api.mathjs.org/v4/?expr=${encodeURIComponent(args.join(''))}`)
       return { success: true, reply: `Solution: ${answer.data}` }
-    }catch(err) { return { success: false, reply: `There was an error evaluating that problem. ${err}` } }
+    } catch (err) { return { success: false, reply: `There was an error evaluating that problem. ${err}` } }
   }
 
   if (command === 'math') {
@@ -1752,76 +1729,8 @@ client.on("PRIVMSG", async (msg) => {
     client.me(channel, `${user} --> https://darkvypr.com/specs NekoProud`);
   }
 
-  if (command === 'setstatus') {
-    fs.ensureFileSync(`status/${userlow}.json`)
-    if (`${args.join(' ').trim()}` === 'clear' || `${args.join(' ').trim()}` === 'none') {
-      let newStatus = JSON.stringify({ status: `noActiveStatus`, dateOfStatus: `` })
-      fs.writeFileSync(`status/${userlow}.json`, newStatus)
-      client.me(channel, `${user} --> Successfully cleared your status.`);
-    }
-    else if (`${args.join(' ')}` === '') {
-      client.me(channel, `${user} --> This command gives you a status that people can check. Example: "${prefix}setstatus learning javascript". To clear your status, use: "${prefix}setstatus none" "${prefix}setstatus clear".`)
-    }
-    else {
-      let newStatus = JSON.stringify({ status: `${args.join(' ')}`, dateOfStatus: `${new Date()}` })
-      fs.writeFileSync(`status/${userlow}.json`, newStatus)
-      client.me(channel, `${user} --> Successfully set your current status to: "${args.join(" ")}"`);
-    }
-  }
-
   if (command === '🥪') {
     client.me(channel, `${user} --> https://www.youtube.com/shorts/7XkP11Pomuc`);
-  }
-
-  if (command === 'status') {
-    if (!args[0]) {
-      let doesUserExist = fs.existsSync(`status/${userlow}.json`)
-      if (doesUserExist === true) {
-        function addZero(i) {
-          if (i < 10) { i = "0" + i }
-          return i;
-        }
-        let status = fs.readJsonSync(`status/${userlow}.json`)
-        let currentStatus = status.status
-        if (currentStatus === 'noActiveStatus') {
-          client.me(channel, `${user} --> You have not set your status. Example: "${prefix}setstatus learning javascript"`)
-        }
-        else {
-          let dateSetDateObj = new Date(status.dateOfStatus)
-          let sinceDateSet = humanizeDuration(new Date(dateSetDateObj) - new Date(), { units: ["d", "h", "m", "s"], round: true, largest: 2 })
-          let dateSetFormatted = (dateSetDateObj.getMonth() + 1) + '/' + dateSetDateObj.getDate() + '/' + dateSetDateObj.getFullYear() + ' at ' + (+dateSetDateObj.getHours() - 5) + ':' + addZero(dateSetDateObj.getMinutes())
-
-          client.me(channel, `${user} --> Your current status is: ${currentStatus} | Set on ${dateSetFormatted} (${sinceDateSet} ago) (EST-5). To clear your status, use: "${prefix}setstatus none" or "${prefix}setstatus clear".`)
-        }
-      }
-      else {
-        client.me(channel, `${user} --> You have not set your status. Example: "${prefix}setstatus learning javascript"`)
-      }
-    }
-    else {
-      let userToCheck = `${args[0].replace('@', '').toLowerCase()}`
-      let doesUserExist = fs.existsSync(`status/${userToCheck}.json`)
-      if (doesUserExist === true) {
-        function addZero(i) {
-          if (i < 10) { i = "0" + i }
-          return i;
-        }
-        let status = fs.readJsonSync(`status/${userToCheck}.json`)
-        let currentStatus = status.status
-        if (currentStatus === 'noActiveStatus') {
-          client.me(channel, `${user} --> That user has not yet set their status.`)
-        }
-        else {
-          let dateSetDateObj = new Date(status.dateOfStatus)
-          let sinceDateSet = humanizeDuration(new Date(dateSetDateObj) - new Date(), { units: ["d", "h", "m", "s"], round: true, largest: 2 })
-          let dateSetFormatted = (dateSetDateObj.getMonth() + 1) + '/' + dateSetDateObj.getDate() + '/' + dateSetDateObj.getFullYear() + ' at ' + (+dateSetDateObj.getHours() - 5) + ':' + addZero(dateSetDateObj.getMinutes())
-          client.me(channel, `${user} --> ${userToCheck}'s current status is: ${currentStatus} | Set on ${dateSetFormatted} (${sinceDateSet} ago) (EST-5)`)
-        }
-      }
-      else {
-        client.me(channel, `${user} --> That user has not yet set their status.`)
-      }
-    }
   }
 
   async function getUserTime(user, args) {
@@ -2440,7 +2349,7 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   async function huntNammers(user) {
-    let [userNammers, randomInt] = [await db.get(`${user}nammers`), Math.floor(Math.random() * 61) - 20]
+    let [userNammers, randomInt] = [await db.get(`${user}nammers`), Math.floor(Math.random() * 100) - 50]
     let huntMessage = (randomInt) => {
       switch (true) {
         case (randomInt >= 50):
