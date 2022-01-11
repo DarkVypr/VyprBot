@@ -378,7 +378,7 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'datadelete') {
-    if (`${userlow}` === 'darkvypr') {
+    if (await checkAdmin(userlow)) {
       db.get(`${args[0].toLowerCase()}`).then(function(value) {
         let valueofkey = `${value}`
         client.me(channel, (`${user} --> Succesfully deleted key: "${args[0]}" value: "${valueofkey}" MODS`))
@@ -391,7 +391,7 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'datacreate') {
-    if (`${userlow}` === 'darkvypr') {
+    if (await checkAdmin(userlow)) {
       db.set(`${args[0].toLowerCase()}`, `${args[1]}`);
       client.me(channel, `${user} --> Succesfully added key: "${args[0]}"  value: "${args[1]}" NOTED`)
     }
@@ -401,7 +401,7 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'datainspect') {
-    if (`${userlow}` === 'darkvypr') {
+    if (await checkAdmin(userlow)) {
       db.get(`${args[0].toLowerCase()}`).then(function(value) {
         client.me(channel, (`${user} --> Key: "${args[0]}" Value: "${value}". NOTED`))
       })
@@ -412,7 +412,7 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'datalist') {
-    if (userlow === 'darkvypr') {
+    if (await checkAdmin(userlow)) {
       if (!args[0]) {
         db.list().then(keys => console.log(keys))
       }
@@ -448,16 +448,6 @@ client.on("PRIVMSG", async (msg) => {
         db.set(`${args[0].toLowerCase()}nammers`, addednammers)
         client.me(channel, (`${user} --> Gave ${args[1]} nammers to ${args[0]}!`))
       })
-    }
-    else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
-    }
-  }
-
-  if (command === 'cooldownoverride') {
-    if (`${userlow}` === 'darkvypr') {
-      talkedRecently.delete(`${args[0]}`)
-      client.me(channel, `${user} --> Reset the cooldown of user: "${args[0]}"!`);
     }
     else {
       client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
@@ -728,8 +718,12 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   async function checkSuggestion(args) {
+    if (args[0] == 'all' && await checkAdmin(userlow)) {
+      let suggestions = fs.readdirSync('suggestions/active').join(', ')
+      return { success: true, reply:`Active Suggestions: ${suggestions.replace(/.json/g, '')}` }
+    }
     if (args.length == 0 || !/^\d+$/.test(args[0])) {
-      return { success: false, reply: `Please provide a valid suggestion ID to unset.` }
+      return { success: false, reply: `Please provide a valid suggestion ID to check.` }
     }
     let id = +args[0]
     let location = () => {
