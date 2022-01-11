@@ -1,5 +1,4 @@
 // require("http").createServer((_, res) => res.end("Alive!")).listen(8080)
-// MAKE CHECK COMMAND CHECK ALL DIRECTORIES AND SEND THE STATE
 const huntNammersCooldown = new Set()
 const talkedRecently = new Set()
 const commandcooldown = new Set()
@@ -701,7 +700,7 @@ client.on("PRIVMSG", async (msg) => {
     }
     let [id, content, today] = [+(await db.get('suggestion')) + 1, args.join(' '), new Date().addHours(-5).toISOString()]
     db.set('suggestion', id)
-    await fs.writeJson(`suggestions/active/${id}.json`, { user: userlow, id: id, date: today, state: 'active', suggestion: content })
+    await fs.writeJson(`suggestions/active/${id}.json`, { user: userlow, id: id, date: today, state: 'Active/Being Worked On', suggestion: content })
     client.whisper('darkvypr', `[New Suggestion] User: ${userlow} | ID: ${id} | Body: ${content}`)
     let checkIfAFK = await axios.get(`https://supinic.com/api/bot/afk/check?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}&userID=1093802`)
     if (checkIfAFK.data.data.status !== null) {
@@ -720,10 +719,10 @@ client.on("PRIVMSG", async (msg) => {
       return { success: false, reply: `There is no suggestion with that id!` }
     }
     let suggestionDetails = await fs.readJson(`suggestions/active/${id}.json`)
-    if (suggestionDetails.user !== userlow) {
+    if (suggestionDetails.user !== userlow && !await checkAdmin(userlow)) {
       return { success: false, reply: `You don't own that suggestion!` }
     }
-    await fs.writeJson(`suggestions/active/${id}.json`, { user: userlow, id: id, date: suggestionDetails.date, dateDismissed: new Date().addHours(-5).toISOString(), state: 'dismissed by author', suggestion: suggestionDetails.suggestion })
+    await fs.writeJson(`suggestions/active/${id}.json`, { user: userlow, id: id, date: suggestionDetails.date, dateDismissed: new Date().addHours(-5).toISOString(), state: 'Dismissed By Author (Unset)', suggestion: suggestionDetails.suggestion })
     await fs.rename(`suggestions/active/${id}.json`, `suggestions/author-dismissed/${id}.json`)
     return { success: true, reply: `Your suggestion with the ID ${id} was successfully unset.` }
   }
@@ -733,11 +732,29 @@ client.on("PRIVMSG", async (msg) => {
       return { success: false, reply: `Please provide a valid suggestion ID to unset.` }
     }
     let id = +args[0]
-    if (!(await fs.exists(`suggestions/active/${id}.json`))) {
+    let location = () => {
+      if(fs.existsSync(`suggestions/active/${id}.json`)) {
+        return { success: true, location: 'active' }
+      }
+      else if(fs.existsSync(`suggestions/approved/${id}.json`)) {
+        return { success: true, location: 'approved' }
+      }
+      else if(fs.existsSync(`suggestions/author-dismissed/${id}.json`)) {
+        return { success: true, location: 'author-dismissed' }
+      }
+      else if(fs.existsSync(`suggestions/denied/${id}.json`)) {
+        return { success: true, location: 'denied' }
+      }
+      else {
+        return { success: false, location: null }
+      }
+    }
+    let locationOfSuggestion = location()
+    if (!locationOfSuggestion.success) {
       return { success: false, reply: `There is no suggestion with that id!` }
     }
-    let suggestionDetails = await fs.readJson(`suggestions/active/${id}.json`)
-    if (suggestionDetails.user !== userlow) {
+    let suggestionDetails = await fs.readJson(`suggestions/${locationOfSuggestion.location}/${id}.json`)
+    if (suggestionDetails.user !== userlow && !await checkAdmin(userlow)) {
       return { success: false, reply: `You don't own that suggestion!` }
     }
     let suggestionObj = {
@@ -747,7 +764,18 @@ client.on("PRIVMSG", async (msg) => {
       state: suggestionDetails.state,
       body: suggestionDetails.suggestion
     }
-    return { success: true, suggestionObj, reply: `ID: ${id} | Date Created: ${dateFormat(suggestionObj.date, "mmmm dS, yyyy ' at ' h:MM TT")} (${humanizeDuration(timeDelta(suggestionObj.date), { largest: 2, round: true, delimiter: " and " })} ago) | Suggestion: ${suggestionObj.body}` }
+    let reasonsAndMoreInfo = () => {
+      if(locationOfSuggestion.location == 'denied' || locationOfSuggestion.location == 'approved') {
+        if(suggestionDetails.reason == '') {
+          return `| No reason provided | Action By: ${suggestionDetails.actionBy} |`
+        }
+        return `| Reason: ${suggestionDetails.reason} | Action By: ${suggestionDetails.actionBy} |`
+      }
+      else {
+        return `|`
+      }
+    }
+    return { success: true, suggestionObj, reply: `ID: ${id} | State: ${suggestionObj.state} | Date Created: ${dateFormat(suggestionObj.date, "mmmm dS, yyyy ' at ' h:MM TT")} (${humanizeDuration(timeDelta(suggestionObj.date), { largest: 2, round: true, delimiter: " and " })} ago) ${reasonsAndMoreInfo()} Suggestion: ${suggestionObj.body}` }
   }
 
   async function completeSuggestion(args) {
@@ -775,14 +803,14 @@ client.on("PRIVMSG", async (msg) => {
       body: suggestionDetails.suggestion
     }
     if (action == 'approved' || action == 'completed') {
-      await fs.writeJson(`suggestions/active/${id}.json`, { user: suggestionDetails.user, approvedBy: userlow, id: id, date: suggestionDetails.date, dateApproved: new Date().addHours(-5).toISOString(), state: action, suggestion: suggestionDetails.suggestion, reason: reason() })
+      await fs.writeJson(`suggestions/active/${id}.json`, { user: suggestionDetails.user, actionBy: userlow, id: id, date: suggestionDetails.date, dateApproved: new Date().addHours(-5).toISOString(), state: 'Approved/Finished', suggestion: suggestionDetails.suggestion, reason: reason() })
       await fs.rename(`suggestions/active/${id}.json`, `suggestions/approved/${id}.json`)
       client.whisper(suggestionObj.user, `[Suggestion Update] Your suggestion with the ID ${suggestionDetails.id} was ${action}! Notes: ${reason()}`)
       await axios.post(`https://supinic.com/api/bot/reminder?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}&username=${suggestionDetails.user}&private=true&text=[VyprBot Update] Your suggestion on VyprBot with the ID ${suggestionDetails.id} was ${action}! Notes: ${reason()}`)
       return { success: true, reply: `Successfully notified @${suggestionDetails.user} and ${action} suggestion ${suggestionDetails.id}.` }
     }
     else if (action == 'denied' || action == 'declined') {
-      await fs.writeJson(`suggestions/active/${id}.json`, { user: suggestionDetails.user, deniedBy: userlow, id: id, date: suggestionDetails.date, dateApproved: new Date().addHours(-5).toISOString(), state: action, suggestion: suggestionDetails.suggestion, reason: reason() })
+      await fs.writeJson(`suggestions/active/${id}.json`, { user: suggestionDetails.user, actionBy: userlow, id: id, date: suggestionDetails.date, dateApproved: new Date().addHours(-5).toISOString(), state: 'Denied', suggestion: suggestionDetails.suggestion, reason: reason() })
       await fs.rename(`suggestions/active/${id}.json`, `suggestions/denied/${id}.json`)
       client.whisper(suggestionObj.user, `[Suggestion Update] Your suggestion with the ID ${suggestionDetails.id} was ${action}! Notes: ${reason()}`)
       await axios.post(`https://supinic.com/api/bot/reminder?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}&username=${suggestionDetails.user}&private=true&text=[VyprBot Update] Your suggestion on VyprBot with the ID ${suggestionDetails.id} was ${action}! Notes: ${reason()}`)
