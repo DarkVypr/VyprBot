@@ -20,4 +20,4 @@ If you would like this bot to be added to your chat, make sure to read [the comm
 
 # How can I remove the bot from my chat?
 
-If you would like this bot to be removed from your chat, use the "vp part" command in your channel's chat.
+If you would like this bot to be removed from your chat, use the "vb part" command in your channel's chat.

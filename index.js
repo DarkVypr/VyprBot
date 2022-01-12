@@ -1523,12 +1523,12 @@ client.on("PRIVMSG", async (msg) => {
 
   async function mathCommand(args) {
     if (args.length == 0) {
-      return { success: false, reply: 'Please provide an equation to evaluate.' }
+      return { success: false, reply: 'Please provide an equation to evaluate. | Examples: https://i.darkvypr.com/mathjs.png' }
     }
     try {
       let answer = await axios.get(`https://api.mathjs.org/v4/?expr=${encodeURIComponent(args.join(''))}`)
       return { success: true, reply: `Solution: ${answer.data}` }
-    } catch (err) { return { success: false, reply: `There was an error evaluating that problem. ${err}` } }
+    } catch (err) { return { success: false, reply: `There was an error evaluating that problem. | Examples: https://i.darkvypr.com/mathjs.png | ${err}` } }
   }
 
   if (command === 'math') {
