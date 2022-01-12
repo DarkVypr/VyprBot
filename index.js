@@ -1232,28 +1232,27 @@ client.on("PRIVMSG", async (msg) => {
     client.me(channel, `elisDance`);
   }
 
+  async function define(args) {
+    if(args.length == 0) {
+      return { success: false, reply: `Please provide a word to define.` }
+    }
+    let definition = await axios.get(`https://dictionaryapi.com/api/v3/references/collegiate/json/${args.join(' ')}?key=${process.env['DICTIONARY_KEY']}`)
+    if(!definition.data || definition.data.length == 0 || definition.data == '') {
+      return { success: false, reply: `There is no definition for that word or string!` }
+    }
+    if(!definition.data[0].meta) {
+      return { success: true, reply: `There is no definition for that word, but there is a list of similar words: ${definition.data.join(', ')}` }
+    }
+    if(!definition.data[0].shortdef) {
+      return { success: true, reply: `There is no definition for that word or string!` }
+    }
+    return { success: true, reply: `${definition.data[0].shortdef.join(' | ')}` }
+  }
+  
   if (command === 'define') {
-    axios.get(`https://dictionaryapi.com/api/v3/references/collegiate/json/${args.join(' ')}?key=${process.env['DICTIONARY_KEY']}`)
-      .then((response) => {
-        let defineresult = response.data[0]
-        if (!defineresult) {
-          client.me(channel, `${user} --> No definition available for that string or word!`)
-        }
-        else {
-          let shortanswer = `${defineresult.shortdef}`
-          if (!shortanswer) {
-            client.me(channel, `${user} --> No definition available for that string or word!`)
-          }
-          else {
-            if (checkPhrase(shortanswer)) {
-              client.me(channel, `${user} --> cmonNep ?????`)
-            }
-            else {
-              client.me(channel, `${user} --> Definition: ${shortanswer}`)
-            }
-          }
-        }
-      });
+    define(args).then(definition => {
+      client.me(channel, `${user} --> ${definition.reply}`)
+    })
   }
 
   if (command === 'derick') {
