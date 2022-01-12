@@ -444,6 +444,15 @@ client.on("PRIVMSG", async (msg) => {
     return splitStr.join(' ');
   }
 
+  // Truncate
+
+  function truncate(string, limit) {
+    if (string.length <= limit) {
+      return string
+    }
+    return string.slice(0, limit) + '...'
+  }
+
   // Capitalize Each Word In A String
 
   let timeDelta = (date) => {
@@ -825,98 +834,52 @@ client.on("PRIVMSG", async (msg) => {
 
   // Permission System
 
-  async function permitUser(user) {
-    var existingPermits = await db.get(`${channel}permits`)
-    if (existingPermits === null) {
-      await db.set(`${channel}permits`, channel)
+  async function permitSystem(args) {
+    if (!await checkAdmin(userlow) && userlow !== channel) {
+      return { success: false, reply: `You don't have the required permission to perform that command! Required: Channel Broadcaster or Above.` }
     }
-    var existingPermits = await db.get(`${channel}permits`)
-    let existingPermitsArray = existingPermits.split(' ')
-    if (existingPermitsArray.indexOf(user) > -1) {
-      return 'That user is alredy permitted in this channel!'
+    if (args.length == 0 || !/^add$|^remove$|^delete$|^check$/i.test(args[0]) || !args[1]) {
+      return { success: false, reply: `Invalid Syntax! Example: "${prefix}permit {add|delete|remove|check} {user}"` }
+    }
+    var existingPerms = await db.get(`${channel}permits`)
+    if (!existingPerms || existingPerms == '') {
+      await db.set(`${channel}permits`, channel)
+      existingPerms = await db.get(`${channel}permits`)
+    }
+    let [permitsArray, action, userPermit] = [existingPerms.split(' '), args[0].toLowerCase(), args[1].replace('@', '').toLowerCase()]
+    if (action == 'add') {
+      if (permitsArray.indexOf(userPermit) > -1) { return { success: false, reply: 'That user is alredy permitted in this channel!' } }
+      permitsArray.push(userPermit)
+      db.set(`${channel}permits`, permitsArray.join(' '))
+      return { success: true, reply: `Successfully permitted @${userPermit} in #${channel}` }
+    }
+    else if (action == 'delete' || action == 'remove') {
+      if (permitsArray.indexOf(userPermit) < 0) { return { success: false, reply: 'That user is not permitted in this channel!' } }
+      permitsArray.splice(permitsArray.indexOf(userPermit), 1)
+      db.set(`${channel}permits`, permitsArray.join(' '))
+      return { success: true, reply: `Successfully removed @${userPermit}'s permissions in #${channel}` }
+    }
+    else if (action == 'check') {
+      if (permitsArray.indexOf(userPermit) < 0) { return { success: true, reply: `@${userPermit} is not permitted in #${channel}!❌` } }
+      else { return { success: true, reply: `@${userPermit} is permitted in #${channel}!✅` } }
     }
     else {
-      existingPermitsArray.push(user)
-      let joinedExisting = existingPermitsArray.join(' ').trim()
-      db.set(`${channel}permits`, joinedExisting)
-    }
-  }
-
-  async function unpermitUser(user) {
-    var existingPermits = await db.get(`${channel}permits`)
-    if (existingPermits === null) {
-      await db.set(`${channel}permits`, channel)
-    }
-    var existingPermits = await db.get(`${channel}permits`)
-    let existingPermitsArray = existingPermits.split(' ')
-    let indexOfUser = existingPermitsArray.indexOf(user)
-    if (indexOfUser > -1) {
-      existingPermitsArray.splice(indexOfUser)
-      let joinedExisting = existingPermitsArray.join(' ').trim()
-      db.set(`${channel}permits`, joinedExisting)
-    }
-    else {
-      return 'That user is not permitted in this channel!'
+      return { success: true, reply: `An unknown error has occured. Please report this by suggesting this so I can fix it.` }
     }
   }
 
   async function checkPermitted(user) {
-    var permits = await db.get(`${channel}permits`)
-    if (permits === null) {
-      await db.set(`${channel}permits`, channel)
-    }
-    else {
-      var permits = await db.get(`${channel}permits`)
-      permitsArray = permits.split(' ')
-      if (permitsArray.indexOf(user) > -1) {
-        return 'true'
-      }
-      else {
-        return 'false'
-      }
-    }
+    if (await checkAdmin(user)) { return 'true' }
+    if (user == channel) { return 'true' }
+    var existingPerms = await db.get(`${channel}permits`)
+    if (!existingPerms) { return 'false' }
+    let permitsArray = existingPerms.split(' ')
+    return permitsArray.indexOf(user) > -1 ? 'true' : 'false'
   }
 
   if (command === 'permit') {
-    checkAdmin(userlow).then(function(isAdmin) {
-      if (userlow === 'darkvypr' || userlow === channel || isAdmin) {
-        if (!/^add$|^remove$|^delete$|^check$/i.test(args[0]) || !args[1]) {
-          client.me(channel, `${user} --> Invalid Syntax! Example: "${prefix}permit {add|delete|remove|check} {user}".`)
-        }
-        else if (`${args[0]}` === 'add') {
-          permitUser(`${args[1].toLowerCase()}`).then(function(value) {
-            if (value === 'That user is alredy permitted in this channel!') {
-              client.me(channel, `${user} --> That user is alredy permitted in #${channel}!`)
-            }
-            else {
-              client.me(channel, `${user} --> Successfully allowed user ${args[1].toLowerCase()} to use all permission locked commands!`)
-            }
-          })
-        }
-        else if (`${args[0]}` === 'delete' || `${args[0]}` === 'remove') {
-          unpermitUser(`${args[1].toLowerCase()}`).then(function(value) {
-            if (value === 'That user is not permitted in this channel!') {
-              client.me(channel, `${user} --> That user is not permitted in #${channel}!`)
-            }
-            else {
-              client.me(channel, `${user} --> Successfully removed ${args[1].toLowerCase()}'s permissions to use all locked commands!`)
-            }
-          })
-        }
-        else if (`${args[0]}` === 'check') {
-          checkPermitted(`${args[1].toLowerCase()}`).catch(err => { client.me(channel, `${user} --> ${err}!`) }).then(function(value) {
-            if (value === 'true') {
-              client.me(channel, `${user} --> User ${args[1]} is permitted in #${channel}! ✅`)
-            }
-            else {
-              client.me(channel, `${user} --> User ${args[1]} is not permitted in #${channel}! ❌`)
-            }
-          })
-        }
-      }
-      else {
-        client.me(channel, `${user} --> You dont have permission to use that command! Required: Bot Developer, Broadcaster or Admin`)
-      }
+    permitSystem(args).then(permitDetails => {
+      client.me(channel, `${user} --> ${permitDetails.reply}`)
     })
   }
 
@@ -1116,7 +1079,7 @@ client.on("PRIVMSG", async (msg) => {
   if (command === 'clear') {
     checkAdmin(userlow).then(function(isAdmin) {
       checkPermitted(userlow).then(function(isPermitted) {
-        if (isPermitted === 'true' || isAdmin) {
+        if (isPermitted || isAdmin) {
           let clearamount = +`${args[0]}`
           if (clearamount > 100) {
             client.me(channel, `${user} --> The max clear is 100!`);
@@ -1233,22 +1196,22 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   async function define(args) {
-    if(args.length == 0) {
+    if (args.length == 0) {
       return { success: false, reply: `Please provide a word to define.` }
     }
     let definition = await axios.get(`https://dictionaryapi.com/api/v3/references/collegiate/json/${args.join(' ')}?key=${process.env['DICTIONARY_KEY']}`)
-    if(!definition.data || definition.data.length == 0 || definition.data == '') {
+    if (!definition.data || definition.data.length == 0 || definition.data == '') {
       return { success: false, reply: `There is no definition for that word or string!` }
     }
-    if(!definition.data[0].meta) {
+    if (!definition.data[0].meta) {
       return { success: true, reply: `There is no definition for that word, but there is a list of similar words: ${definition.data.join(', ')}` }
     }
-    if(!definition.data[0].shortdef) {
+    if (!definition.data[0].shortdef) {
       return { success: true, reply: `There is no definition for that word or string!` }
     }
-    return { success: true, reply: `${definition.data[0].shortdef.join(' | ')}` }
+    return { success: true, reply: `${truncate(definition.data[0].shortdef.join(' | '), 450)}` }
   }
-  
+
   if (command === 'define') {
     define(args).then(definition => {
       client.me(channel, `${user} --> ${definition.reply}`)
@@ -1691,7 +1654,7 @@ client.on("PRIVMSG", async (msg) => {
   if (command === 'spam') {
     checkAdmin(userlow).then(function(isAdmin) {
       checkPermitted(userlow).catch(err => { client.me(channel, `${user} --> ${err}`) }).then(function(isPermitted) {
-        if (isAdmin || isPermitted === 'true' || userlow === channel) {
+        if (isAdmin || isPermitted || userlow === channel) {
           let spamAmount = args[0]
           if (!isNumber(spamAmount) || !args[1]) {
             client.me(channel, `${user} --> Invalid Syntax! Example: "${prefix}spam {amount} {phrase}"`)
