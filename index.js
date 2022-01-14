@@ -129,8 +129,8 @@ client.on("PRIVMSG", async (msg) => {
     }
   }
 
-  let [command, ...args] = message.slice(prefix.length).split(/ +/g);
-
+  let [command, ...args] = message.slice(prefix.length).split(/ +/g)
+  command = command.toLowerCase()
   // Variables
 
   var defaultname = args[0]
@@ -563,7 +563,7 @@ client.on("PRIVMSG", async (msg) => {
       latency: Math.round((t1 - t0)),
     }
     db.set('commandusage', pingObj.commands)
-    return `PunOko 🏓 | Latency: ${pingObj.latency} ms | Bot Uptime: ${humanizeDuration(Math.round(pingObj.uptime) * 1000)} | Commands Used: ${pingObj.commands + 1} | RAM Usage: ${pingObj.ram} MB | Prefix: "${prefix.trim()}" | Commands: https://darkvypr.com/commands | Use "${prefix}request" for info on requesting the bot.`
+    return `PunOko 🏓 | Latency: ${pingObj.latency} ms | Bot Uptime: ${humanizeDuration(Math.round(pingObj.uptime) * 1000, { round: true, largest: 2 })} | Commands Used: ${pingObj.commands + 1} | RAM Usage: ${pingObj.ram} MB | Prefix: "${prefix.trim()}" | Commands: https://darkvypr.com/commands | Use "${prefix}request" for info on requesting the bot.`
   }
 
   if (command === 'ping' || command === 'help') {
@@ -687,7 +687,7 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   async function unsetSuggestion(args) {
-    if (args.length == 0 || !/^\d+$/.test(args[0])) {
+    if (args.length == 0 || !isNumber(args[0])) {
       return { success: false, reply: `Please provide a valid suggestion ID to unset.` }
     }
     let id = +args[0]
@@ -708,7 +708,7 @@ client.on("PRIVMSG", async (msg) => {
       let suggestions = fs.readdirSync('suggestions/active').join(', ')
       return { success: true, reply: `Active Suggestions: ${suggestions.replace(/.json/g, '')}` }
     }
-    if (args.length == 0 || !/^\d+$/.test(args[0])) {
+    if (args.length == 0 || !isNumber(args[0])) {
       return { success: false, reply: `Please provide a valid suggestion ID to check.` }
     }
     let id = +args[0]
@@ -759,7 +759,7 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   async function completeSuggestion(args) {
-    if (args.length < 2 || !/^\d+$/.test(args[0]) || !/^approved|denied|completed|declined$/.test(args[1])) {
+    if (args.length < 2 || !isNumber(args[0]) || !/^approved|denied|completed|declined$/.test(args[1])) {
       return { success: false, reply: `Invalid Syntax! Example: "${prefix}complete {id} {action} {reason}"` }
     }
     let [id, action] = [+args[0], args[1].toLowerCase()]
@@ -874,7 +874,7 @@ client.on("PRIVMSG", async (msg) => {
     var existingPerms = await db.get(`${channel}permits`)
     if (!existingPerms) { return 'false' }
     let permitsArray = existingPerms.split(' ')
-    return permitsArray.indexOf(user) > -1 ? 'true' : 'false'
+    return permitsArray.indexOf(user) > -1 ? true : false
   }
 
   if (command === 'permit') {
@@ -1077,32 +1077,20 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'clear') {
-    checkAdmin(userlow).then(function(isAdmin) {
-      checkPermitted(userlow).then(function(isPermitted) {
-        if (isPermitted || isAdmin) {
-          let clearamount = +`${args[0]}`
-          if (clearamount > 100) {
-            client.me(channel, `${user} --> The max clear is 100!`);
-          }
-          else {
-            for (let i = clearamount; i--;)
-              client.privmsg(channel, `/clear`);
-          }
+    checkPermitted(userlow).then(isPermitted => {
+      if (isPermitted) {
+        if (!isNumber(args[0]) || args[0] > 100 || args[0] < 1) {
+          client.me(channel, `${user} --> Invalid Syntax! The max clear is 100, and the format should be: "${prefix}clear {amount}"!`);
         }
         else {
-          client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again!`)
+          for (let i = args[0]; i--;)
+            client.privmsg(channel, `/clear`);
         }
-      })
+      }
+      else {
+        client.me(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again!`)
+      }
     })
-  }
-
-  if (command === 'code') {
-    if (!args[0]) {
-      client.me(channel, `${user} --> The code for the whole bot can be found at: http://bot.darkvypr.com/ | Input a command name to view the code for a command. Example: "${prefix}code loyalty".`);
-    }
-    else {
-      client.me(channel, `${user} --> The ${args[0]} command's code can be found at: https://code.darkvypr.com/${args[0]}.txt`);
-    }
   }
 
   if (command === 'coin') {
@@ -1182,16 +1170,6 @@ client.on("PRIVMSG", async (msg) => {
 
   if (command === 'dance') {
     client.me(channel, `${user} elisDance https://i.darkvypr.com/dance.mp4`);
-    client.me(channel, `elisDance`);
-    client.me(channel, `elisDance`);
-    client.me(channel, `elisDance`);
-    client.me(channel, `elisDance`);
-    client.me(channel, `elisDance`);
-    client.me(channel, `elisDance`);
-    client.me(channel, `elisDance`);
-    client.me(channel, `elisDance`);
-    client.me(channel, `elisDance`);
-    client.me(channel, `elisDance`);
     client.me(channel, `elisDance`);
   }
 
@@ -1383,7 +1361,7 @@ client.on("PRIVMSG", async (msg) => {
           client.me(channel, `${user} --> @${followage.followUser} is not following @${followage.followChannel}`)
         }
         else {
-          client.me(channel, `${user} --> @${followage.followUser} followed @${followage.followChannel} on ${new Date(followage.followedAt).toDateString()} which was ${followage.timeSinceFollow} ago.`)
+          client.me(channel, `${user} --> @${followage.followUser} followed @${followage.followChannel} on ${dateFormat(new Date(followage.followedAt), 'fullDate')} which was ${followage.timeSinceFollow} ago.`)
         }
       })
   }
@@ -1509,7 +1487,7 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'nam') {
-    for (let i = 20; i--;)
+    for (let i = 2; i--;)
       client.privmsg(channel, `AYAYA --> 👉 🚪 NammersOut elisDance NammersOut`);
   }
 
@@ -1652,29 +1630,27 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'spam') {
-    checkAdmin(userlow).then(function(isAdmin) {
-      checkPermitted(userlow).catch(err => { client.me(channel, `${user} --> ${err}`) }).then(function(isPermitted) {
-        if (isAdmin || isPermitted || userlow === channel) {
+    checkPermitted(userlow).then(isPermitted => {
+      if (isPermitted) {
+        if (!isNumber(args[0]) || !args[1]) {
+          client.me(channel, `${user} --> Invalid Syntax! Example: "${prefix}spam {amount} {phrase}"`)
+        }
+        else if (args[0] > 80) {
+          client.me(channel, `${user} --> The max spam is 80!`)
+        }
+        else if (!checkPhrase(`${args.join(' ')}`)) {
           let spamAmount = args[0]
-          if (!isNumber(spamAmount) || !args[1]) {
-            client.me(channel, `${user} --> Invalid Syntax! Example: "${prefix}spam {amount} {phrase}"`)
-          }
-          else if (spamAmount > 80) {
-            client.me(channel, `${user} --> The max spam is 80!`)
-          }
-          else if (!checkPhrase(`${args.join(' ')}`)) {
-            args.shift()
-            for (let i = spamAmount; i--;)
-              client.privmsg(channel, ` 󠀀 ${args.join(' ')}`)
-          }
-          else {
-            client.me(channel, `${user} --> cmonNep ??????`)
-          }
+          args.shift()
+          for (let i = spamAmount; i--;)
+            client.privmsg(channel, ` 󠀀 ${args.join(' ')}`)
         }
         else {
-          client.privmsg(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again!`)
+          client.me(channel, `${user} --> cmonNep ??????`)
         }
-      })
+      }
+      else {
+        client.me(channel, `${user} --> You aren't permitted to use that command. Get the broadcaster to permit you and try again!`)
+      }
     })
   }
 
@@ -2185,7 +2161,7 @@ client.on("PRIVMSG", async (msg) => {
         reply: 'Please provide an emote or emote code/id to look up.'
       }
     }
-    let isEmoteID = (/^\d+$/.test(args[0])) || (/emotesv2_[a-z0-9]{32}/.test(args[0]))
+    let isEmoteID = (isNumber(args[0])) || (/emotesv2_[a-z0-9]{32}/.test(args[0]))
     try {
       let emoteData = await axios.get(`https://api.ivr.fi/v2/twitch/emotes/${args[0]}?id=${isEmoteID}`)
       return {
