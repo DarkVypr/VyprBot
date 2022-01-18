@@ -4,6 +4,7 @@ const talkedRecently = new Set()
 const commandcooldown = new Set()
 const cdrcooldown = new Set()
 const fs = require('fs-extra')
+const Twitter = require('twitter')
 const si = require('systeminformation')
 const { performance } = require('perf_hooks')
 const Database = require("@replit/database")
@@ -12,6 +13,11 @@ const humanizeDuration = require("humanize-duration")
 const dateFormat = require('dateformat')
 const axios = require('axios').default
 const { ChatClient, AlternateMessageModifier, SlowModeRateLimiter } = require("dank-twitch-irc")
+let twitterClient = new Twitter({
+  consumer_key: process.env.TWITTER_CONSUMER_KEY,
+  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
+  bearer_token: process.env.TWITTER_BEARER_TOKEN
+})
 let client = new ChatClient({
 
   username: process.env['TWITCH_USERNAME'],
@@ -81,6 +87,10 @@ client.on("PRIVMSG", async (msg) => {
 
   if (userlow === 'xenoplopqb' && message.includes('modCheck') && channel === 'darkvypr') {
     client.privmsg(channel, `modCheck`)
+  }
+
+  if (/(vyprbot)(\s)?(v(2|two)|version(\s)?(2|two))/i.test(message) && userlow !== 'vyprbot') {
+    client.me(channel, `VyprBot V2 Soon ™ Copium`)
   }
 
   if (/\bn(a|4)m(mer|ming)?\b/gi.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
@@ -319,7 +329,7 @@ client.on("PRIVMSG", async (msg) => {
       }
     })
   }
-
+  
   async function partChannel(channel, admin) {
     if (!channel && admin) {
       return { success: false, case: 'no_channel_given', channelLeft: null, reply: "Please provide a channel to leave." }
@@ -417,7 +427,7 @@ client.on("PRIVMSG", async (msg) => {
       client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
     }
   }
-
+  
   if (command === 'addnammers') {
     if (`${userlow}` === 'darkvypr') {
       db.get(`${args[0].toLowerCase()}nammers`).then(function(value) {
@@ -523,11 +533,10 @@ client.on("PRIVMSG", async (msg) => {
     }
 
     let creationDate = dateFormat(userData.data.createdAt, "fullDate")
-    let timeSinceCreation = humanizeDuration((new Date(creationDate).addHours(-5)) - (new Date().addHours(-5)), { units: ["y", "mo", "d", "m"], round: true, largest: 3 })
-
+    let timeSinceCreation = humanizeDuration(timeDelta(creationDate), { units: ["y", "mo", "d", "m"], round: true, largest: 3 })
     let rolesArray = (isAffiliate(userData.data.roles.isAffiliate) + isPartner(userData.data.roles.isPartner) + isStaff(userData.data.roles.isStaff) + isSiteAdmin(userData.data.roles.isSiteAdmin) + isBot(userData.data.bot)).trim().split(' ')
     let roles = (isAffiliate(userData.data.roles.isAffiliate) + isPartner(userData.data.roles.isPartner) + isStaff(userData.data.roles.isStaff) + isSiteAdmin(userData.data.roles.isSiteAdmin) + isBot(userData.data.bot)).trim().split(' ').join(', ')
-
+    let followCount = await axios.get(`https://decapi.me/twitch/followcount/${user.replace('@', '')}`)
     var obj = {
       banned: userData.data.banned,
       name: userData.data.displayName,
@@ -535,6 +544,7 @@ client.on("PRIVMSG", async (msg) => {
       bio: userData.data.bio,
       colour: userData.data.chatColor,
       pfp: userData.data.logo,
+      followCount: followCount.data,
       roles: roles,
       rolesArray: rolesArray,
       creationDate: creationDate,
@@ -1044,10 +1054,6 @@ client.on("PRIVMSG", async (msg) => {
     client.me(channel, `${user} --> MrDestructoid BOP https://files.darkvypr.com/DarkVyprBotList.txt`);
   }
 
-  if (command === 'breed') {
-    client.me(channel, `${user} breeds with ${args[0]} for hours LewdAhegao spilledGlue`);
-  }
-
   if (command === 'bttvemote') {
     client.me(channel, `${user} --> https://betterttv.com/emotes/shared/search?query=${args[0]}`);
   }
@@ -1379,11 +1385,19 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'fuck') {
-    client.me(channel, `${user} fucks ${args[0]} LewdAhegao spilledGlue`);
+    let fuckMSG = 'peepoShy'
+    if(!args[0]) { client.me(channel, `${user} --> Please..... provide a user to fuck....... Example: "${prefix}fuck {user} {optional message}"`); return }
+    let recipient = args[0]
+    if(args[1]) { args.shift(); fuckMSG = args.join(' ') }
+    client.me(channel, `${user} fucks ${recipient} in the ass: ${fuckMSG} 🍆🍑`)
   }
 
   if (command === 'gnkiss') {
-    client.me(channel, `${user} tucks ${args[0]} to bed and gently kisses their cheek: ${gnkissmsg}`);
+    let kissMSG = 'FumoTuck 💓'
+    if(!args[0]) { client.me(channel, `${user} --> Please provide a user to gnkiss. Example: "${prefix}gnkiss {user} {optional message}"`); return }
+    let recipient = args[0]
+    if(args[1]) { args.shift(); kissMSG = args.join(' ') }
+    client.me(channel, `${user} tucks ${recipient} to bed and gently kisses their cheek: ${kissMSG} 💤`)
   }
 
   if (command === 'hare') {
@@ -1441,7 +1455,11 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'kiss') {
-    client.me(channel, `${user} pulls ${args[0]} close and kisses them on the lips. ${kissmsg} 💋💖`);
+    let kissMSG = 'FumoKiss 💞'
+    if(!args[0]) { client.me(channel, `${user} --> Please provide a user to kiss. Example: "${prefix}kiss {user} {optional message}"`); return }
+    let recipient = args[0]
+    if(args[1]) { args.shift(); kissMSG = args.join(' ') }
+    client.me(channel, `${user} kisses ${recipient} on the cheek: ${kissMSG} 💋`)
   }
 
   if (command === 'kitten') {
@@ -1508,29 +1526,33 @@ client.on("PRIVMSG", async (msg) => {
     client.me(channel, `${user} --> NOTED https://darkvypr.com/numbers`);
   }
 
-  // OCR Language Detect
-
-  let ocrlang = `${args[1]}`
-
-  if (ocrlang) {
-    var ocrlangresult = `&language=${args[1]}`
-  }
-
-  else {
-    var ocrlangresult = '&language=eng'
+  async function ocr(args) {
+    if(args.length == 0) {
+      return { success: false, reply: `Please provide a direct link to an image, and optionally a language. Valid Languages: https://i.darkvypr.com/ocr_languages.png | Usage: "${prefix}ocr {image} lang:{optional: source_language_code}" | Examples: "${prefix}ocr https://i.darkvypr.com/ocr_example.png" or "${prefix}ocr https://i.darkvypr.com/ocr_example_2.png lang:fre"` }
+    }
+    let language = 'eng'
+    if(args[1]) {
+      if(/(language|lang)(=|:)(ara|bul|chs|cht|hrv|cze|dan|eng|dut|fin|fre|ger|gre|hun|kor|ita|jpn|pol|por|rus|slv|spa|swe|tur)/i.test(args[1])) {
+        language = args[1].replace(/(language|lang)(=|:)/, '')
+      }
+      else {
+        return { success: false, reply: `That wasn't a valid target language! Valid Languages: https://i.darkvypr.com/ocr_languages.png | Usage: "${prefix}ocr {image} lang:{optional: source_language_code}" | Examples: "${prefix}ocr https://i.darkvypr.com/ocr_example.png" or "${prefix}ocr https://i.darkvypr.com/ocr_example_2.png lang:fre"` }
+      }
+    }
+    let ocrResult = await axios.get(`https://api.ocr.space/parse/imageurl?apikey=${process.env['OCR_KEY']}&url=${args[0]}&language=${language}&scale=true&isTable=true`)
+    if(!ocrResult.data.ParsedResults || !ocrResult.data.ParsedResults[0].ParsedText || ocrResult.data.ParsedResults[0].ParsedText == '') {
+      return { success: false, reply: `No text was found in that image. If you are using an alternate language, please specify that. Valid Languages: https://i.darkvypr.com/ocr_languages.png | Usage: "${prefix}ocr {image} lang:{optional: source_language_code}" | Examples: "${prefix}ocr https://i.darkvypr.com/ocr_example.png" or "${prefix}ocr https://i.darkvypr.com/ocr_example_2.png lang:fre"` }
+    }
+    if(checkPhrase(ocrResult.data.ParsedResults[0].ParsedText)) {
+      return { success: false, reply: `cmonNep ?????` }
+    }
+    return { success: true, reply: ocrResult.data.ParsedResults[0].ParsedText.replace(/(\t|\r\n|\n|\r)/gm, '') }
   }
 
   if (command === 'ocr') {
-    axios.get(`https://api.ocr.space/parse/imageurl?apikey=${process.env['OCR_KEY']}&url=${args[0]}${ocrlangresult}`)
-      .then((response) => {
-        let ocrresults = response.data.ParsedResults[0].ParsedText
-        if (!ocrresults || ocrresults === '' || ocrresults === ' ') {
-          client.me(channel, `${user} --> OCR.space was unable to find the text in that image. Make sure that the image's text is clearly visible with no pictures or items that may confuse the API.`);
-        }
-        else {
-          client.me(channel, `${user} --> OCR Results: ${ocrresults.replace('\r\n', '')}`);
-        }
-      })
+    ocr(args).then(ocrResult => {
+      client.me(channel, `${user} --> ${ocrResult.reply}`)
+    })
   }
 
   async function rPFP() {
@@ -1965,6 +1987,12 @@ client.on("PRIVMSG", async (msg) => {
     getUserData(args).then(userData => {
       client.me(channel, `${user} --> UID: ${userData.uid}`)
     })
+  }
+
+  if (command === 'uptime') {
+    getStreamData(args)/*.then(streamInfo => {
+      client.me(channel, `${user} --> ${streamInfo}`)
+    })*/
   }
 
   if (command === 'urban') {
