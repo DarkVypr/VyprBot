@@ -10,8 +10,8 @@
     "dateformat": "^4.6.3",
     "fs-extra": "^10.0.0",
     "humanize-duration": "^3.27.1",
-    "systeminformation": "^5.10.0",
-    "twitter": "^1.7.1"
+    "recent-tweets": "^0.9.0",
+    "systeminformation": "^5.10.0"
   },
   "devDependencies": {},
   "scripts": {

@@ -4,7 +4,6 @@ const talkedRecently = new Set()
 const commandcooldown = new Set()
 const cdrcooldown = new Set()
 const fs = require('fs-extra')
-const Twitter = require('twitter')
 const si = require('systeminformation')
 const { performance } = require('perf_hooks')
 const Database = require("@replit/database")
@@ -13,11 +12,6 @@ const humanizeDuration = require("humanize-duration")
 const dateFormat = require('dateformat')
 const axios = require('axios').default
 const { ChatClient, AlternateMessageModifier, SlowModeRateLimiter } = require("dank-twitch-irc")
-let twitterClient = new Twitter({
-  consumer_key: process.env.TWITTER_CONSUMER_KEY,
-  consumer_secret: process.env.TWITTER_CONSUMER_SECRET,
-  bearer_token: process.env.TWITTER_BEARER_TOKEN
-})
 let client = new ChatClient({
 
   username: process.env['TWITCH_USERNAME'],
@@ -329,7 +323,7 @@ client.on("PRIVMSG", async (msg) => {
       }
     })
   }
-  
+
   async function partChannel(channel, admin) {
     if (!channel && admin) {
       return { success: false, case: 'no_channel_given', channelLeft: null, reply: "Please provide a channel to leave." }
@@ -427,7 +421,7 @@ client.on("PRIVMSG", async (msg) => {
       client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
     }
   }
-  
+
   if (command === 'addnammers') {
     if (`${userlow}` === 'darkvypr') {
       db.get(`${args[0].toLowerCase()}nammers`).then(function(value) {
@@ -1008,7 +1002,7 @@ client.on("PRIVMSG", async (msg) => {
           client.me(channel, `${user} --> Before using this command, you must set your birthday with the "${prefix}set birthday" command. It must be in M/D/YYYY or MM/DD/YYYY format. Examples: "${prefix}set birthday 8/14/2005", "${prefix}set birthday 10/16/2004" or "${prefix}set birthday 9/11/1973".`)
         }
         else {
-          client.me(channel, `${user} --> You were born on ${birthday.bday}, which means you are ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
+          client.me(channel, `${user} --> You were born on ${birthday.bday} and are ${birthday.currentage} years old. You will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
         }
       })
     }
@@ -1020,7 +1014,7 @@ client.on("PRIVMSG", async (msg) => {
           client.me(channel, `${user} --> User ${args[0]} hasn't set their birthday! Get them to set it and retry this command! Hint: "${prefix}set birthday".`)
         }
         else {
-          client.me(channel, `${user} --> ${args[0]} was born on ${birthday.bday}, which means they are ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
+          client.me(channel, `${user} --> ${args[0]} was born on ${birthday.bday}, they're ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
         }
       })
     }
@@ -1386,17 +1380,17 @@ client.on("PRIVMSG", async (msg) => {
 
   if (command === 'fuck') {
     let fuckMSG = 'peepoShy'
-    if(!args[0]) { client.me(channel, `${user} --> Please..... provide a user to fuck....... Example: "${prefix}fuck {user} {optional message}"`); return }
+    if (!args[0]) { client.me(channel, `${user} --> Please..... provide a user to fuck....... Example: "${prefix}fuck {user} {optional message}"`); return }
     let recipient = args[0]
-    if(args[1]) { args.shift(); fuckMSG = args.join(' ') }
+    if (args[1]) { args.shift(); fuckMSG = args.join(' ') }
     client.me(channel, `${user} fucks ${recipient} in the ass: ${fuckMSG} 🍆🍑`)
   }
 
   if (command === 'gnkiss') {
     let kissMSG = 'FumoTuck 💓'
-    if(!args[0]) { client.me(channel, `${user} --> Please provide a user to gnkiss. Example: "${prefix}gnkiss {user} {optional message}"`); return }
+    if (!args[0]) { client.me(channel, `${user} --> Please provide a user to gnkiss. Example: "${prefix}gnkiss {user} {optional message}"`); return }
     let recipient = args[0]
-    if(args[1]) { args.shift(); kissMSG = args.join(' ') }
+    if (args[1]) { args.shift(); kissMSG = args.join(' ') }
     client.me(channel, `${user} tucks ${recipient} to bed and gently kisses their cheek: ${kissMSG} 💤`)
   }
 
@@ -1456,9 +1450,9 @@ client.on("PRIVMSG", async (msg) => {
 
   if (command === 'kiss') {
     let kissMSG = 'FumoKiss 💞'
-    if(!args[0]) { client.me(channel, `${user} --> Please provide a user to kiss. Example: "${prefix}kiss {user} {optional message}"`); return }
+    if (!args[0]) { client.me(channel, `${user} --> Please provide a user to kiss. Example: "${prefix}kiss {user} {optional message}"`); return }
     let recipient = args[0]
-    if(args[1]) { args.shift(); kissMSG = args.join(' ') }
+    if (args[1]) { args.shift(); kissMSG = args.join(' ') }
     client.me(channel, `${user} kisses ${recipient} on the cheek: ${kissMSG} 💋`)
   }
 
@@ -1527,12 +1521,12 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   async function ocr(args) {
-    if(args.length == 0) {
+    if (args.length == 0) {
       return { success: false, reply: `Please provide a direct link to an image, and optionally a language. Valid Languages: https://i.darkvypr.com/ocr_languages.png | Usage: "${prefix}ocr {image} lang:{optional: source_language_code}" | Examples: "${prefix}ocr https://i.darkvypr.com/ocr_example.png" or "${prefix}ocr https://i.darkvypr.com/ocr_example_2.png lang:fre"` }
     }
     let language = 'eng'
-    if(args[1]) {
-      if(/(language|lang)(=|:)(ara|bul|chs|cht|hrv|cze|dan|eng|dut|fin|fre|ger|gre|hun|kor|ita|jpn|pol|por|rus|slv|spa|swe|tur)/i.test(args[1])) {
+    if (args[1]) {
+      if (/(language|lang)(=|:)(ara|bul|chs|cht|hrv|cze|dan|eng|dut|fin|fre|ger|gre|hun|kor|ita|jpn|pol|por|rus|slv|spa|swe|tur)/i.test(args[1])) {
         language = args[1].replace(/(language|lang)(=|:)/, '')
       }
       else {
@@ -1540,10 +1534,10 @@ client.on("PRIVMSG", async (msg) => {
       }
     }
     let ocrResult = await axios.get(`https://api.ocr.space/parse/imageurl?apikey=${process.env['OCR_KEY']}&url=${args[0]}&language=${language}&scale=true&isTable=true`)
-    if(!ocrResult.data.ParsedResults || !ocrResult.data.ParsedResults[0].ParsedText || ocrResult.data.ParsedResults[0].ParsedText == '') {
+    if (!ocrResult.data.ParsedResults || !ocrResult.data.ParsedResults[0].ParsedText || ocrResult.data.ParsedResults[0].ParsedText == '') {
       return { success: false, reply: `No text was found in that image. If you are using an alternate language, please specify that. Valid Languages: https://i.darkvypr.com/ocr_languages.png | Usage: "${prefix}ocr {image} lang:{optional: source_language_code}" | Examples: "${prefix}ocr https://i.darkvypr.com/ocr_example.png" or "${prefix}ocr https://i.darkvypr.com/ocr_example_2.png lang:fre"` }
     }
-    if(checkPhrase(ocrResult.data.ParsedResults[0].ParsedText)) {
+    if (checkPhrase(ocrResult.data.ParsedResults[0].ParsedText)) {
       return { success: false, reply: `cmonNep ?????` }
     }
     return { success: true, reply: ocrResult.data.ParsedResults[0].ParsedText.replace(/(\t|\r\n|\n|\r)/gm, '') }
@@ -1618,6 +1612,28 @@ client.on("PRIVMSG", async (msg) => {
       db.set("plopmoments", `${plusonepm}`);
       client.me(channel, (`${user} --> There has been ${plusonepm} plop moments donkJAM`)
       )
+    })
+  }
+
+  async function qrCode(args) {
+    if(args.length == 0 || !/read|create/.test(args[0]) || !args[1]) {
+      return { success:false, reply: `Invalid Syntax! Example to make a QR code: "${prefix}${command} create {text/data}", Example to read a QR code: "${prefix}${command} read {text/data}"` }
+    }
+    let action = args[0]
+    args.shift()
+    let content = encodeURIComponent(args.join(' '))
+    let code = /^read$/i.test(action) ? await axios.get(`http://api.qrserver.com/v1/read-qr-code/?fileurl=${content}`) : /^create$/i.test(action) ? `http://api.qrserver.com/v1/create-qr-code/?data=${content}}` : null
+    if(code.data) {
+      console.log(code.data[0].data)
+      console.log(code.data[0].error)
+      return { success: null, reply: code.data[0].symbol[0].data ? code.data[0].symbol[0].data : code.data[0].symbol[0].error ? code.data[0].symbol[0].error : 'penis' }
+    }
+    return { success: true, reply: code }
+  }
+
+  if (command === 'qr' || ommand === 'qrcode') {
+    qrCode(args).then(qrCode => {
+      client.me(channel, `${user} --> ${qrCode.reply}`)
     })
   }
 
@@ -1954,19 +1970,26 @@ client.on("PRIVMSG", async (msg) => {
     }
   }
 
-  async function urbanDictionary(term) {
-    if (term.length === 0) {
-      return {
-        success: false,
-        reply: "Please provide a term or phrase to look up!"
-      }
+  if (command === 'uid') {
+    getUserData(args).then(userData => {
+      client.me(channel, `${user} --> UID: ${userData.uid}`)
+    })
+  }
+
+  if (command === 'uptime') {
+    getStreamData(args)/*.then(streamInfo => {
+      client.me(channel, `${user} --> ${streamInfo}`)
+    })*/
+  }
+
+  async function urbanDictionary(args) {
+    if (args.length == 0) {
+      return { success: false, reply: "Please provide a term or phrase to look up!" }
     }
-    let urbanResult = await axios.get(`https://api.urbandictionary.com/v0/define?term=${term.join(' ')}`, { timeout: 10000 })
+    let term = args.join(' ').toLowerCase()
+    let urbanResult = await axios.get(`https://api.urbandictionary.com/v0/define?term=${term}`, { timeout: 10000 })
     if (urbanResult.data.list.length == 0) {
-      return {
-        success: false,
-        reply: "Urban Dictionary does not have a definition for that word!"
-      }
+      return { success: false, reply: "Urban Dictionary does not have a definition for that word!" }
     }
     else if (urbanResult.data.list.length !== 0) {
       spaceRegex = new RegExp('\"\r\n\r\n', 'g', 'i', 'm')
@@ -1981,18 +2004,6 @@ client.on("PRIVMSG", async (msg) => {
         reply: `For whatever reason, Urban Dictionary could not process your request.`
       }
     }
-  }
-
-  if (command === 'uid') {
-    getUserData(args).then(userData => {
-      client.me(channel, `${user} --> UID: ${userData.uid}`)
-    })
-  }
-
-  if (command === 'uptime') {
-    getStreamData(args)/*.then(streamInfo => {
-      client.me(channel, `${user} --> ${streamInfo}`)
-    })*/
   }
 
   if (command === 'urban') {
