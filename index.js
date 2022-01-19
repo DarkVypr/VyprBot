@@ -1622,11 +1622,11 @@ client.on("PRIVMSG", async (msg) => {
     let action = args[0]
     args.shift()
     let content = encodeURIComponent(args.join(' '))
-    let code = /^read$/i.test(action) ? await axios.get(`http://api.qrserver.com/v1/read-qr-code/?fileurl=${content}`) : /^create$/i.test(action) ? `http://api.qrserver.com/v1/create-qr-code/?data=${content}}` : null
+    let code = /^read$/i.test(action) ? await axios.get(`http://api.qrserver.com/v1/read-qr-code/?fileurl=${content}`) : /^create$/i.test(action) ? `http://api.qrserver.com/v1/create-qr-code/?data=${content}` : null
     if(code.data) {
       console.log(code.data[0].data)
       console.log(code.data[0].error)
-      return { success: null, reply: code.data[0].symbol[0].data ? code.data[0].symbol[0].data : code.data[0].symbol[0].error ? code.data[0].symbol[0].error : 'penis' }
+      return { success: null, reply: code.data[0].symbol[0].data ? code.data[0].symbol[0].data : code.data[0].symbol[0].error ? code.data[0].symbol[0].error : 'An Unknown Error Has Occured!' }
     }
     return { success: true, reply: code }
   }
