@@ -1631,7 +1631,7 @@ client.on("PRIVMSG", async (msg) => {
     return { success: true, reply: code }
   }
 
-  if (command === 'qr' || ommand === 'qrcode') {
+  if (command === 'qr' || command === 'qrcode') {
     qrCode(args).then(qrCode => {
       client.me(channel, `${user} --> ${qrCode.reply}`)
     })
@@ -1749,19 +1749,19 @@ client.on("PRIVMSG", async (msg) => {
     if (isSender) {
       return {
         currentTime,
-        reply: `${location} is in ${fullTimeZone}. It's currently ${currentTime.time}, ⌚ and the date is ${currentTime.date}.📅`
+        reply: `${location} is in ${fullTimeZone}. It's currently ${currentTime.time}, ⌚ and the date is ${currentTime.date}. 📅`
       }
     }
     else if (!isSender && isUser) {
       return {
         currentTime,
-        reply: `${args[0].toLowerCase()} is in ${fullTimeZone} (${location}). It's currently ${currentTime.time}, ⌚ and the date is ${currentTime.date}.📅`
+        reply: `${args[0].toLowerCase()} is in ${fullTimeZone} (${location}). It's currently ${currentTime.time}, ⌚ and the date is ${currentTime.date}. 📅`
       }
     }
     else {
       return {
         currentTime,
-        reply: `${location} is in ${timeZone}. It's currently ${currentTime.time}, ⌚ and the date is ${currentTime.date}.📅`
+        reply: `${location} is in ${timeZone}. It's currently ${currentTime.time}, ⌚ and the date is ${currentTime.date}. 📅`
       }
     }
   }
@@ -1976,12 +1976,6 @@ client.on("PRIVMSG", async (msg) => {
     })
   }
 
-  if (command === 'uptime') {
-    getStreamData(args)/*.then(streamInfo => {
-      client.me(channel, `${user} --> ${streamInfo}`)
-    })*/
-  }
-
   async function urbanDictionary(args) {
     if (args.length == 0) {
       return { success: false, reply: "Please provide a term or phrase to look up!" }
@@ -2080,6 +2074,7 @@ client.on("PRIVMSG", async (msg) => {
     let weather = await axios.get(`https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&exclude=hourly,daily&units=metric&appid=${process.env['WEATHER_KEY']}`)
     let [condition, icon, description] = [weather.data.current.weather[0].main, weather.data.current.weather[0].icon, weather.data.current.weather[0].description]
     let [celcius, fahrenheit] = [(+weather.data.current.temp).toFixed(1), (+weather.data.current.temp * 1.8 + 32).toFixed(1)]
+    let [feelsLikeCelcius, feelsLikeFahrenheit] = [(+weather.data.current.feels_like).toFixed(1), (+weather.data.current.feels_like * 1.8 + 32).toFixed(1)]
     let [windSpeed, windGust] = [(+weather.data.current.wind_speed * 3.6).toFixed(1), (+weather.data.current.wind_gust * 3.6).toFixed(1)]
     let [humidity, clouds, alerts] = [+weather.data.current.humidity, +weather.data.current.clouds, weather.data.alerts]
     let [sunrise, sunset, currentTime] = [new Date(+weather.data.current.sunrise * 1000), new Date(+weather.data.current.sunset * 1000), new Date()]
@@ -2090,7 +2085,7 @@ client.on("PRIVMSG", async (msg) => {
           return 'None'
           break
         default:
-          return weather.data.alerts[0].event + '.⚠️'
+          return weather.data.alerts[0].event + '. ⚠️'
       }
     }
     let precipitation = () => {
@@ -2101,10 +2096,10 @@ client.on("PRIVMSG", async (msg) => {
         return `It's raining at a rate of ${rain['1h']} mm/hr, and snowing at a rate of ${snow['1h']} mm/hr. 🌧️🌨️`
       }
       else if (rain && !snow) {
-        return `It's raining at a rate of ${rain['1h']} mm/hr. ☔🌧️`
+        return `It's raining at a rate of ${rain['1h']} mm/hr. ☔ 🌧️`
       }
       else {
-        return `It's snowing at a rate of ${snow['1h']} mm/hr. ☔🌧️`
+        return `It's snowing at a rate of ${snow['1h']} mm/hr. ☔ 🌧️`
       }
     }
     let windGusts = () => {
@@ -2119,25 +2114,25 @@ client.on("PRIVMSG", async (msg) => {
     let conditionString = () => {
       switch (condition) {
         case 'Clear':
-          return 'with clear skies. ☀️⛱️'
+          return 'with clear skies. ☀️ ⛱️'
           break
         case 'Thunderstorm':
-          return `with a ${description}. ⛈️☔`
+          return `with a ${description}. ⛈️ ☔`
           break
         case 'Drizzle':
-          return 'with slight rain. 🌦️🌧️'
+          return 'with slight rain. 🌦️ 🌧️'
           break
         case 'Rain':
-          return `with ${description}. 🌧️☔`
+          return `with ${description}. 🌧️ ☔`
           break
         case 'Snow':
-          return `with ${description}. 🌨️❄️`
+          return `with ${description}. 🌨️ ❄️`
           break
         case 'Clouds':
-          return `with ${description}. ☁️🌥️`
+          return `with ${description}. ☁️ 🌥️`
           break
         default:
-          return `with a special weather event: ${condition}. 📊🔍`
+          return `with a special weather event: ${condition}. 📊 🔍`
       }
     }
     let sunState = () => {
@@ -2158,7 +2153,7 @@ client.on("PRIVMSG", async (msg) => {
     let weatherObj = {
       success: true,
       location: location,
-      temp: { c: celcius + '°C', f: fahrenheit + '°F' },
+      temp: { c: celcius + '°C', f: fahrenheit + '°F', fC: feelsLikeCelcius + '°C', fF: feelsLikeFahrenheit + '°F' },
       precipitation: precipitation(),
       wind: { speed: windSpeed + ' km/h', gust: windGusts() },
       sun: sunState(),
@@ -2170,19 +2165,19 @@ client.on("PRIVMSG", async (msg) => {
     if (isSender) {
       return {
         weatherObj,
-        reply: `The temperature in ${weatherObj.location} is ${weatherObj.temp.c} (${weatherObj.temp.f}) ${weatherObj.condition} ${weatherObj.precipitation} The wind speed is ${weatherObj.wind.speed}, ${weatherObj.wind.gust} ${weatherObj.sun} Humidity: ${weatherObj.humidity} Cloud Coverage: ${weatherObj.clouds} Alert: ${weatherObj.weatherAlert}`
+        reply: `The temperature in ${weatherObj.location} is ${weatherObj.temp.c} (${weatherObj.temp.f}) feels like ${weatherObj.temp.fC} (${weatherObj.temp.fF}) ${weatherObj.condition} ${weatherObj.precipitation} The wind speed is ${weatherObj.wind.speed}, ${weatherObj.wind.gust} ${weatherObj.sun} Humidity: ${weatherObj.humidity} Cloud Coverage: ${weatherObj.clouds} Alert: ${weatherObj.weatherAlert}`
       }
     }
     else if (!isSender && isUser) {
       return {
         weatherObj,
-        reply: `The temperature in ${args[0]}'s location (${weatherObj.location}) is ${weatherObj.temp.c} (${weatherObj.temp.f}) ${weatherObj.condition} ${weatherObj.precipitation} The wind speed is ${weatherObj.wind.speed}, ${weatherObj.wind.gust} ${weatherObj.sun} Humidity: ${weatherObj.humidity} Cloud Coverage: ${weatherObj.clouds} Alert: ${weatherObj.weatherAlert}`
+        reply: `The temperature in ${args[0]}'s location (${weatherObj.location}) is ${weatherObj.temp.c} (${weatherObj.temp.f}) feels like ${weatherObj.temp.fC} (${weatherObj.temp.fF}) ${weatherObj.condition} ${weatherObj.precipitation} The wind speed is ${weatherObj.wind.speed}, ${weatherObj.wind.gust} ${weatherObj.sun} Humidity: ${weatherObj.humidity} Cloud Coverage: ${weatherObj.clouds} Alert: ${weatherObj.weatherAlert}`
       }
     }
     else {
       return {
         weatherObj,
-        reply: `The temperature in ${weatherObj.location} is ${weatherObj.temp.c} (${weatherObj.temp.f}) ${weatherObj.condition} ${weatherObj.precipitation} The wind speed is ${weatherObj.wind.speed}, ${weatherObj.wind.gust} ${weatherObj.sun} Humidity: ${weatherObj.humidity} Cloud Coverage: ${weatherObj.clouds} Alert: ${weatherObj.weatherAlert}`
+        reply: `The temperature in ${weatherObj.location} is ${weatherObj.temp.c} (${weatherObj.temp.f}) feels like ${weatherObj.temp.fC} (${weatherObj.temp.fF}) ${weatherObj.condition} ${weatherObj.precipitation} The wind speed is ${weatherObj.wind.speed}, ${weatherObj.wind.gust} ${weatherObj.sun} Humidity: ${weatherObj.humidity} Cloud Coverage: ${weatherObj.clouds} Alert: ${weatherObj.weatherAlert}`
       }
     }
   }
@@ -2326,11 +2321,11 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   async function huntNammers(user) {
-    let [userNammers, randomInt] = [await db.get(`${user}nammers`), Math.floor(Math.random() * 100) - 50]
+    let [userNammers, randomInt] = [await db.get(`${user}nammers`), Math.floor(Math.random() * 50) - 10]
     let huntMessage = (randomInt) => {
       switch (true) {
         case (randomInt >= 50):
-          return `You take control of a city full of nammers, and send all of its citizens to your prison.🏙️`
+          return `You take control of a city full of nammers, and send all ${randomInt} of its citizens to your prison.🏙️`
         case (randomInt >= 40):
           return `You raid Chaz, a police-free autonomous zone, and return with ${randomInt} nammers.🚧`
         case (randomInt >= 30):
