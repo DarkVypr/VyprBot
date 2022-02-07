@@ -1010,7 +1010,10 @@ client.on("PRIVMSG", async (msg) => {
       let userLookup = `${args[0].toLowerCase().replace('@', '').replace(' ', '')}`
       getBirthdayDetails(userLookup).then(function(value) {
         let birthday = value
-        if (birthday === null) {
+        if (userLookup == 'vyprbot') {
+          client.me(channel, `${user} --> I was made on November 12, 2021 which was ${humanizeDuration(timeDelta('November 12 2021'), { delimiter: ' and ', round: true, largest: 2 } )} ago.`)
+        }
+        else if (!birthday) {
           client.me(channel, `${user} --> User ${args[0]} hasn't set their birthday! Get them to set it and retry this command! Hint: "${prefix}set birthday".`)
         }
         else {
@@ -1115,7 +1118,7 @@ client.on("PRIVMSG", async (msg) => {
       db.get(`${userlow}time`).then(function(value) {
         let usercitycountry = `${value}`
         if (usercitycountry === null) {
-          client.me(channel, `${user} --> Before using this command, you must set your location with the ${prefix}set location command. Example: “${prefix}set location lasalle ontario”, “${prefix}set location springfield virginia” or “${prefix}set location stockholm sweden”. More info: https://darkvypr.com/commands`)
+          client.me(channel, `${user} --> Before using this command, you must set your location with the ${prefix}set location command. Example: "${prefix}set location lasalle ontario", "${prefix}set location springfield virginia" or "${prefix}set location stockholm sweden". More info: https://darkvypr.com/commands`)
         }
         else {
           axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${usercitycountry}&apiKey=${process.env['GEOCODING_KEY']}`)
@@ -1211,24 +1214,6 @@ client.on("PRIVMSG", async (msg) => {
     client.me(channel, `dogJAM`);
     client.me(channel, `dogJAM`);
     client.me(channel, `dogJAM`);
-  }
-
-  if (command === 'domain') {
-    if (!args[0]) {
-      client.me(channel, `${user} --> Please input a domain to lookup!`)
-    }
-    else {
-      axios.get(`https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=${process.env['WHOIS_KEY']}&domainName=${args[0]}&outputFormat=JSON&ipWhois=1&preferFresh=1`)
-        .then((response) => {
-          let whoisresults = response.data
-          if (`${whoisresults.WhoisRecord.dataError}` === 'INCOMPLETE_DATA') {
-            client.me(channel, `${user} --> There was an error loading the data for ${args[0]}! Hint: That TLD isn't supported, or the domain dosent exist.`)
-          }
-          else {
-            client.me(channel, `${user} --> Info for "${whoisresults.WhoisRecord.domainName}" Registrant Name: ${whoisresults.WhoisRecord.registrant.name} | Registrar Name: ${whoisresults.WhoisRecord.registrarName} | Location: ${whoisresults.WhoisRecord.registrant.city}, ${whoisresults.WhoisRecord.registrant.country} | Created: "${whoisresults.WhoisRecord.registryData.audit.createdDate}"`);
-          }
-        })
-    }
   }
 
   if (command === 'echo') {
@@ -1520,6 +1505,10 @@ client.on("PRIVMSG", async (msg) => {
     client.me(channel, `${user} --> NOTED https://darkvypr.com/numbers`);
   }
 
+  if (command === 'oaks' || command === 'oaksemotes') {
+    client.me(channel, `${user} --> peepoGiggles https://i.darkvypr.com/oaks-emotes.mp4`)
+  }
+
   async function ocr(args) {
     if (args.length == 0) {
       return { success: false, reply: `Please provide a direct link to an image, and optionally a language. Valid Languages: https://i.darkvypr.com/ocr_languages.png | Usage: "${prefix}ocr {image} lang:{optional: source_language_code}" | Examples: "${prefix}ocr https://i.darkvypr.com/ocr_example.png" or "${prefix}ocr https://i.darkvypr.com/ocr_example_2.png lang:fre"` }
@@ -1730,7 +1719,7 @@ client.on("PRIVMSG", async (msg) => {
       location = encodeURIComponent(args.join(' '))
     }
     if (location == null && isSender) {
-      return { success: false, case: 'sender_unsetlocation', reply: `Before using this command, you must set your location with the ${prefix}set location command. Example: “${prefix}set location lasalle ontario”, “${prefix}set location springfield virginia” or “${prefix}set location stockholm sweden”. More info: https://darkvypr.com/commands` }
+      return { success: false, case: 'sender_unsetlocation', reply: `Before using this command, you must set your location with the ${prefix}set location command. Example: "${prefix}set location lasalle ontario", "${prefix}set location springfield virginia" or "${prefix}set location stockholm sweden". More info: https://darkvypr.com/commands` }
     }
     if (location == null && !isSender) {
       return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "${prefix}set location"` }
@@ -1769,6 +1758,42 @@ client.on("PRIVMSG", async (msg) => {
   if (command === 'time') {
     getUserTime(userlow, args).then(time => {
       client.me(channel, `${user} --> ${time.reply}`)
+    })
+  }
+
+  async function getTwitter(user, args) {
+    var isUser
+    var isSender
+    var account
+    if (!args[0]) {
+      let userTwitter = await db.get(`${user}twitter`)
+      isUser = true
+      isSender = true
+      account = userTwitter
+    }
+    else if (args[0].startsWith('@')) {
+      let userTwitter = await db.get(`${args[0].toLowerCase().replace('@', '')}twitter`)
+      isUser = true
+      isSender = false
+      account = userTwitter
+    }
+    else {
+      isUser = false
+      account = encodeURIComponent(args.join(' '))
+    }
+    if (account == null && isSender) {
+      return { success: false, reply: `Before using this command, you must set your Twitter account with the ${prefix}set twitter command. Example: "${prefix}set twitter darkvyprr" or "${prefix}set twitter @coolvisio". More info: https://darkvypr.com/commands` }
+    }
+    if (account == null && !isSender) {
+      return { success: false, reply: `That user hasn't set their Twitter account! If you would like to check a specific Twitter account, don't include the @ symbol.` }
+    }
+    let tweetData = await axios.get(`https://decapi.me/twitter/latest/${account.toLowerCase().replace('@', '')}?include_replies=true&url=true&howlong=true`)
+    return { success: false, reply: tweetData.data }
+  }
+
+  if (command === 'twitter') {
+    getTwitter(userlow, args).then(tweetResult => {
+      client.me(channel, `${user} --> ${tweetResult.reply}`)
     })
   }
 
@@ -2061,7 +2086,7 @@ client.on("PRIVMSG", async (msg) => {
       location = encodeURIComponent(args.join(' '))
     }
     if (location == null && isSender) {
-      return { success: false, case: 'sender_unsetlocation', reply: `Before using this command, you must set your location with the ${prefix}set location command. Example: “${prefix}set location lasalle ontario”, “${prefix}set location springfield virginia” or “${prefix}set location stockholm sweden”. More info: https://darkvypr.com/commands` }
+      return { success: false, case: 'sender_unsetlocation', reply: `Before using this command, you must set your location with the ${prefix}set location command. Example: "${prefix}set location lasalle ontario", "${prefix}set location springfield virginia" or "${prefix}set location stockholm sweden". More info: https://darkvypr.com/commands` }
     }
     if (location == null && !isSender) {
       return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "${prefix}set location"` }
