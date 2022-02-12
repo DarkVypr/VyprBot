@@ -1497,6 +1497,25 @@ client.on("PRIVMSG", async (msg) => {
     }
   }
 
+  async function getNews(user, args) {
+    if(!args[0]) { return { success: false, reply: `Please input a query for the bot to use. For example: "${prefix}news covid omicron".` } }
+    let news = await axios.get(`https://contextualwebsearch-websearch-v1.p.rapidapi.com/api/search/NewsSearchAPI?q=${args.join()}&pageNumber=1&pageSize=10&autoCorrect=true&safeSearch=false&withThumbnails=false&fromPublishedDate=null&toPublishedDate=null`, { "headers": { "x-rapidapi-host": "contextualwebsearch-websearch-v1.p.rapidapi.com", "x-rapidapi-key": process.env['NEWS_KEY'] } })
+    if(news.data.value.length == 0) { return { success: false, reply: `No articles found for that query!` } }
+    let newsObj = {
+      date: news.data.value[0].datePublished,
+      dateString: humanizeDuration(timeDelta(news.data.value[0].datePublished), { round: true, largest: 2, delimiter: ' and ' }),
+      news: truncate(news.data.value[0].description, 450)
+    }
+    if(checkPhrase(newsObj.news)) { return { success: false, reply: `cmonNep ???`} }
+    return { success:true, reply: newsObj.news + ` (Published: ${newsObj.dateString} ago) ` }
+  }
+
+  if (command === 'news') {
+    getNews(user, args).then(news => {
+      client.me(channel, `${user} --> ${news.reply}`)
+    })
+  }
+
   if (command === 'noah') {
     client.me(channel, `${user} --> https://i.imgur.com/Dn0CjkF.png`);
   }
@@ -2063,6 +2082,10 @@ client.on("PRIVMSG", async (msg) => {
 
   if (command === 'vyprcolour') {
     client.me(channel, `${user} --> #FF7FD3`);
+  }
+
+  if (command === 'vypr') {
+    client.me(channel, `https://clips.twitch.tv/AbstemiousRacyTigerHeyGirl-ccTj4SmQPNDRhjmP or https://i.darkvypr.com/darkviper.mp4`);
   }
 
   async function getWeather(user, args) {
