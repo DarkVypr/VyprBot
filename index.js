@@ -1011,7 +1011,7 @@ client.on("PRIVMSG", async (msg) => {
       getBirthdayDetails(userLookup).then(function(value) {
         let birthday = value
         if (userLookup == 'vyprbot') {
-          client.me(channel, `${user} --> I was made on November 12, 2021 which was ${humanizeDuration(timeDelta('November 12 2021'), { delimiter: ' and ', round: true, largest: 2 } )} ago.`)
+          client.me(channel, `${user} --> I was made on November 12, 2021 which was ${humanizeDuration(timeDelta('November 12 2021'), { delimiter: ' and ', round: true, largest: 2 })} ago.`)
         }
         else if (!birthday) {
           client.me(channel, `${user} --> User ${args[0]} hasn't set their birthday! Get them to set it and retry this command! Hint: "${prefix}set birthday".`)
@@ -1498,16 +1498,16 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   async function getNews(user, args) {
-    if(!args[0]) { return { success: false, reply: `Please input a query for the bot to use. For example: "${prefix}news covid omicron".` } }
+    if (!args[0]) { return { success: false, reply: `Please input a query for the bot to use. For example: "${prefix}news covid omicron".` } }
     let news = await axios.get(`https://contextualwebsearch-websearch-v1.p.rapidapi.com/api/search/NewsSearchAPI?q=${args.join()}&pageNumber=1&pageSize=10&autoCorrect=true&safeSearch=false&withThumbnails=false&fromPublishedDate=null&toPublishedDate=null`, { "headers": { "x-rapidapi-host": "contextualwebsearch-websearch-v1.p.rapidapi.com", "x-rapidapi-key": process.env['NEWS_KEY'] } })
-    if(news.data.value.length == 0) { return { success: false, reply: `No articles found for that query!` } }
+    if (news.data.value.length == 0) { return { success: false, reply: `No articles found for that query!` } }
     let newsObj = {
       date: news.data.value[0].datePublished,
       dateString: humanizeDuration(timeDelta(news.data.value[0].datePublished), { round: true, largest: 2, delimiter: ' and ' }),
       news: truncate(news.data.value[0].description, 450)
     }
-    if(checkPhrase(newsObj.news)) { return { success: false, reply: `cmonNep ???`} }
-    return { success:true, reply: newsObj.news + ` (Published: ${newsObj.dateString} ago) ` }
+    if (checkPhrase(newsObj.news)) { return { success: false, reply: `cmonNep ???` } }
+    return { success: true, reply: newsObj.news + ` (Published: ${newsObj.dateString} ago) ` }
   }
 
   if (command === 'news') {
@@ -1624,14 +1624,14 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   async function qrCode(args) {
-    if(args.length == 0 || !/read|create/.test(args[0]) || !args[1]) {
-      return { success:false, reply: `Invalid Syntax! Example to make a QR code: "${prefix}${command} create {text/data}", Example to read a QR code: "${prefix}${command} read {text/data}"` }
+    if (args.length == 0 || !/read|create/.test(args[0]) || !args[1]) {
+      return { success: false, reply: `Invalid Syntax! Example to make a QR code: "${prefix}${command} create {text/data}", Example to read a QR code: "${prefix}${command} read {text/data}"` }
     }
     let action = args[0]
     args.shift()
     let content = encodeURIComponent(args.join(' '))
     let code = /^read$/i.test(action) ? await axios.get(`http://api.qrserver.com/v1/read-qr-code/?fileurl=${content}`) : /^create$/i.test(action) ? `http://api.qrserver.com/v1/create-qr-code/?data=${content}` : null
-    if(code.data) {
+    if (code.data) {
       console.log(code.data[0].data)
       console.log(code.data[0].error)
       return { success: null, reply: code.data[0].symbol[0].data ? code.data[0].symbol[0].data : code.data[0].symbol[0].error ? code.data[0].symbol[0].error : 'An Unknown Error Has Occured!' }
@@ -1708,6 +1708,31 @@ client.on("PRIVMSG", async (msg) => {
       });
   }
 
+  async function songData(user, args) {
+    if (!args[0]) { return { success: false, reply: `Please provide a song name to look up.` } }
+    const searchInput = args.join(' ').match(/index(:|=)(\d+)/i)
+    var index = 0
+    if (searchInput) { index = +searchInput[2]; args.splice(args.indexOf(searchInput[0]), 1) }
+    let songInfo = await axios.get(`http://api.musixmatch.com/ws/1.1/track.search?apikey=${process.env['MUSICXMATCH_KEY']}&q_track=${args.join(' ')}&s_track_rating=DESC`)
+    let tracks = songInfo.data.message.body.track_list
+    if (tracks.length == 0) { return { success: false, reply: `No songs could be found using that phrase.` } }
+    if (index > tracks.length - 1) { return { success: false, reply: `The song index you specified is larger than the amount of results. Please use an index less than or equal to ${tracks.length - 1}.` } }
+    var flags = []
+    if (tracks[index].track.explicit == 1) { flags.push('Explicit') }
+    if (tracks[index].track.has_lyrics == 1) { flags.push('Has_Lyrics') }
+    if (tracks[index].track.has_subtitles == 1) { flags.push('Has_Subtitles') }
+    if (tracks[index].track.restricted == 1) { flags.push('Restricted') }
+    return {
+      success: true,
+      reply: `Artist: ${tracks[index].track.artist_name} | Album: ${tracks[index].track.album_name} | Track: ${tracks[index].track.track_name} | Flags: ${flags.join(', ')}`
+    }
+  }
+
+  if (command === 'song' || command === 'music') {
+    songData(user, args).then(songData => {
+      client.me(channel, `${user} --> ${songData.reply}`)
+    })
+  }
 
   if (command === 'specs') {
     client.me(channel, `${user} --> https://darkvypr.com/specs NekoProud`);
@@ -2236,40 +2261,31 @@ client.on("PRIVMSG", async (msg) => {
     })
   }
 
-  async function emoteLookup(args) {
-    if (args.length == 0) {
-      return {
-        success: false,
-        reply: 'Please provide an emote or emote code/id to look up.'
-      }
+  async function emoteLookup(user, args) {
+    if (!args[0]) {
+      return { success: false, reply: 'Please provide an emote or emote code/id to look up.' }
     }
-    let isEmoteID = (isNumber(args[0])) || (/emotesv2_[a-z0-9]{32}/.test(args[0]))
+    const isEmoteID = isNumber(args[0]) || /emotesv2_[a-z0-9]{32}/.test(args[0])
     try {
-      let emoteData = await axios.get(`https://api.ivr.fi/v2/twitch/emotes/${args[0]}?id=${isEmoteID}`)
-      return {
-        success: true,
-        reply: emoteData.data
+      const emoteData = await axios.get(`https://api.ivr.fi/v2/twitch/emotes/${args[0]}?id=${String(isEmoteID)}`)
+      if (emoteData.data.emoteType == 'GLOBALS') {
+        return { success: true, reply: `${emoteData.data.emoteCode} (ID: ${emoteData.data.emoteID}) is a ${emoteData.data.emoteAssetType.toLowerCase()} global Twitch emote. Emote Link: ${emoteData.data.emoteURL.replace('dark/1.0', 'dark/3.0')}` }
+      }
+      if (emoteData.data.emoteType == 'SUBSCRIPTIONS') {
+        return { success: true, reply: `${emoteData.data.emoteCode} (ID: ${emoteData.data.emoteID}) is a ${emoteData.data.emoteAssetType.toLowerCase()} Tier ${emoteData.data.emoteTier} subscriber emote to the channel @${emoteData.data.channelName} ( @${emoteData.data.channelLogin} ). Emote Link: ${emoteData.data.emoteURL.replace('dark/1.0', 'dark/3.0')}` }
+      }
+      if (emoteData.data.emoteType == 'FOLLOWER') {
+        return { success: true, reply: `${emoteData.data.emoteCode} (ID: ${emoteData.data.emoteID}) is a ${emoteData.data.emoteAssetType.toLowerCase()} follower emote to the channel @${emoteData.data.channelName} ( @${emoteData.data.channelLogin} ). Emote Link: ${emoteData.data.emoteURL.replace('dark/1.0', 'dark/3.0')}` }
       }
     }
     catch (err) {
-      return {
-        success: false,
-        reply: 'There was an error getting the data for that emote!'
-      }
+      return { success: false, reply: `Error Code: ${err.response.data.statusCode} | Error: ${err.response.data.message}` }
     }
   }
 
   if (command === 'weit' || command === 'whatemoteisit') {
-    emoteLookup(args[0]).then(function(emoteData) {
-      if (emoteData.success && emoteData.reply.emoteType === 'GLOBALS') {
-        client.me(channel, `${user} --> The emote "${emoteData.reply.emoteCode}" (ID: ${emoteData.reply.emoteID}) is a ${emoteData.reply.emoteAssetType.toLowerCase()} Global Twitch emote. Emote Link: ${emoteData.reply.emoteURL.replace('dark/1.0', 'dark/3.0')}`)
-      }
-      else if (emoteData.success && emoteData.reply.emoteType === 'SUBSCRIPTIONS') {
-        client.me(channel, `${user} --> The emote "${emoteData.reply.emoteCode}" (ID: ${emoteData.reply.emoteID}) is a ${emoteData.reply.emoteAssetType.toLowerCase()} Tier ${emoteData.reply.emoteTier} sub emote to the channel @${emoteData.reply.channelLogin}. Emote Link: ${emoteData.reply.emoteURL.replace('dark/1.0', 'dark/3.0')}`)
-      }
-      else {
-        client.me(channel, `${user} --> ${emoteData.reply}`)
-      }
+    emoteLookup(user, args).then(emoteData => {
+      client.me(channel, `${user} --> ${emoteData.reply}`)
     })
   }
 
