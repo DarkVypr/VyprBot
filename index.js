@@ -1713,7 +1713,7 @@ client.on("PRIVMSG", async (msg) => {
     const searchInput = args.join(' ').match(/index(:|=)(\d+)/i)
     var index = 0
     if (searchInput) { index = +searchInput[2]; args.splice(args.indexOf(searchInput[0]), 1) }
-    let songInfo = await axios.get(`http://api.musixmatch.com/ws/1.1/track.search?apikey=${process.env['MUSICXMATCH_KEY']}&q_track=${args.join(' ')}&s_track_rating=DESC`)
+    let songInfo = await axios.get(`http://api.musixmatch.com/ws/1.1/track.search?apikey=${process.env['MUSICXMATCH_KEY']}&q_track=${encodeURIComponent(args.join(' '))}&s_track_rating=DESC`)
     let tracks = songInfo.data.message.body.track_list
     if (tracks.length == 0) { return { success: false, reply: `No songs could be found using that phrase.` } }
     if (index > tracks.length - 1) { return { success: false, reply: `The song index you specified is larger than the amount of results. Please use an index less than or equal to ${tracks.length - 1}.` } }
@@ -2045,41 +2045,24 @@ client.on("PRIVMSG", async (msg) => {
     })
   }
 
-  async function urbanDictionary(args) {
-    if (args.length == 0) {
-      return { success: false, reply: "Please provide a term or phrase to look up!" }
-    }
-    let term = args.join(' ').toLowerCase()
-    let urbanResult = await axios.get(`https://api.urbandictionary.com/v0/define?term=${term}`, { timeout: 10000 })
-    if (urbanResult.data.list.length == 0) {
-      return { success: false, reply: "Urban Dictionary does not have a definition for that word!" }
-    }
-    else if (urbanResult.data.list.length !== 0) {
-      spaceRegex = new RegExp('\"\r\n\r\n', 'g', 'i', 'm')
-      return {
-        success: true,
-        reply: `${(urbanResult.data.list[0].definition + ' | Example: ' + urbanResult.data.list[0].example).replace(/\[|\]/g, '').replace(/n:/, '').replace(spaceRegex, ' ').replace(/\b\\b/g, '').replace(/(\r\n|\n|\r)/gm, "").trim()}`
-      }
-    }
-    else {
-      return {
-        success: false,
-        reply: `For whatever reason, Urban Dictionary could not process your request.`
-      }
+  async function urbanDictionary(user, args) {
+    if (!args[0]) { return { success: false, reply: "Please provide a phrase to look up!" } }
+    const phraseCheck = args.join(' ').match(/index(:|=)(\d+)/i)
+    var index = 0
+    if (phraseCheck) { index = +phraseCheck[2]; args.splice(args.indexOf(phraseCheck[0]), 1) }
+    let urbanResult = await axios.get(`https://api.urbandictionary.com/v0/define?term=${encodeURIComponent(args.join(' '))}`, { timeout: 10000 })
+    urbanResult = urbanResult.data.list
+    if (urbanResult.length == 0) { return { success: false, reply: "Urban Dictionary does not have a definition for that word!" } }
+    if (index > urbanResult.length - 1) { return { success: false, reply: `The definition index you specified is larger than the amount of results. Please use an index less than or equal to ${urbanResult.length - 1}.` } }
+    return {
+      success: true,
+      reply: `(${urbanResult.length - index - 1} other definitions) (${urbanResult[index].thumbs_up} upvotes) - ${urbanResult[index].definition.replace(/\[|\]/gim, '').replace(/n:/, '').replace(/\"\r\n\r\n/gim, ' ').replace(/\b\\b/gim, '').replace(/(\r\n|\n|\r)/gim, " ")} - Example: ${urbanResult[index].example.replace(/\[|\]/gim, '').replace(/\"\r\n\r\n/gim, ' ').replace(/\b\\b/gim, '').replace(/(\r\n|\n|\r)/gim, " ")}`
     }
   }
 
   if (command === 'urban') {
-    urbanDictionary(args).then(function(definition) {
-      if (!definition.success) {
-        client.me(channel, `${user} --> ${definition.reply}`)
-      }
-      else if (definition.success && !checkPhrase(definition.reply)) {
-        client.me(channel, `${user} --> ${definition.reply}`)
-      }
-      else {
-        client.me(channel, `${user} --> cmonNep ???`)
-      }
+    urbanDictionary(userlow, args).then(urban => {
+      client.me(channel, `${user} --> ${urban.reply}`)
     })
   }
 
