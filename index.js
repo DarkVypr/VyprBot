@@ -1098,62 +1098,45 @@ client.on("PRIVMSG", async (msg) => {
     client.me(channel, `${user} --> https://i.imgur.com/PqQCXC3.png`);
   }
 
-  if (command === 'covid') {
+  async function covid(user, args) {
+    var isUser
+    var isSender
+    var location
     if (!args[0]) {
-      db.get(`${userlow}time`).then(function(value) {
-        let usercitycountry = `${value}`
-        if (usercitycountry === null) {
-          client.me(channel, `${user} --> Before using this command, you must set your location with the ${prefix}set location command. Example: "${prefix}set location lasalle ontario", "${prefix}set location springfield virginia" or "${prefix}set location stockholm sweden". More info: https://darkvypr.com/commands`)
-        }
-        else {
-          axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${usercitycountry}&apiKey=${process.env['GEOCODING_KEY']}`)
-            .then((response) => {
-              let userCountry = response.data.items[0].address.countryName
-
-              axios.get(`https://disease.sh/v3/covid-19/countries/${userCountry}`)
-                .then((response) => {
-                  let covidusercountry = response.data
-                  client.me(channel, `${user} --> Stats for your country (${covidusercountry.country}): Today's Cases: ${covidusercountry.todayCases} | Today's Deaths: ${covidusercountry.todayDeaths} | Total Cases: ${covidusercountry.cases} | Total Deaths: ${covidusercountry.deaths}`)
-                });
-            });
-        }
-      })
+      let userLocation = await db.get(`${user}time`)
+      isUser = true
+      isSender = true
+      location = userLocation
     }
-
+    else if (args[0].startsWith('@')) {
+      let userLocation = await db.get(`${args[0].toLowerCase().replace('@', '')}time`)
+      isUser = true
+      isSender = false
+      location = userLocation
+    }
     else {
-      let specificlocation = `${args.join(' ')}`
-      if (specificlocation[0] === '@') {
-        let removedatsign = specificlocation.replace('@', '')
-        let removedatsignlow = removedatsign.toLowerCase()
-        db.get(`${removedatsignlow}time`).then(function(value) {
-          let lookuptime = `${value}`
-          if (lookuptime === null) {
-            client.me(channel, (`${user} --> That user hasen't set their location! Get them to set it and retry. PANIC`))
-          }
-          else {
-            axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${lookuptime}&apiKey=${process.env['GEOCODING_KEY']}`)
-              .then((response) => {
-                let userCountry = response.data.items[0].address.countryName
-
-                axios.get(`https://disease.sh/v3/covid-19/countries/${userCountry}`)
-                  .then((response) => {
-                    let covidusercountry = response.data
-                    client.me(channel, `${user} --> Stats for ${specificlocation}'s country (${covidusercountry.country}): Today's Cases: ${covidusercountry.todayCases} | Today's Deaths: ${covidusercountry.todayDeaths} | Total Cases: ${covidusercountry.cases} | Total Deaths: ${covidusercountry.deaths}`)
-                  });
-              });
-          }
-        })
-      }
-
-      else {
-        axios.get(`https://disease.sh/v3/covid-19/countries/${args.join(' ')}`)
-          .catch(err => { client.me(channel, `${user} --> That location does not have any COVID-19 stats. Please ensure spelling.`) })
-          .then((response) => {
-            let coviduserquery = response.data
-            client.me(channel, `${user} --> Stats for ${coviduserquery.country}: Today's Cases: ${coviduserquery.todayCases} | Today's Deaths: ${coviduserquery.todayDeaths} | Total Cases: ${coviduserquery.cases} | Total Deaths: ${coviduserquery.deaths}`)
-          });
-      }
+      isUser = false
+      location = encodeURIComponent(args.join(' '))
     }
+    if (!location && isSender) { return { success: false, reply: `Before using this command, you must set your location with the ${prefix}set location command. Example: "${prefix}set location lasalle ontario", "${prefix}set location springfield virginia" or "${prefix}set location stockholm sweden". More info: https://darkvypr.com/commands` } }
+    if (!location && !isSender) { return { success: false, reply: `That user hasn't set their location! Get them to set it and retry! Hint: "${prefix}set location"` } }
+    let locationData = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${location}&apiKey=${process.env['GEOCODING_KEY']}`)
+    if (!locationData.data.items[0]) { return { success: false, reply: `The location provided to the geocoding API was invalid.` } }
+    let country = locationData.data.items[0].address.countryCode
+    try {
+      let covidStats = await axios.get(`https://coronavirus-monitor-v2.p.rapidapi.com/coronavirus/latest_stat_by_country.php?country=${country}`, { "headers": { "x-rapidapi-host": "coronavirus-monitor-v2.p.rapidapi.com", "x-rapidapi-key": process.env['COVID_KEY'] } })
+      if (isSender) { return { success: true, reply: `COVID-19 stats for ${covidStats.data.country} (Updated: ${humanizeDuration(timeDelta(covidStats.data.latest_stat_by_country[0].record_date), { round: true, largest: 2 } )} ago) | Total Cases: ${covidStats.data.latest_stat_by_country[0].total_cases} | Total Deaths: ${covidStats.data.latest_stat_by_country[0].total_deaths} | Total Recoveries: ${covidStats.data.latest_stat_by_country[0].total_recovered} | New Cases: ${covidStats.data.latest_stat_by_country[0].new_cases} | New Deaths: ${covidStats.data.latest_stat_by_country[0].new_deaths} | Critical Condition: ${covidStats.data.latest_stat_by_country[0].serious_critical} | Total Tested: ${covidStats.data.latest_stat_by_country[0].total_tests}` } }
+      if (!isSender && isUser) { return { success: true, reply: `@${args[0].replace('@', '')}'s COVID-19 stats (${locationData.data.items[0].address.countryName}) (Updated: ${humanizeDuration(timeDelta(covidStats.data.latest_stat_by_country[0].record_date), { round: true, largest: 2 } )} ago) | Total Cases: ${covidStats.data.latest_stat_by_country[0].total_cases} | Total Deaths: ${covidStats.data.latest_stat_by_country[0].total_deaths} | Total Recoveries: ${covidStats.data.latest_stat_by_country[0].total_recovered} | New Cases: ${covidStats.data.latest_stat_by_country[0].new_cases} | New Deaths: ${covidStats.data.latest_stat_by_country[0].new_deaths} | Critical Condition: ${covidStats.data.latest_stat_by_country[0].serious_critical} | Total Tested: ${covidStats.data.latest_stat_by_country[0].total_tests}` } }
+      return { success: true, reply: `COVID-19 stats for ${covidStats.data.country} (Updated: ${humanizeDuration(timeDelta(covidStats.data.latest_stat_by_country[0].record_date), { round: true, largest: 2 } )} ago) | Total Cases: ${covidStats.data.latest_stat_by_country[0].total_cases} | Total Deaths: ${covidStats.data.latest_stat_by_country[0].total_deaths} | Total Recoveries: ${covidStats.data.latest_stat_by_country[0].total_recovered} | New Cases: ${covidStats.data.latest_stat_by_country[0].new_cases} | New Deaths: ${covidStats.data.latest_stat_by_country[0].new_deaths} | Critical Condition: ${covidStats.data.latest_stat_by_country[0].serious_critical} | Total Tested: ${covidStats.data.latest_stat_by_country[0].total_tests}` }
+    }catch(e) {
+      return { success: false, reply: `There was an error getting the COVID-19 data! The country is most likely invalid/not tracked.` }
+    }
+  }
+
+  if (command === 'covid') {
+    covid(userlow, args).then(covidStats => {
+      client.me(channel, `${user} --> ${covidStats.reply}`)
+    })
   }
 
   if (command === 'dance') {
