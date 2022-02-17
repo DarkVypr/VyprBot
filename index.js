@@ -582,56 +582,41 @@ client.on("PRIVMSG", async (msg) => {
 
   // Set Commands
 
-  if (command === 'set') {
-    const valueToSet = `${args[0]}`
-    let value1 = `${args[1]}`
-    let value2 = `${args[2]}`
-    const regex = new RegExp('^(?!0?2/3)(?!0?2/29/.{3}[13579])(?!0?2/29/.{2}[02468][26])(?!0?2/29/.{2}[13579][048])(?!(0?[469]|11)/31)(?!0?2/29/[13579][01345789]0{2})(?!0?2/29/[02468][1235679]0{2})(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/([0-9]{4})$')
-    if (args.length == 0 || !args[1]) {
-      client.me(channel, `${user} --> Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "${prefix}set twitter darkvyprr", "${prefix}set birthday 8/14/2005 (mm/dd/yyyy)" or "${prefix}set location lasalle ontario ({city} {state, province or country})"`)
+  async function setData(user, args) {
+    if (!args[0] || !args[1]) { return { success: false, reply: `Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "${prefix}set twitter darkvyprr", "${prefix}set birthday 8/14/2005 (mm/dd/yyyy)" or "${prefix}set location lasalle ontario ({city} {state, province or country})"` } }
+    const [setting, value, bdayRegExp] = [args[0], args[1], new RegExp('^(?!0?2/3)(?!0?2/29/.{3}[13579])(?!0?2/29/.{2}[02468][26])(?!0?2/29/.{2}[13579][048])(?!(0?[469]|11)/31)(?!0?2/29/[13579][01345789]0{2})(?!0?2/29/[02468][1235679]0{2})(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/([0-9]{4})$')]
+    args.shift()
+    if (setting == 'twitter') {
+      let account = value.replace('@', '').toLowerCase()
+      db.set(`${user}twitter`, account)
+      return { success: true, reply: `Successfully set your Twitter account to: @${account}!` }
     }
-    else if (valueToSet == 'twitter') {
-      let twitterAccount = `${args[1]}`.replace('@', '').toLowerCase()
-      db.set(`${userlow}twitter`, twitterAccount)
-      client.me(channel, `${user} --> Succesfully set your Twitter account to @${twitterAccount}!`)
+    if (setting == 'location') {
+      let location = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${encodeURIComponent(args.join(' ')).toLowerCase()}&apiKey=${process.env['GEOCODING_KEY']}`)
+      if (location.data.items.length == 0) { return { success: false, reply: `That location is invalid!` } }
+      db.set(`${user}time`, encodeURIComponent(location.data.items[0].title))
+      return { success: true, reply: `Successfully set your location to: ${location.data.items[0].title}` }
     }
-    else if (valueToSet == 'location') {
-      if (!value1 || !value2) {
-        client.me(channel, `${user} --> That's not a valid location! Examples: "${prefix}set location stockholm sweden" or "${prefix}set location springfield virginia".`)
-      }
-      else {
-        let locationCorrected = (value1[0].toUpperCase() + value1.substring(1)) + ', ' + (value2[0].toUpperCase() + value2.substring(1))
-        db.set(`${userlow}time`, locationCorrected)
-        client.me(channel, `${user} --> Successfully set your location to ${locationCorrected}!`)
-      }
+    if (setting == 'bday' || setting == 'birthday') {
+      if (!bdayRegExp.test(value)) { return { success: false, reply: `Invalid Syntax. Example: "${prefix}set birthday 8/14/2005 (mm/dd/yyyy)".` } }
+      db.set(`${user}bday`, value)
+      return { success: false, reply: `Successfully set your birthday to: ${dateFormat(value, "fullDate")}!` }
     }
-    else if (valueToSet == 'bday' || valueToSet == 'birthday') {
-      if (!regex.test(args[1])) {
-        client.me(channel, `${user} --> Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "${prefix}set twitter darkvyprr", "${prefix}set birthday 8/14/2005 (mm/dd/yyyy)" or "${prefix}set location lasalle ontario ({city} {state, province or country})"`)
+    if (setting == 'prefix') {
+      if (msg.isMod || await checkAdmin(user) || channel == userlow) {
+        if (/^\w+$/.test(value)) { db.set(`${channel}Prefix`, `${value} `); return { success: true, reply: `Successfully set the prefix for this channel to: ${value}` } }
+        db.set(`${channel}Prefix`, value)
+        return { success: true, reply: `Successfully set the prefix for this channel to: ${value}` }
       }
-      else {
-        db.set(`${userlow}bday`, value1)
-        client.me(channel, `${user} --> Successfully set your birthday to ${value1}!`)
-      }
+      return { success: false, reply: `You don't have the required permission to use that command! Required: Moderator or above.` }
     }
-    else if (valueToSet == 'prefix') {
-      if (msg.isMod || await checkAdmin(userlow) || channel == userlow) {
-        if (/^\w+$/.test(args[1])) {
-          db.set(`${channel}Prefix`, `${value1} `)
-          client.me(channel, `${user} --> Successfully set the prefix for this channel to: "${value1}"`)
-        }
-        else {
-          db.set(`${channel}Prefix`, value1)
-          client.me(channel, `${user} --> Successfully set the prefix for this channel to: "${value1}"`)
-        }
-      }
-      else {
-        client.me(channel, `${user} --> You don't have the required permission to use that command! Required: Moderator or above.`)
-      }
-    }
-    else {
-      client.me(channel, `${user} --> Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "${prefix}set twitter darkvyprr", "${prefix}set birthday 8/14/2005 (mm/dd/yyyy)" or "${prefix}set location lasalle ontario ({city} {state, province or country})"`)
-    }
+    return { success: false, reply: `Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "${prefix}set twitter darkvyprr", "${prefix}set birthday 8/14/2005 (mm/dd/yyyy)" or "${prefix}set location lasalle ontario ({city} {state, province or country})"` }
+  }
+
+  if (command == 'set') {
+    setData(userlow, args).then(response => {
+      client.me(channel, `${user} --> ${response.reply}`)
+    })
   }
 
   // Social Commands - Self Promo
@@ -1176,25 +1161,23 @@ client.on("PRIVMSG", async (msg) => {
     client.me(channel, `elisDance`);
   }
 
-  async function define(args) {
-    if (args.length == 0) {
-      return { success: false, reply: `Please provide a word to define.` }
-    }
+  async function define(user, args) {
+    if (!args[0]) { return { success: false, reply: "Please provide a phrase or word to define!" } }
+    const phraseCheck = args.join(' ').match(/index(:|=)(\d+)/i)
+    var index = 0
+    if (phraseCheck) { index = +phraseCheck[2]; args.splice(args.indexOf(phraseCheck[0]), 1) }
     let definition = await axios.get(`https://dictionaryapi.com/api/v3/references/collegiate/json/${args.join(' ')}?key=${process.env['DICTIONARY_KEY']}`)
-    if (!definition.data || definition.data.length == 0 || definition.data == '') {
-      return { success: false, reply: `There is no definition for that word or string!` }
-    }
-    if (!definition.data[0].meta) {
-      return { success: true, reply: `There is no definition for that word, but there is a list of similar words: ${definition.data.join(', ')}` }
-    }
-    if (!definition.data[0].shortdef) {
-      return { success: true, reply: `There is no definition for that word or string!` }
-    }
-    return { success: true, reply: `${truncate(definition.data[0].shortdef.join(' | '), 450)}` }
+    if (definition.data.length == 0) { return { success: false, reply: "dictionaryapi.com does not have a definition for that word!" } }
+    if (!definition.data[0].meta) { return { success: false, reply: "dictionaryapi.com does not have a definition for that word!" } }
+    if (index > definition.data.length - 1) { return { success: false, reply: `The index you specified is larger than the amount of results. Please use an index less than or equal to ${definition.data.length - 1}.` } }
+    definition = definition.data[index]
+    let meaning = definition.shortdef[0] ? definition.shortdef[0] : "No definition available."
+    let [word, offensive, literaryDevice] = [definition.meta.id.replace(/:\d+/g, ''), definition.meta.offensive, definition.fl]
+    return { success: true, reply: `Word: ${word} | Literary Device: ${literaryDevice} | Offensive: ${offensive} | Meaning: ${truncate(meaning, 450)}` }
   }
 
   if (command === 'define') {
-    define(args).then(definition => {
+    define(user, args).then(definition => {
       client.me(channel, `${user} --> ${definition.reply}`)
     })
   }
