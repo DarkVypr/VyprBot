@@ -6,6 +6,7 @@
   "dependencies": {
     "@replit/database": "^2.0.1",
     "axios": "^0.24.0",
+    "currency-converter-lt": "^1.2.4",
     "dank-twitch-irc": "^4.3.0",
     "dateformat": "^4.6.3",
     "fs-extra": "^10.0.0",

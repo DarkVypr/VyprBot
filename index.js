@@ -10,6 +10,7 @@ const Database = require("@replit/database")
 const db = new Database()
 const humanizeDuration = require("humanize-duration")
 const dateFormat = require('dateformat')
+const CC = require('currency-converter-lt')
 const axios = require('axios').default
 const { ChatClient, AlternateMessageModifier, SlowModeRateLimiter } = require("dank-twitch-irc")
 let client = new ChatClient({
@@ -1125,10 +1126,10 @@ client.on("PRIVMSG", async (msg) => {
     let country = locationData.data.items[0].address.countryCode
     try {
       let covidStats = await axios.get(`https://coronavirus-monitor-v2.p.rapidapi.com/coronavirus/latest_stat_by_country.php?country=${country}`, { "headers": { "x-rapidapi-host": "coronavirus-monitor-v2.p.rapidapi.com", "x-rapidapi-key": process.env['COVID_KEY'] } })
-      if (isSender) { return { success: true, reply: `COVID-19 stats for ${covidStats.data.country} (Updated: ${humanizeDuration(timeDelta(covidStats.data.latest_stat_by_country[0].record_date), { round: true, largest: 2 } )} ago) | Total Cases: ${covidStats.data.latest_stat_by_country[0].total_cases} | Total Deaths: ${covidStats.data.latest_stat_by_country[0].total_deaths} | Total Recoveries: ${covidStats.data.latest_stat_by_country[0].total_recovered} | New Cases: ${covidStats.data.latest_stat_by_country[0].new_cases} | New Deaths: ${covidStats.data.latest_stat_by_country[0].new_deaths} | Critical Condition: ${covidStats.data.latest_stat_by_country[0].serious_critical} | Total Tested: ${covidStats.data.latest_stat_by_country[0].total_tests}` } }
-      if (!isSender && isUser) { return { success: true, reply: `@${args[0].replace('@', '')}'s COVID-19 stats (${locationData.data.items[0].address.countryName}) (Updated: ${humanizeDuration(timeDelta(covidStats.data.latest_stat_by_country[0].record_date), { round: true, largest: 2 } )} ago) | Total Cases: ${covidStats.data.latest_stat_by_country[0].total_cases} | Total Deaths: ${covidStats.data.latest_stat_by_country[0].total_deaths} | Total Recoveries: ${covidStats.data.latest_stat_by_country[0].total_recovered} | New Cases: ${covidStats.data.latest_stat_by_country[0].new_cases} | New Deaths: ${covidStats.data.latest_stat_by_country[0].new_deaths} | Critical Condition: ${covidStats.data.latest_stat_by_country[0].serious_critical} | Total Tested: ${covidStats.data.latest_stat_by_country[0].total_tests}` } }
-      return { success: true, reply: `COVID-19 stats for ${covidStats.data.country} (Updated: ${humanizeDuration(timeDelta(covidStats.data.latest_stat_by_country[0].record_date), { round: true, largest: 2 } )} ago) | Total Cases: ${covidStats.data.latest_stat_by_country[0].total_cases} | Total Deaths: ${covidStats.data.latest_stat_by_country[0].total_deaths} | Total Recoveries: ${covidStats.data.latest_stat_by_country[0].total_recovered} | New Cases: ${covidStats.data.latest_stat_by_country[0].new_cases} | New Deaths: ${covidStats.data.latest_stat_by_country[0].new_deaths} | Critical Condition: ${covidStats.data.latest_stat_by_country[0].serious_critical} | Total Tested: ${covidStats.data.latest_stat_by_country[0].total_tests}` }
-    }catch(e) {
+      if (isSender) { return { success: true, reply: `COVID-19 stats for ${covidStats.data.country} (Updated: ${humanizeDuration(timeDelta(covidStats.data.latest_stat_by_country[0].record_date), { round: true, largest: 2 })} ago) | Total Cases: ${covidStats.data.latest_stat_by_country[0].total_cases} | Total Deaths: ${covidStats.data.latest_stat_by_country[0].total_deaths} | Total Recoveries: ${covidStats.data.latest_stat_by_country[0].total_recovered} | New Cases: ${covidStats.data.latest_stat_by_country[0].new_cases} | New Deaths: ${covidStats.data.latest_stat_by_country[0].new_deaths} | Critical Condition: ${covidStats.data.latest_stat_by_country[0].serious_critical} | Total Tested: ${covidStats.data.latest_stat_by_country[0].total_tests}` } }
+      if (!isSender && isUser) { return { success: true, reply: `@${args[0].replace('@', '')}'s COVID-19 stats (${locationData.data.items[0].address.countryName}) (Updated: ${humanizeDuration(timeDelta(covidStats.data.latest_stat_by_country[0].record_date), { round: true, largest: 2 })} ago) | Total Cases: ${covidStats.data.latest_stat_by_country[0].total_cases} | Total Deaths: ${covidStats.data.latest_stat_by_country[0].total_deaths} | Total Recoveries: ${covidStats.data.latest_stat_by_country[0].total_recovered} | New Cases: ${covidStats.data.latest_stat_by_country[0].new_cases} | New Deaths: ${covidStats.data.latest_stat_by_country[0].new_deaths} | Critical Condition: ${covidStats.data.latest_stat_by_country[0].serious_critical} | Total Tested: ${covidStats.data.latest_stat_by_country[0].total_tests}` } }
+      return { success: true, reply: `COVID-19 stats for ${covidStats.data.country} (Updated: ${humanizeDuration(timeDelta(covidStats.data.latest_stat_by_country[0].record_date), { round: true, largest: 2 })} ago) | Total Cases: ${covidStats.data.latest_stat_by_country[0].total_cases} | Total Deaths: ${covidStats.data.latest_stat_by_country[0].total_deaths} | Total Recoveries: ${covidStats.data.latest_stat_by_country[0].total_recovered} | New Cases: ${covidStats.data.latest_stat_by_country[0].new_cases} | New Deaths: ${covidStats.data.latest_stat_by_country[0].new_deaths} | Critical Condition: ${covidStats.data.latest_stat_by_country[0].serious_critical} | Total Tested: ${covidStats.data.latest_stat_by_country[0].total_tests}` }
+    } catch (e) {
       return { success: false, reply: `There was an error getting the COVID-19 data! The country is most likely invalid/not tracked.` }
     }
   }
@@ -1707,7 +1708,7 @@ client.on("PRIVMSG", async (msg) => {
   if (command === '🥪') {
     client.me(channel, `${user} --> https://www.youtube.com/shorts/7XkP11Pomuc`);
   }
-
+  
   async function getUserTime(user, args) {
     var isUser
     var isSender
@@ -1806,96 +1807,35 @@ client.on("PRIVMSG", async (msg) => {
       client.me(channel, `${user} --> ${tweetResult.reply}`)
     })
   }
-
-  async function getSubage(user, channel) {
-    let subDetails = await axios.get(`https://api.ivr.fi/twitch/subage/${user}/${channel}`)
-    let isHidden = subDetails.data.hidden
-    let subUser = subDetails.data.username
-    let subChannel = subDetails.data.channel
-    let isSubbed = subDetails.data.subscribed
-    let subType = subDetails.data.meta.type
-    let subTier = subDetails.data.meta.tier
-    let isGift = subDetails.data.meta.gift
-    let totalMonths = subDetails.data.cumulative.months
-    let remainingOnActiveSub = humanizeDuration(new Date(subDetails.data.meta.endsAt) - new Date(), { units: ["d", "h", "m", "s"], round: true, largest: 2, delimiter: ' and ' })
-    let timeSinceSubEnded = humanizeDuration(new Date(subDetails.data.cumulative.end) - new Date(), { units: ["d", "h", "m", "s"], round: true, largest: 2, delimiter: ' and ' })
-    let subStreak = subDetails.data.streak.months
-    function isUserSubbed() {
-      if (`${isSubbed}` === 'false') {
-        return `@${subUser} is not currently subscribed to @${subChannel},`
-      }
-      else {
-        return `@${subUser} is currently subscribed to @${subChannel}`
-      }
+  
+  async function getSubage(userlow, args) {
+    let [targetUser, targetChannel] = [args[0] ? args[0].toLowerCase().replace('@', '') : userlow, args[1] ? args[1].toLowerCase().replace('@', '') : channel]
+    try {
+      let subDetails = await axios.get(`https://api.ivr.fi/twitch/subage/${targetUser}/${targetChannel}`)
+      let subData = subDetails.data
+      let [hidden, user, channel, subStatus, subType, subTier, giftData, months, streak] = [subData.hidden, subData.username, subData.channel, subData.subscribed, subData.meta.type, subData.meta.tier, subData.meta.gift, subData.cumulative.months, subData.streak.months]
+      let remainingOnActiveSub = humanizeDuration(timeDelta(subData.meta.endsAt), { units: ["d", "h", "m", "s"], round: true, largest: 2, delimiter: ' and ' })
+      let timeSinceSubEnded = humanizeDuration(timeDelta(subData.cumulative.end), { units: ["d", "h", "m", "s"], round: true, largest: 2, delimiter: ' and ' })
+      if(hidden) { return { success: true, reply: `@${user} has hidden their subscription status, or the target channel (#${channel}) is not an affiliate!` } }
+      if(months == 0) { return { success: true, reply: `@${user} has never been subbed to @${channel}.` } }
+      if(!subStatus && months != 0) { return { success: true, reply: `@${user} isn't currently subbed to @${channel} but they have previously. They were subbed for ${months} month(s) and their sub expired ${timeSinceSubEnded} ago.` } }
+      if(subTier == 'Custom') { return { success: true, reply: `@${user} is currently subbed to @${channel} with a permanent sub! They have been subbed for ${months} month(s).` } }
+      if(subTier == 3 && !subData.meta.endsAt) { return { success: true, reply: `@${user} is currently subbed to @${channel} with a permanent sub! They have been subbed for ${months} month(s).` } }
+      if(subType == 'paid') { return { success: true, reply: `@${user} is currently subbed to @${channel} with a tier ${subTier} paid sub! They have been subbed for ${months} month(s) and are on a ${streak} month streak. Their sub expires/renews in ${remainingOnActiveSub}.` } }
+      if(subType == 'prime') { return { success: true, reply: `@${user} is currently subbed to @${channel} with a free Twitch Prime sub! They have been subbed for ${months} month(s) and are on a ${streak} month streak. Their sub expires/renews in ${remainingOnActiveSub}.` } }
+      if(subType == 'gift') { return { success: true, reply: `@${user} is currently subbed to @${channel} with a tier ${subTier} gift sub by ${giftData.name}! They have been subbed for ${months} month(s) and are on a ${streak} month streak. Their sub expires/renews in ${remainingOnActiveSub}.` } }
     }
-    let userSubbed = isUserSubbed()
-
-    function isGifted() {
-      if (!isGift || isGift == null) {
-        return null
-      }
-      else {
-        return `with a tier ${subTier} gift sub by @${subDetails.data.meta.gift.name}`
-      }
+    catch (err) {
+      return { success: false, reply: `${err.response.data.error}` }
     }
-    let userGifted = isGifted()
-    let obj = {
-      hidden: isHidden,
-      subUser: subUser,
-      subChannel: subChannel,
-      userGifted: userGifted,
-      userSubbed: userSubbed,
-      isSubbed: isSubbed,
-      subType: subType,
-      subTier: subTier,
-      totalMonths: totalMonths,
-      remainingOnActiveSub: remainingOnActiveSub,
-      timeSinceSubEnded: timeSinceSubEnded,
-      subStreak: subStreak,
-      isBotPermaSub: subDetails.data.meta.endsAt,
-    }
-    return obj
   }
 
   if (command === 'subage' || command === 'sa') {
-    var userLookup = `${args[0]}`
-    if (!args[0])
-      var userLookup = userlow
-
-    var channelLookup = `${args[1]}`
-    if (!args[1])
-      var channelLookup = channel
-
-    getSubage(userLookup, channelLookup)
-      .catch(err => { client.me(channel, `${user} --> There was an error getting that user's subage! Make sure that the account exists, and you have spelt the channel and username correctly!`) })
-      .then(function(subage) {
-        if (subage.hidden === true) {
-          client.me(channel, `${user} --> ${subage.subUser} has hidden their subscription status. (Psst... Another reason that this might pop up is because you are trying to check a channel that is not affiliated.)`)
-        }
-        else if (!subage.totalMonths || +subage.totalMonths === 0) {
-          client.me(channel, `${user} --> ${subage.subUser} has never subscribed to @${subage.subChannel}.`)
-        }
-        else if (subage.isSubbed === false && subage.totalMonths) {
-          client.me(channel, `${user} --> ${subage.userSubbed} but previously had a subscription for ${subage.totalMonths} month(s). Their sub expired ${subage.timeSinceSubEnded} ago.`)
-        }
-        else if (subage.isSubbed === true && subage.subTier === 'Custom') {
-          client.me(channel, `${user} --> ${subage.userSubbed}. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak). This is a permanent subscription!`)
-        }
-        else if (subage.isSubbed === true && subage.subTier === '3' && subage.isBotPermaSub == null) {
-          client.me(channel, `${user} --> ${subage.userSubbed}. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak). This is a permanent subscription!`)
-        }
-        else if (subage.isSubbed === true && subage.subType === 'paid') {
-          client.me(channel, `${user} --> ${subage.userSubbed} with a tier ${subage.subTier} paid sub. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak) and their sub expires/renews in ${subage.remainingOnActiveSub}.`)
-        }
-        else if (subage.isSubbed === true && subage.subType === 'prime') {
-          client.me(channel, `${user} --> ${subage.userSubbed} with a Twitch Prime sub. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak) and their sub expires/renews in ${subage.remainingOnActiveSub}.`)
-        }
-        else if (subage.isSubbed === true && subage.subType === 'gift') {
-          client.me(channel, `${user} --> ${subage.userSubbed} ${subage.userGifted}. They have been subbed for ${subage.totalMonths} month(s) (${subage.subStreak} month streak) and their sub expires/renews in ${subage.remainingOnActiveSub}.`)
-        }
-      })
+    getSubage(userlow, args).then(subData => {
+      client.me(channel, `${user} --> ${subData.reply}`)
+    })
   }
-
+  
   async function translateText(text, toLanguage) {
     function checkTargetLang(toLanguage) {
       switch (toLanguage) {
