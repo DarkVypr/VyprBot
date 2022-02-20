@@ -584,7 +584,7 @@ client.on("PRIVMSG", async (msg) => {
   // Set Commands
 
   async function setData(user, args) {
-    if (!args[0] || !args[1]) { return { success: false, reply: `Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "${prefix}set twitter darkvyprr", "${prefix}set birthday 8/14/2005 (mm/dd/yyyy)" or "${prefix}set location lasalle ontario ({city} {state, province or country})"` } }
+    if (!args[0] || !args[1]) { return { success: false, reply: `Invalid command syntax!. Examples: "${prefix}set twitter darkvyprr", "${prefix}set birthday 8/14/2005 (mm/dd/yyyy)" or "${prefix}set location lasalle ontario"` } }
     const [setting, value, bdayRegExp] = [args[0], args[1], new RegExp('^(?!0?2/3)(?!0?2/29/.{3}[13579])(?!0?2/29/.{2}[02468][26])(?!0?2/29/.{2}[13579][048])(?!(0?[469]|11)/31)(?!0?2/29/[13579][01345789]0{2})(?!0?2/29/[02468][1235679]0{2})(0?[1-9]|1[012])/(0?[1-9]|[12][0-9]|3[01])/([0-9]{4})$')]
     args.shift()
     if (setting == 'twitter') {
@@ -611,7 +611,7 @@ client.on("PRIVMSG", async (msg) => {
       }
       return { success: false, reply: `You don't have the required permission to use that command! Required: Moderator or above.` }
     }
-    return { success: false, reply: `Invalid Syntax. Options: Location, Twitter account or Birthday. Examples: "${prefix}set twitter darkvyprr", "${prefix}set birthday 8/14/2005 (mm/dd/yyyy)" or "${prefix}set location lasalle ontario ({city} {state, province or country})"` }
+    return { success: false, reply: `Invalid command syntax!. Examples: "${prefix}set twitter darkvyprr", "${prefix}set birthday 8/14/2005 (mm/dd/yyyy)" or "${prefix}set location lasalle ontario"` }
   }
 
   if (command == 'set') {
