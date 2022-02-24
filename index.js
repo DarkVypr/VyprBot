@@ -505,7 +505,7 @@ client.on("PRIVMSG", async (msg) => {
         creationDate: creationDate,
         timeSinceCreation: timeSinceCreation,
       }
-      return { success: true, reply: `Display Name: ${obj.name} | Banned: ${obj.banned} | UID: ${obj.uid} | Created: ${obj.creationDate} (${obj.timeSinceCreation} ago) | Colour: ${obj.colour} | Bio: ${obj.bio} | Profile Picture: ${obj.pfp} | Roles/Ranks: ${obj.roles}`}
+      return { success: true, obj, reply: `Display Name: ${obj.name} | Banned: ${obj.banned} | UID: ${obj.uid} | Created: ${obj.creationDate} (${obj.timeSinceCreation} ago) | Colour: ${obj.colour} | Bio: ${obj.bio} | Profile Picture: ${obj.pfp} | Roles/Ranks: ${obj.roles}`}
     }catch (err) {
       return { success: false, reply: `Error: ${err.response.data.message}` }
     }
@@ -1183,21 +1183,10 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'emotes') {
-    if (!args[0]) {
-      axios.get(`https://api.ivr.fi/twitch/resolve/${user}`)
-        .then((response) => {
-          let userdata = response.data
-          client.me(channel, `${user} --> The emotes for ${userdata.displayName} can be found at: https://emotes.raccatta.cc/twitch/${userdata.displayName}`);
-        });
-    }
-    else {
-      axios.get(`https://api.ivr.fi/twitch/resolve/${args[0]}`)
-        .catch(err => { client.me(channel, `${user} --> That user doesn't exist!`) })
-        .then((response) => {
-          let userdata = response.data
-          client.me(channel, `${user} --> The emotes for ${userdata.displayName} can be found at: https://emotes.raccatta.cc/twitch/${userdata.displayName}`);
-        });
-    }
+    getUserData(userlow, args).then(userData => {
+      if(!userData.obj) { client.me(channel, `${user} --> ${userData.reply}`); return }
+      client.me(channel, `${user} --> https://emotes.raccatta.cc/twitch/${userData.obj.name}`)
+    })
   }
 
   if (command === 'eval') {
@@ -1504,7 +1493,7 @@ client.on("PRIVMSG", async (msg) => {
 
   if (command === 'pfp') {
     getUserData(args).then(value => {
-      client.me(channel, `${user} --> ${value.pfp}`)
+      client.me(channel, `${user} --> ${value.obj.pfp}`)
     })
   }
 
@@ -1909,8 +1898,8 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'uid') {
-    getUserData(user, args).then(userData => {
-      client.me(channel, `${user} --> UID: ${userData.uid}`)
+    getUserData(userlow, args).then(userData => {
+      client.me(channel, `${user} --> UID: ${userData.obj.uid}`)
     })
   }
 
