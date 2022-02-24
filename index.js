@@ -473,79 +473,42 @@ client.on("PRIVMSG", async (msg) => {
 
   // Leppu Query
 
-  async function getUserData(args) {
-    var user = userlow
-    if (args[0]) { user = args[0] }
-    let userData = await axios.get(`https://api.ivr.fi/twitch/resolve/${user.replace('@', '')}`)
-      .catch(err => { client.me(channel, `${user} --> That user doesn't exist!`) })
-    let isAffiliate = (data) => {
-      if (`${data}` == 'true') {
-        return 'Affiliate '
+  async function getUserData(user, args) {
+    const idCheck = args.join(' ').match(/uid(:|=)(true|false)/i)
+    var idBoolean = 'false'
+    if (idCheck) { idBoolean = idCheck[2]; args.splice(args.indexOf(idCheck[0]), 1) }
+    if (args[0]) { user = args[0].replace('@', '') }
+    try {
+      let userData = await axios.get(`https://api.ivr.fi/v2/twitch/user/${user}?id=${idBoolean}`)
+      userData = userData.data
+      let creationDate = dateFormat(userData.createdAt, "fullDate")
+      let timeSinceCreation = humanizeDuration(timeDelta(creationDate), { units: ["y", "mo", "d", "m"], round: true, largest: 3 })
+      var roles = []
+      var uid = userData.id
+      if(userData.roles.isAffiliate) { roles.push('Affiliate') }
+      if(userData.roles.isPartner) { roles.push('Partner') }
+      if(userData.roles.isStaff) { roles.push('Staff') }
+      if(userData.verifiedBot) { roles.push('Verified Bot') }
+      if(!userData.roles.isAffiliate && !userData.roles.isPartner && !userData.roles.isStaff && !userData.verifiedBot) { roles.push('No Roles Associated') }
+      if(userData.banned) { uid = userData.id + " ( ⛔ Banned User ⛔ )" }    
+      let obj = {
+        banned: userData.banned,
+        followers: userData.followers,
+        following: userData.follows,
+        name: userData.displayName,
+        uid: uid,
+        bio: userData.bio,
+        colour: userData.chatColor,
+        pfp: userData.logo,
+        rolesArray: roles,
+        roles: roles.join(', '),
+        creationDate: creationDate,
+        timeSinceCreation: timeSinceCreation,
       }
-      else {
-        return ''
-      }
+      return { success: true, reply: `Display Name: ${obj.name} | Banned: ${obj.banned} | UID: ${obj.uid} | Created: ${obj.creationDate} (${obj.timeSinceCreation} ago) | Colour: ${obj.colour} | Bio: ${obj.bio} | Profile Picture: ${obj.pfp} | Roles/Ranks: ${obj.roles}`}
+    }catch (err) {
+      return { success: false, reply: `Error: ${err.response.data.message}` }
     }
-    let isPartner = (data) => {
-      if (`${data}` == 'true') {
-        return 'Partner '
-      }
-      else {
-        return ''
-      }
-    }
-    let isStaff = (data) => {
-      if (`${data}` == 'true') {
-        return 'Staff '
-      }
-      else {
-        return ''
-      }
-    }
-    let isSiteAdmin = (data) => {
-      if (`${data}` == 'true') {
-        return 'Admin '
-      }
-      else {
-        return ''
-      }
-    }
-    let isBot = (data) => {
-      if (`${data}` == 'true') {
-        return 'Verified_Bot '
-      }
-      else {
-        return ''
-      }
-    }
-    let uid = (data) => {
-      if (!userData.data.banned) {
-        return `${userData.data.id}`
-      }
-      else {
-        return `${userData.data.id} (Banned User⛔)`
-      }
-    }
-
-    let creationDate = dateFormat(userData.data.createdAt, "fullDate")
-    let timeSinceCreation = humanizeDuration(timeDelta(creationDate), { units: ["y", "mo", "d", "m"], round: true, largest: 3 })
-    let rolesArray = (isAffiliate(userData.data.roles.isAffiliate) + isPartner(userData.data.roles.isPartner) + isStaff(userData.data.roles.isStaff) + isSiteAdmin(userData.data.roles.isSiteAdmin) + isBot(userData.data.bot)).trim().split(' ')
-    let roles = (isAffiliate(userData.data.roles.isAffiliate) + isPartner(userData.data.roles.isPartner) + isStaff(userData.data.roles.isStaff) + isSiteAdmin(userData.data.roles.isSiteAdmin) + isBot(userData.data.bot)).trim().split(' ').join(', ')
-    let followCount = await axios.get(`https://decapi.me/twitch/followcount/${user.replace('@', '')}`)
-    var obj = {
-      banned: userData.data.banned,
-      name: userData.data.displayName,
-      uid: uid(),
-      bio: userData.data.bio,
-      colour: userData.data.chatColor,
-      pfp: userData.data.logo,
-      followCount: followCount.data,
-      roles: roles,
-      rolesArray: rolesArray,
-      creationDate: creationDate,
-      timeSinceCreation: timeSinceCreation
-    }
-    return obj
   }
 
   // Check for no-no words
@@ -605,7 +568,7 @@ client.on("PRIVMSG", async (msg) => {
     }
     if (setting == 'prefix') {
       if (msg.isMod || await checkAdmin(user) || channel == userlow) {
-        if (/^\w+$/.test(value)) { db.set(`${channel}Prefix`, `${value} `); return { success: true, reply: `Successfully set the prefix for this channel to: ${value}` } }
+        if (/^[a-zA-Z]+$/.test(value)) { db.set(`${channel}Prefix`, `${value} `); return { success: true, reply: `Successfully set the prefix for this channel to: ${value}` } }
         db.set(`${channel}Prefix`, value)
         return { success: true, reply: `Successfully set the prefix for this channel to: ${value}` }
       }
@@ -1370,9 +1333,9 @@ client.on("PRIVMSG", async (msg) => {
     client.me(channel, `${user} --> http://imagerepo.darkvypr.com`);
   }
 
-  if (command === 'info') {
-    getUserData(args).then(value => {
-      client.me(channel, `${user} --> Name: @${value.name} | Banned: ${value.banned} | UID: ${value.uid} | Created: ${value.creationDate} (${value.timeSinceCreation} ago) | Colour: ${value.colour} | Bio: ${value.bio} | Profile Picture: ${value.pfp} | Roles: ${value.roles}`)
+  if (command === 'info' || command === 'user') {
+    getUserData(userlow, args).then(userData => {
+      client.me(channel, `${user} --> ${userData.reply}`)
     })
   }
 
@@ -1708,7 +1671,7 @@ client.on("PRIVMSG", async (msg) => {
   if (command === '🥪') {
     client.me(channel, `${user} --> https://www.youtube.com/shorts/7XkP11Pomuc`);
   }
-  
+
   async function getUserTime(user, args) {
     var isUser
     var isSender
@@ -1807,7 +1770,7 @@ client.on("PRIVMSG", async (msg) => {
       client.me(channel, `${user} --> ${tweetResult.reply}`)
     })
   }
-  
+
   async function getSubage(userlow, args) {
     let [targetUser, targetChannel] = [args[0] ? args[0].toLowerCase().replace('@', '') : userlow, args[1] ? args[1].toLowerCase().replace('@', '') : channel]
     try {
@@ -1816,14 +1779,14 @@ client.on("PRIVMSG", async (msg) => {
       let [hidden, user, channel, subStatus, subType, subTier, giftData, months, streak] = [subData.hidden, subData.username, subData.channel, subData.subscribed, subData.meta.type, subData.meta.tier, subData.meta.gift, subData.cumulative.months, subData.streak.months]
       let remainingOnActiveSub = humanizeDuration(timeDelta(subData.meta.endsAt), { units: ["d", "h", "m", "s"], round: true, largest: 2, delimiter: ' and ' })
       let timeSinceSubEnded = humanizeDuration(timeDelta(subData.cumulative.end), { units: ["d", "h", "m", "s"], round: true, largest: 2, delimiter: ' and ' })
-      if(hidden) { return { success: true, reply: `@${user} has hidden their subscription status, or the target channel (#${channel}) is not an affiliate!` } }
-      if(months == 0) { return { success: true, reply: `@${user} has never been subbed to @${channel}.` } }
-      if(!subStatus && months != 0) { return { success: true, reply: `@${user} isn't currently subbed to @${channel} but they have previously. They were subbed for ${months} month(s) and their sub expired ${timeSinceSubEnded} ago.` } }
-      if(subTier == 'Custom') { return { success: true, reply: `@${user} is currently subbed to @${channel} with a permanent sub! They have been subbed for ${months} month(s).` } }
-      if(subTier == 3 && !subData.meta.endsAt) { return { success: true, reply: `@${user} is currently subbed to @${channel} with a permanent sub! They have been subbed for ${months} month(s).` } }
-      if(subType == 'paid') { return { success: true, reply: `@${user} is currently subbed to @${channel} with a tier ${subTier} paid sub! They have been subbed for ${months} month(s) and are on a ${streak} month streak. Their sub expires/renews in ${remainingOnActiveSub}.` } }
-      if(subType == 'prime') { return { success: true, reply: `@${user} is currently subbed to @${channel} with a free Twitch Prime sub! They have been subbed for ${months} month(s) and are on a ${streak} month streak. Their sub expires/renews in ${remainingOnActiveSub}.` } }
-      if(subType == 'gift') { return { success: true, reply: `@${user} is currently subbed to @${channel} with a tier ${subTier} gift sub by ${giftData.name}! They have been subbed for ${months} month(s) and are on a ${streak} month streak. Their sub expires/renews in ${remainingOnActiveSub}.` } }
+      if (hidden) { return { success: true, reply: `@${user} has hidden their subscription status, or the target channel (#${channel}) is not an affiliate!` } }
+      if (months == 0) { return { success: true, reply: `@${user} has never been subbed to @${channel}.` } }
+      if (!subStatus && months != 0) { return { success: true, reply: `@${user} isn't currently subbed to @${channel} but they have previously. They were subbed for ${months} month(s) and their sub expired ${timeSinceSubEnded} ago.` } }
+      if (subTier == 'Custom') { return { success: true, reply: `@${user} is currently subbed to @${channel} with a permanent sub! They have been subbed for ${months} month(s).` } }
+      if (subTier == 3 && !subData.meta.endsAt) { return { success: true, reply: `@${user} is currently subbed to @${channel} with a permanent sub! They have been subbed for ${months} month(s).` } }
+      if (subType == 'paid') { return { success: true, reply: `@${user} is currently subbed to @${channel} with a tier ${subTier} paid sub! They have been subbed for ${months} month(s) and are on a ${streak} month streak. Their sub expires/renews in ${remainingOnActiveSub}.` } }
+      if (subType == 'prime') { return { success: true, reply: `@${user} is currently subbed to @${channel} with a free Twitch Prime sub! They have been subbed for ${months} month(s) and are on a ${streak} month streak. Their sub expires/renews in ${remainingOnActiveSub}.` } }
+      if (subType == 'gift') { return { success: true, reply: `@${user} is currently subbed to @${channel} with a tier ${subTier} gift sub by ${giftData.name}! They have been subbed for ${months} month(s) and are on a ${streak} month streak. Their sub expires/renews in ${remainingOnActiveSub}.` } }
     }
     catch (err) {
       return { success: false, reply: `${err.response.data.error}` }
@@ -1835,7 +1798,7 @@ client.on("PRIVMSG", async (msg) => {
       client.me(channel, `${user} --> ${subData.reply}`)
     })
   }
-  
+
   async function translateText(text, toLanguage) {
     function checkTargetLang(toLanguage) {
       switch (toLanguage) {
@@ -1946,7 +1909,7 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'uid') {
-    getUserData(args).then(userData => {
+    getUserData(user, args).then(userData => {
       client.me(channel, `${user} --> UID: ${userData.uid}`)
     })
   }
@@ -2047,7 +2010,7 @@ client.on("PRIVMSG", async (msg) => {
           return 'None'
           break
         default:
-          return weather.data.alerts[0].event + '. ⚠️'
+          return weather.data.alerts[0].event + ' ⚠️'
       }
     }
     let precipitation = () => {
@@ -2165,6 +2128,9 @@ client.on("PRIVMSG", async (msg) => {
       }
       if (emoteData.data.emoteType == 'FOLLOWER') {
         return { success: true, reply: `${emoteData.data.emoteCode} (ID: ${emoteData.data.emoteID}) is a ${emoteData.data.emoteAssetType.toLowerCase()} follower emote to the channel @${emoteData.data.channelName} ( @${emoteData.data.channelLogin} ). Emote Link: ${emoteData.data.emoteURL.replace('dark/1.0', 'dark/3.0')}` }
+      }
+      if (emoteData.data.emoteType == 'SMILIES') {
+        return { success: true, reply: `${emoteData.data.emoteCode} (ID: ${emoteData.data.emoteID}) is a ${emoteData.data.emoteAssetType.toLowerCase()} Twitch smiley emote. Emote Link: ${emoteData.data.emoteURL.replace('dark/1.0', 'dark/3.0')}` }
       }
     }
     catch (err) {
