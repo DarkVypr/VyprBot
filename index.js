@@ -505,7 +505,7 @@ client.on("PRIVMSG", async (msg) => {
         creationDate: creationDate,
         timeSinceCreation: timeSinceCreation,
       }
-      return { success: true, obj, reply: `Display Name: ${obj.name} | Banned: ${obj.banned} | UID: ${obj.uid} | Created: ${obj.creationDate} (${obj.timeSinceCreation} ago) | Colour: ${obj.colour} | Bio: ${obj.bio} | Profile Picture: ${obj.pfp} | Roles/Ranks: ${obj.roles}`}
+      return { success: true, obj, reply: `Display Name: ${obj.name} | Banned: ${obj.banned} | UID: ${obj.uid} | Created: ${obj.creationDate} (${obj.timeSinceCreation} ago) | Followers: ${obj.followers} | Colour: ${obj.colour} | Bio: ${obj.bio} | Profile Picture: ${obj.pfp} | Roles/Ranks: ${obj.roles}`}
     }catch (err) {
       return { success: false, reply: `Error: ${err.response.data.message}` }
     }
