@@ -10,7 +10,7 @@ const Database = require("@replit/database")
 const db = new Database()
 const humanizeDuration = require("humanize-duration")
 const dateFormat = require('dateformat')
-const CC = require('currency-converter-lt')
+const isoConv = require('iso-language-converter')
 const axios = require('axios').default
 const { ChatClient, AlternateMessageModifier, SlowModeRateLimiter } = require("dank-twitch-irc")
 let client = new ChatClient({
@@ -42,8 +42,10 @@ client.on("close", (error) => {
   }
 });
 const channelOptions = fs.readFileSync('channels.txt').toString().split(' ')
+
 client.connect();
 client.joinAll(channelOptions)
+
 setInterval(function() {
   axios.put(`https://supinic.com/api/bot-program/bot/active?auth_user=${process.env['SUPI_USER_AUTH']}&auth_key=${process.env['SUPI_USERKEY_AUTH']}`)
     .catch(err => { client.whisper('darkvypr', `There was an error pinging Supi's API!`) })
@@ -1788,113 +1790,29 @@ client.on("PRIVMSG", async (msg) => {
     })
   }
 
-  async function translateText(text, toLanguage) {
-    function checkTargetLang(toLanguage) {
-      switch (toLanguage) {
-        case 'bulgarian':
-          return 'BG'
-          break
-        case 'czech':
-          return 'CS'
-          break
-        case 'danish':
-          return 'DA'
-          break
-        case 'german':
-          return 'DE'
-          break
-        case 'spanish':
-          return 'ES'
-          break
-        case 'greek':
-          return 'EL'
-          break
-        case 'estonian':
-          return 'ET'
-          break
-        case 'french':
-          return 'FR'
-          break
-        case 'finnish':
-          return 'FI'
-          break
-        case 'hungarian':
-          return 'HU'
-          break
-        case 'italian':
-          return 'IT'
-          break
-        case 'japanese':
-          return 'JA'
-          break
-        case 'lithuanian':
-          return 'LT'
-          break
-        case 'latvian':
-          return 'LV'
-          break
-        case 'dutch':
-          return 'NL'
-          break
-        case 'polish':
-          return 'PL'
-          break
-        case 'portuguese':
-          return 'PT-PT'
-          break
-        case 'romanian':
-          return 'RO'
-          break
-        case 'russian':
-          return 'RU'
-          break
-        case 'slovak':
-          return 'SK'
-          break
-        case 'slovenian':
-          return 'SL'
-          break
-        case 'swedish':
-          return 'SV'
-          break
-        case 'chinese':
-          return 'ZH'
-          break
-        default:
-          return 'EN-US'
-      }
+  async function translate(user, args) {
+    if (!args[0]) { return { success: false, reply: "Please provide a phrase or word to translate! Example: https://i.darkvypr.com/translate-example.png" } }
+    const toCheck = args.join(' ').match(/to(:|=)([a-zA-Z])+/i)
+    const fromCheck = args.join(' ').match(/from(:|=)([a-zA-Z])+/i)
+    var to = 'en'
+    var from = ' '
+    if (toCheck && toCheck[0].length > 5) { to = isoConv(capitalizeEachWord(toCheck[0].replace(/to(:|=)/i, ''))); args.splice(args.indexOf(toCheck[0]), 1) }
+    if (fromCheck && fromCheck[0].length > 5) { from = isoConv(capitalizeEachWord(fromCheck[0].replace(/from(:|=)/i, ''))); args.splice(args.indexOf(fromCheck[0]), 1) }
+    try {
+      let translation = await axios.get(`https://api-free.deepl.com/v2/translate?auth_key=${process.env['TRANSLATE_KEY']}&text=${encodeURIComponent(args.join(' '))}&target_lang=${to}&source_lang=${from}`)
+      translation = translation.data.translations[0]
+      to = isoConv(to)
+      from = isoConv(translation.detected_source_language.toLowerCase())
+      return { success: true, reply: `(${from} > ${to}) Translation: ${translation.text}` }
+    }catch(e) {
+      return { success: true, reply: `Error! ${e.response.data.message}` }
     }
-    let targetLang = checkTargetLang(toLanguage)
-    let translation = await axios.get(`https://api-free.deepl.com/v2/translate?auth_key=${process.env['TRANSLATE_KEY']}&text=${text}&target_lang=${targetLang}`)
-
-    var translationDetails = {
-      translatedText: translation.data.translations[0].text,
-      sourceLang: translation.data.translations[0].detected_source_language,
-      targetLang: targetLang
-    }
-    return translationDetails
   }
-
+  
   if (command === 'translate') {
-    if (`${args[0]}`.includes('to:')) {
-      let targetLang = `${args[0]}`.replace('to:', '').toLowerCase().trim()
-      if (/\bfrench|Bulgarian|Czech|Danish|German|Greek|English|Spanish|Estonian|Finnish|French|Hungarian|Italian|Japanese|Lithuanian|Latvian|Dutch|Polish|Portuguese|Romanian|Russian|Slovak|Slovenian|swedish|chinese/i.test(`${targetLang}`)) {
-        let textUnsplit = `${args.join(' ')}`
-        let textSplit = textUnsplit.split(" ")
-        let textSend = textSplit.slice(1).toString().replace(/,/g, ' ')
-        translateText(encodeURIComponent(textSend), targetLang).then(function(value) {
-          client.me(channel, `${user} --> ${value.sourceLang} > ${value.targetLang} | Text: ${value.translatedText}`)
-        })
-      }
-      else {
-        client.me(channel, `${user} --> That isn't a valid language! Valid languages can be found here: https://i.darkvypr.com/languages.png`)
-      }
-    }
-    else {
-      translateText(encodeURIComponent(args.join(' '))).then(function(value) {
-        client.me(channel, `${user} --> ${value.sourceLang} > EN | Text: ${value.translatedText}`)
-      })
-    }
+    translate(userlow, args).then(translation => {
+      client.me(channel, `${user} --> ${translation.reply}`)
+    })
   }
 
   if (command === 'uid') {
