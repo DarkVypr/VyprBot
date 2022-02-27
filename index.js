@@ -532,8 +532,9 @@ client.on("PRIVMSG", async (msg) => {
       commands: +commands + 1,
       latency: Math.round((t1 - t0)),
     }
+    let channelAmount = channelOptions.length
     db.set('commandusage', pingObj.commands)
-    return `PunOko 🏓 | Latency: ${pingObj.latency} ms | Bot Uptime: ${humanizeDuration(Math.round(pingObj.uptime) * 1000, { round: true, largest: 2 })} | Commands Used: ${pingObj.commands + 1} | RAM Usage: ${pingObj.ram} MB | Prefix: "${prefix.trim()}" | Commands: https://darkvypr.com/commands | Use "${prefix}request" for info on requesting the bot.`
+    return `PunOko 🏓 | Latency: ${pingObj.latency} ms | Channels Joined: ${channelAmount} | Bot Uptime: ${humanizeDuration(Math.round(pingObj.uptime) * 1000, { round: true, largest: 2 })} | Commands Used: ${pingObj.commands + 1} | RAM Usage: ${pingObj.ram} MB | Prefix: "${prefix.trim()}" | Commands: https://darkvypr.com/commands | Use "${prefix}request" for info on requesting the bot.`
   }
 
   if (command === 'ping' || command === 'help') {
@@ -1023,7 +1024,7 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'channels') {
-    client.me(channel, `${user} --> A list of the channels I am in are available here: http://channels.darkvypr.com/ | Use "${prefix}request" for help on getting the bot in your chat!`);
+    client.me(channel, `${user} --> I am in ${channelOptions.length} channels! | Channel List: http://channels.darkvypr.com/ | Use "${prefix}request" for help on getting the bot in your chat!`);
   }
 
   if (command === 'chatterino') {
@@ -1721,6 +1722,19 @@ client.on("PRIVMSG", async (msg) => {
     })
   }
 
+  async function trump(user, args) {
+    let trumpQuote = await axios.get(`https://api.tronalddump.io/random/quote`)
+    trumpQuote = trumpQuote.data
+    let [timeSaid, year, quote] = [humanizeDuration(timeDelta(trumpQuote.appeared_at), { round: true, largest: 2 }), new Date(trumpQuote.appeared_at).getFullYear(), trumpQuote.value.replace(/(\r\n|\n|\r)/gim, " ").replace(/\"\r\n\r\n/gim, ' ')]
+    return { success: true, reply: `(${timeSaid} ago) "${quote}" - Trump, ${year}` }
+  }
+
+  if (command === 'trump') {
+    trump(userlow, args).then(quote => {
+      client.me(channel, `${user} --> ${quote.reply}`)
+    })
+  }
+  
   async function getTwitter(user, args) {
     var isUser
     var isSender
@@ -1827,7 +1841,7 @@ client.on("PRIVMSG", async (msg) => {
     if (index > urbanResult.length - 1) { return { success: false, reply: `The definition index you specified is larger than the amount of results. Please use an index less than or equal to ${urbanResult.length - 1}.` } }
     return {
       success: true,
-      reply: `(${urbanResult.length - index - 1} other definitions) (${urbanResult[index].thumbs_up} upvotes) - ${urbanResult[index].definition.replace(/\[|\]/gim, '').replace(/n:/, '').replace(/\"\r\n\r\n/gim, ' ').replace(/\b\\b/gim, '').replace(/(\r\n|\n|\r)/gim, " ")} - Example: ${urbanResult[index].example.replace(/\[|\]/gim, '').replace(/\"\r\n\r\n/gim, ' ').replace(/\b\\b/gim, '').replace(/(\r\n|\n|\r)/gim, " ")}`
+      reply: truncate(`(${urbanResult.length - index - 1} other definitions) (${urbanResult[index].thumbs_up} upvotes) - ${urbanResult[index].definition.replace(/\[|\]/gim, '').replace(/n:/, '').replace(/\"\r\n\r\n/gim, ' ').replace(/\b\\b/gim, '').replace(/(\r\n|\n|\r)/gim, " ")} - Example: ${urbanResult[index].example.replace(/\[|\]/gim, '').replace(/\"\r\n\r\n/gim, ' ').replace(/\b\\b/gim, '').replace(/(\r\n|\n|\r)/gim, " ")}`, 475)
     }
   }
 
