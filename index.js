@@ -59,7 +59,8 @@ setInterval(function() {
         client.whisper('darkvypr', `There was an error pinging Supi's API!`)
       }
     });
-}, 10 * 60000);
+}, 10 * 60000)
+
 client.on("PRIVMSG", async (msg) => {
   let [user, userlow, channel, message] = [msg.displayName, msg.senderUsername, msg.channelName, msg.messageText.replace(' 󠀀', '')]
 
@@ -73,10 +74,6 @@ client.on("PRIVMSG", async (msg) => {
     client.whisper('darkvypr', `Channel: #${channel} | User: ${userlow} | Message: ${message}`)
   }
 
-  if (/\bn(a|4)m(mer|ming)?\b/gi.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
-    client.privmsg(channel, `NammersOut elisDance NammersOut`);
-  }
-
   let prefix = await db.get(`${channel}Prefix`)
   if (!prefix) {
     prefix = 'vb '
@@ -88,10 +85,6 @@ client.on("PRIVMSG", async (msg) => {
 
   if (/(vyprbot)(\s)?(v(2|two)|version(\s)?(2|two))/i.test(message) && userlow !== 'vyprbot') {
     client.me(channel, `VyprBot V2 Soon ™ Copium`)
-  }
-
-  if (/\bn(a|4)m(mer|ming)?\b/gi.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
-    client.privmsg(channel, `NammersOut elisDance NammersOut`)
   }
 
   if (/NaN/.test(message) && userlow !== 'vyprbot' && channel === 'darkvypr') {
@@ -1123,6 +1116,7 @@ client.on("PRIVMSG", async (msg) => {
     definition = definition.data[index]
     let meaning = definition.shortdef[0] ? definition.shortdef[0] : "No definition available."
     let [word, offensive, literaryDevice] = [definition.meta.id.replace(/:\d+/g, ''), definition.meta.offensive, definition.fl]
+    if(checkPhrase(meaning)) { return { success: false, return: `cmonBruh yooooo????` } }
     return { success: true, reply: `Word: ${word} | Literary Device: ${literaryDevice} | Offensive: ${offensive} | Meaning: ${truncate(meaning, 450)}` }
   }
 
@@ -1562,6 +1556,11 @@ client.on("PRIVMSG", async (msg) => {
     })
   }
 
+  async function wolfram(user, args) {
+    if(!args[0]) { return { success: false, reply: `Please provide a question to lookup on Wolfram|Alpha.` } }
+    
+  }
+
   if (command === 'query') {
     axios.get(`https://api.wolframalpha.com/v1/result?i=${args.join(' ')}&appid=${process.env['WOLFRAM_KEY']}`)
       .catch(err => { client.me(channel, `${user} --> Wolfram|Alpha did not understand your question! PANIC`) })
@@ -1839,9 +1838,11 @@ client.on("PRIVMSG", async (msg) => {
     urbanResult = urbanResult.data.list
     if (urbanResult.length == 0) { return { success: false, reply: "Urban Dictionary does not have a definition for that word!" } }
     if (index > urbanResult.length - 1) { return { success: false, reply: `The definition index you specified is larger than the amount of results. Please use an index less than or equal to ${urbanResult.length - 1}.` } }
+    let [cleanDef, cleanExample] = [urbanResult[index].definition.replace(/\[|\]/gim, '').replace(/n:/, '').replace(/\"\r\n\r\n/gim, ' ').replace(/\b\\b/gim, '').replace(/(\r\n|\n|\r)/gim, " "), urbanResult[index].example.replace(/\[|\]/gim, '').replace(/\"\r\n\r\n/gim, ' ').replace(/\b\\b/gim, '').replace(/(\r\n|\n|\r)/gim, " ")]
+    if(checkPhrase(cleanDef) || checkPhrase(cleanExample)) { return { success: false, reply: `cmonBruh yo???` } }
     return {
       success: true,
-      reply: truncate(`(${urbanResult.length - index - 1} other definitions) (${urbanResult[index].thumbs_up} upvotes) - ${urbanResult[index].definition.replace(/\[|\]/gim, '').replace(/n:/, '').replace(/\"\r\n\r\n/gim, ' ').replace(/\b\\b/gim, '').replace(/(\r\n|\n|\r)/gim, " ")} - Example: ${urbanResult[index].example.replace(/\[|\]/gim, '').replace(/\"\r\n\r\n/gim, ' ').replace(/\b\\b/gim, '').replace(/(\r\n|\n|\r)/gim, " ")}`, 475)
+      reply: truncate(`(${urbanResult.length - index - 1} other definitions) (${urbanResult[index].thumbs_up} upvotes) - ${cleanDef} - Example: ${cleanExample}`, 475)
     }
   }
 
