@@ -487,12 +487,12 @@ client.on("PRIVMSG", async (msg) => {
       let timeSinceCreation = humanizeDuration(timeDelta(creationDate), { units: ["y", "mo", "d", "m"], round: true, largest: 3 })
       var roles = []
       var uid = userData.id
-      if(userData.roles.isAffiliate) { roles.push('Affiliate') }
-      if(userData.roles.isPartner) { roles.push('Partner') }
-      if(userData.roles.isStaff) { roles.push('Staff') }
-      if(userData.verifiedBot) { roles.push('Verified Bot') }
-      if(!userData.roles.isAffiliate && !userData.roles.isPartner && !userData.roles.isStaff && !userData.verifiedBot) { roles.push('No Roles Associated') }
-      if(userData.banned) { uid = userData.id + " ( ⛔ Banned User ⛔ )" }    
+      if (userData.roles.isAffiliate) { roles.push('Affiliate') }
+      if (userData.roles.isPartner) { roles.push('Partner') }
+      if (userData.roles.isStaff) { roles.push('Staff') }
+      if (userData.verifiedBot) { roles.push('Verified Bot') }
+      if (!userData.roles.isAffiliate && !userData.roles.isPartner && !userData.roles.isStaff && !userData.verifiedBot) { roles.push('No Roles Associated') }
+      if (userData.banned) { uid = userData.id + " ( ⛔ Banned User ⛔ )" }
       let obj = {
         banned: userData.banned,
         followers: userData.followers,
@@ -507,8 +507,8 @@ client.on("PRIVMSG", async (msg) => {
         creationDate: creationDate,
         timeSinceCreation: timeSinceCreation,
       }
-      return { success: true, obj, reply: `Display Name: ${obj.name} | Banned: ${obj.banned} | UID: ${obj.uid} | Created: ${obj.creationDate} (${obj.timeSinceCreation} ago) | Followers: ${obj.followers} | Colour: ${obj.colour} | Bio: ${obj.bio} | Profile Picture: ${obj.pfp} | Roles/Ranks: ${obj.roles}`}
-    }catch (err) {
+      return { success: true, obj, reply: `Display Name: ${obj.name} | Banned: ${obj.banned} | UID: ${obj.uid} | Created: ${obj.creationDate} (${obj.timeSinceCreation} ago) | Followers: ${obj.followers} | Colour: ${obj.colour} | Bio: ${obj.bio} | Profile Picture: ${obj.pfp} | Roles/Ranks: ${obj.roles}` }
+    } catch (err) {
       return { success: false, reply: `Error: ${err.response.data.message}` }
     }
   }
@@ -1148,31 +1148,26 @@ client.on("PRIVMSG", async (msg) => {
     client.me(channel, `dogJAM`);
   }
 
+  async function echo(user, args) {
+    if (!args[0]) { return { success: false, reply: `Please provide a message to say.` } }
+    if (!await checkAdmin(user)) { return { success: false, reply: `You must be a VyprBot admin to use that command!` } }
+    const channelCheck = args.join(' ').match(/in(:|=)\w+/i)
+    var targetChannel = channel
+    if (channelCheck) { targetChannel = channelCheck[0].replace(/in(:|=)/i, ''); args.splice(args.indexOf(channelCheck[0]), 1) }
+    if (targetChannel == 'all') {
+      for (let i = 0; i < channelOptions.length; i++) {
+        channelsay = channelOptions[i]
+        client.privmsg(channelsay, args.join(' '))
+      }
+      return
+    }
+    client.privmsg(targetChannel, args.join(' '))
+  }
+
   if (command === 'echo') {
-    if (userlow === 'darkvypr' || userlow === 'yagnesh' || userlow === 'xenoplopqb') {
-      let checkifin = args[0].toLowerCase()
-      if (checkifin[0] === 'i' && checkifin[1] === 'n' && checkifin[2] === ":") {
-        let channelsay = checkifin.replace('in:', '')
-        let messagesendunsplit = `${args.join(' ')}`
-        let messagesendsplit = messagesendunsplit.split(" ")
-        let messagesend = messagesendsplit.slice(1).toString().replace(/,/g, ' ')
-        if (channelsay === 'all' && userlow === 'darkvypr') {
-          for (let i = 0; i < channelOptions.length; i++) {
-            channelsay = channelOptions[i]
-            client.privmsg(channelsay, messagesend);
-          }
-        }
-        else {
-          client.privmsg(channelsay, messagesend);
-        }
-      }
-      else {
-        client.privmsg(channel, `${args.join(' ')}`);
-      }
-    }
-    else {
-      client.me(channel, `${user} --> You don't have the required permission to use that command! Use !say instead.`);
-    }
+    echo(userlow, args).then(echoReply => {
+      echoReply ? client.me(channel, echoReply.reply) : client.privmsg(channel, '/me ')
+    })
   }
 
   if (command === 'elischat') {
@@ -1186,7 +1181,7 @@ client.on("PRIVMSG", async (msg) => {
 
   if (command === 'emotes') {
     getUserData(userlow, args).then(userData => {
-      if(!userData.obj) { client.me(channel, `${user} --> ${userData.reply}`); return }
+      if (!userData.obj) { client.me(channel, `${user} --> ${userData.reply}`); return }
       client.me(channel, `${user} --> https://emotes.raccatta.cc/twitch/${userData.obj.name}`)
     })
   }
@@ -1804,11 +1799,11 @@ client.on("PRIVMSG", async (msg) => {
       to = isoConv(to)
       from = isoConv(translation.detected_source_language.toLowerCase())
       return { success: true, reply: `(${from} > ${to}) Translation: ${translation.text}` }
-    }catch(e) {
+    } catch (e) {
       return { success: true, reply: `Error! ${e.response.data.message}` }
     }
   }
-  
+
   if (command === 'translate') {
     translate(userlow, args).then(translation => {
       client.me(channel, `${user} --> ${translation.reply}`)
