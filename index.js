@@ -108,6 +108,12 @@ client.on("PRIVMSG", async (msg) => {
     })
   }
 
+  if (/!ping\b/i.test(message)) {
+    pingServer().then(pingData => {
+      client.me(channel, `${user} --> ${pingData}`)
+    })
+  }
+  
   if (!message.startsWith(prefix) || userlow === 'vyprbot') {
     return
   }
@@ -527,7 +533,7 @@ client.on("PRIVMSG", async (msg) => {
     }
     let channelAmount = channelOptions.length
     db.set('commandusage', pingObj.commands)
-    return `PunOko 🏓 | Latency: ${pingObj.latency} ms | Channels Joined: ${channelAmount} | Bot Uptime: ${humanizeDuration(Math.round(pingObj.uptime) * 1000, { round: true, largest: 2 })} | Commands Used: ${pingObj.commands + 1} | RAM Usage: ${pingObj.ram} MB | Prefix: "${prefix.trim()}" | Info: https://bot.darkvypr.com | Use "${prefix}request" for info on requesting the bot.`
+    return `PunOko 🏓 | Prefix: "${prefix.trim()}" | Latency: ${pingObj.latency} ms | Channels Joined: ${channelAmount} | Bot Uptime: ${humanizeDuration(Math.round(pingObj.uptime) * 1000, { round: true, largest: 2 })} | Commands Used: ${pingObj.commands + 1} | RAM Usage: ${pingObj.ram} MB | Info: https://bot.darkvypr.com | Use "${prefix}request" for info on requesting the bot.`
   }
 
   if (command === 'ping' || command === 'help') {
