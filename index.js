@@ -527,7 +527,7 @@ client.on("PRIVMSG", async (msg) => {
     }
     let channelAmount = channelOptions.length
     db.set('commandusage', pingObj.commands)
-    return `PunOko 🏓 | Latency: ${pingObj.latency} ms | Channels Joined: ${channelAmount} | Bot Uptime: ${humanizeDuration(Math.round(pingObj.uptime) * 1000, { round: true, largest: 2 })} | Commands Used: ${pingObj.commands + 1} | RAM Usage: ${pingObj.ram} MB | Prefix: "${prefix.trim()}" | Commands: https://darkvypr.com/commands | Use "${prefix}request" for info on requesting the bot.`
+    return `PunOko 🏓 | Latency: ${pingObj.latency} ms | Channels Joined: ${channelAmount} | Bot Uptime: ${humanizeDuration(Math.round(pingObj.uptime) * 1000, { round: true, largest: 2 })} | Commands Used: ${pingObj.commands + 1} | RAM Usage: ${pingObj.ram} MB | Prefix: "${prefix.trim()}" | Info: https://bot.darkvypr.com | Use "${prefix}request" for info on requesting the bot.`
   }
 
   if (command === 'ping' || command === 'help') {
@@ -537,7 +537,7 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'commands') {
-    client.me(channel, `${user} --> A list of commands can be found here NekoProud 👉 https://darkvypr.com/commands`);
+    client.me(channel, `${user} --> A list of commands can be found here NekoProud 👉 https://bot.darkvypr.com/commands and the bot's info site can be found here NekoProud 👉 https://bot.darkvypr.com`);
   }
 
   // Set Commands
@@ -610,7 +610,7 @@ client.on("PRIVMSG", async (msg) => {
 
   if (command === 'site' || command === 'website' || command === 'links') {
     if (channel === 'darkvypr' || `${userlow}` === 'darkvypr') {
-      client.me(channel, `${user} --> https://darkvypr.com NekoProud`);
+      client.me(channel, `${user} --> https://darkvypr.com NekoProud https://bot.darkvypr.com NekoProud`);
     }
     else {
       client.me(channel, `GearScare This command is only available in DarkVypr's chat ${user}`);
@@ -848,17 +848,17 @@ client.on("PRIVMSG", async (msg) => {
     }
   }
 
-  if (command === '2022' || command === 'newyears') {
-    today = new Date().addHours(-5)
+  if (command === '2023' || command === 'newyears') {
+    today = new Date()
     newYears = new Date("January 01, 2023");
 
-    let timeUntilNewYears = humanizeDuration(newYears - today, { units: ["d", "h", "m", "s"], round: true, largest: 2, delimiter: " and " })
+    let timeUntilNewYears = humanizeDuration(newYears - today, { round: true, largest: 2, delimiter: " and " })
 
     if (today.toDateString() === 'Sat Jan 01 2023') {
       client.me(channel, `YAAAY 🎉🎈🎊 HAPPY NEW YEARS! 🎊🎈🎉YAAAY`);
     }
     else {
-      client.me(channel, `${user} --> There is ${timeUntilNewYears} (EST +5) left until new years! PauseChamp 🎊🎈🎉`);
+      client.me(channel, `${user} --> There is ${timeUntilNewYears} (GMT) left until new years! PauseChamp 🎊🎈🎉`);
     }
   }
 
@@ -1078,7 +1078,7 @@ client.on("PRIVMSG", async (msg) => {
       isUser = false
       location = encodeURIComponent(args.join(' '))
     }
-    if (!location && isSender) { return { success: false, reply: `Before using this command, you must set your location with the ${prefix}set location command. Example: "${prefix}set location lasalle ontario", "${prefix}set location springfield virginia" or "${prefix}set location stockholm sweden". More info: https://darkvypr.com/commands` } }
+    if (!location && isSender) { return { success: false, reply: `Before using this command, you must set your location with the ${prefix}set location command. Example: "${prefix}set location lasalle ontario", "${prefix}set location springfield virginia" or "${prefix}set location stockholm sweden". More info: https://bot.darkvypr.com` } }
     if (!location && !isSender) { return { success: false, reply: `That user hasn't set their location! Get them to set it and retry! Hint: "${prefix}set location"` } }
     let locationData = await axios.get(`https://geocode.search.hereapi.com/v1/geocode?q=${location}&apiKey=${process.env['GEOCODING_KEY']}`)
     if (!locationData.data.items[0]) { return { success: false, reply: `The location provided to the geocoding API was invalid.` } }
@@ -1226,40 +1226,19 @@ client.on("PRIVMSG", async (msg) => {
       });
   }
 
-  async function getFollowage(user, channel) {
-    let followDetails = await axios.get(`https://api.ivr.fi/twitch/subage/${user}/${channel}`)
-    let followUser = followDetails.data.username
-    let followChannel = followDetails.data.channel
-    let followedAt = followDetails.data.followedAt
-    let timeSinceFollow = humanizeDuration(new Date(followDetails.data.followedAt) - new Date(), { units: ["y", "mo", "d", "h", "m", "s"], round: true, largest: 3 })
-    let obj = {
-      followUser: followUser,
-      followChannel: followChannel,
-      followedAt: followedAt,
-      timeSinceFollow: timeSinceFollow
-    }
-    return obj
+  async function getFollowage(user, args) {
+    let [targetUser, targetChannel] = [args[0] ? args[0]: user, args[1] ? args[1]: channel]
+    let followDetails = await axios.get(`https://api.ivr.fi/twitch/subage/${targetUser}/${targetChannel}`)
+    followDetails = followDetails.data
+    if(!followDetails.followedAt) { return { success: true, reply: `${followDetails.username} is not following ${followDetails.channel}.` } }
+    let timeSinceFollow = humanizeDuration(timeDelta(followDetails.followedAt), { round: true, largest: 3 })
+    return { success: true, reply: `@${followDetails.username} followed @${followDetails.channel} on ${dateFormat(followDetails.followedAt, "fullDate")} which was ${timeSinceFollow} ago.` }
   }
 
   if (command === 'followage' || command === 'fa') {
-    var userLookup = `${args[0]}`
-    if (!args[0])
-      var userLookup = userlow
-
-    var channelLookup = `${args[1]}`
-    if (!args[1])
-      var channelLookup = channel
-
-    getFollowage(userLookup, channelLookup)
-      .catch(err => { client.me(channel, `${user} --> There was an error getting that user's followage! Make sure that the account exists, and you have spelt the channel and username correctly!`) })
-      .then(function(followage) {
-        if (followage.followedAt === null) {
-          client.me(channel, `${user} --> @${followage.followUser} is not following @${followage.followChannel}`)
-        }
-        else {
-          client.me(channel, `${user} --> @${followage.followUser} followed @${followage.followChannel} on ${dateFormat(new Date(followage.followedAt), 'fullDate')} which was ${followage.timeSinceFollow} ago.`)
-        }
-      })
+    getFollowage(userlow, args).then(followage => {
+      client.me(channel, `${user} --> ${followage.reply}`)
+    })
   }
 
   if (command === 'followbutton') {
@@ -1588,7 +1567,7 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'shop' || command === 'store') {
-    client.me(channel, `${user} --> A list of all purchasable items can be found here: https://darkvypr.com/shop`);
+    client.me(channel, `${user} --> A list of all purchasable items can be found here: https://bot.darkvypr.com/shop`);
   }
 
   if (command === 'spam') {
@@ -1679,7 +1658,7 @@ client.on("PRIVMSG", async (msg) => {
       location = encodeURIComponent(args.join(' '))
     }
     if (location == null && isSender) {
-      return { success: false, case: 'sender_unsetlocation', reply: `Before using this command, you must set your location with the ${prefix}set location command. Example: "${prefix}set location lasalle ontario", "${prefix}set location springfield virginia" or "${prefix}set location stockholm sweden". More info: https://darkvypr.com/commands` }
+      return { success: false, case: 'sender_unsetlocation', reply: `Before using this command, you must set your location with the ${prefix}set location command. Example: "${prefix}set location lasalle ontario", "${prefix}set location springfield virginia" or "${prefix}set location stockholm sweden". More info: https://bot.darkvypr.com` }
     }
     if (location == null && !isSender) {
       return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "${prefix}set location"` }
@@ -1755,7 +1734,7 @@ client.on("PRIVMSG", async (msg) => {
       account = encodeURIComponent(args.join(' '))
     }
     if (account == null && isSender) {
-      return { success: false, reply: `Before using this command, you must set your Twitter account with the ${prefix}set twitter command. Example: "${prefix}set twitter darkvyprr" or "${prefix}set twitter @coolvisio". More info: https://darkvypr.com/commands` }
+      return { success: false, reply: `Before using this command, you must set your Twitter account with the ${prefix}set twitter command. Example: "${prefix}set twitter darkvyprr" or "${prefix}set twitter @coolvisio". More info: https://bot.darkvypr.com` }
     }
     if (account == null && !isSender) {
       return { success: false, reply: `That user hasn't set their Twitter account! If you would like to check a specific Twitter account, don't include the @ symbol.` }
@@ -1903,7 +1882,7 @@ client.on("PRIVMSG", async (msg) => {
       location = encodeURIComponent(args.join(' '))
     }
     if (location == null && isSender) {
-      return { success: false, case: 'sender_unsetlocation', reply: `Before using this command, you must set your location with the ${prefix}set location command. Example: "${prefix}set location lasalle ontario", "${prefix}set location springfield virginia" or "${prefix}set location stockholm sweden". More info: https://darkvypr.com/commands` }
+      return { success: false, case: 'sender_unsetlocation', reply: `Before using this command, you must set your location with the ${prefix}set location command. Example: "${prefix}set location lasalle ontario", "${prefix}set location springfield virginia" or "${prefix}set location stockholm sweden". More info: https://bot.darkvypr.com` }
     }
     if (location == null && !isSender) {
       return { success: false, case: 'user_unsetlocation', reply: `That user hasn't set their location! Get them to set it and retry! Hint: "${prefix}set location"` }
