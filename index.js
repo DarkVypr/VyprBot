@@ -858,7 +858,7 @@ client.on("PRIVMSG", async (msg) => {
     today = new Date()
     newYears = new Date("January 01, 2023");
 
-    let timeUntilNewYears = humanizeDuration(newYears - today, { round: true, largest: 2, delimiter: " and " })
+    let timeUntilNewYears = humanizeDuration(newYears - today, { units: ['d', 'h', 'm', 's'], round: true, largest: 2, delimiter: " and " })
 
     if (today.toDateString() === 'Sat Jan 01 2023') {
       client.me(channel, `YAAAY 🎉🎈🎊 HAPPY NEW YEARS! 🎊🎈🎉YAAAY`);
