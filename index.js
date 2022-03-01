@@ -1906,15 +1906,7 @@ client.on("PRIVMSG", async (msg) => {
     let [humidity, clouds, alerts] = [+weather.data.current.humidity, +weather.data.current.clouds, weather.data.alerts]
     let [sunrise, sunset, currentTime] = [new Date(+weather.data.current.sunrise * 1000), new Date(+weather.data.current.sunset * 1000), new Date()]
     let [rain, snow] = [weather.data.current.rain, weather.data.current.snow]
-    let weatherAlert = () => {
-      switch (alerts) {
-        case undefined:
-          return 'None'
-          break
-        default:
-          return weather.data.alerts[0].event + ' ⚠️'
-      }
-    }
+    let weatherAlert = weather.data.alerts ? weather.data.alerts[0].event + ' ⚠️' : 'None'
     let precipitation = () => {
       if (!rain && !snow) {
         return ''
@@ -1929,15 +1921,8 @@ client.on("PRIVMSG", async (msg) => {
         return `It's snowing at a rate of ${snow['1h']} mm/hr. ☔ 🌧️`
       }
     }
-    let windGusts = () => {
-      switch (windGust) {
-        case 'NaN':
-          return 'No wind gust data. 💨'
-          break
-        default:
-          return `with wind gusts of up to ${windGust} km/h. 💨`
-      }
-    }
+    if(isNaN(windGust)) { windGust = 'No wind gust data. 💨' }
+    if(!isNaN(windGust)) { windGust = `with wind gusts of up to ${windGust} km/h. 💨` }
     let conditionString = () => {
       switch (condition) {
         case 'Clear':
@@ -1982,12 +1967,12 @@ client.on("PRIVMSG", async (msg) => {
       location: location,
       temp: { c: celcius + '°C', f: fahrenheit + '°F', fC: feelsLikeCelcius + '°C', fF: feelsLikeFahrenheit + '°F' },
       precipitation: precipitation(),
-      wind: { speed: windSpeed + ' km/h', gust: windGusts() },
+      wind: { speed: windSpeed + ' km/h', gust: windGust },
       sun: sunState(),
       humidity: humidity + '% 💧',
       condition: conditionString(),
       clouds: clouds + '% ☁️',
-      weatherAlert: weatherAlert()
+      weatherAlert: weatherAlert
     }
     if (isSender) {
       return {
