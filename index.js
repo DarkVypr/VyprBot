@@ -2033,7 +2033,7 @@ client.on("PRIVMSG", async (msg) => {
   async function wikipedia(user, args) {
     if (!args[0]) { return { success: false, reply: `Please provide a word or phrase to look up!` } }
     let wikiResult = await wiki.summary(args.join(' '))
-    return { success: true, reply: wikiResult.extract ? truncate(wikiResult.content_urls.desktop.page + ' | ' + wikiResult.extract, 460) : 'No articles found!' }
+    return { success: true, reply: wikiResult.extract ? truncate(wikiResult.content_urls.desktop.page + ' | ' + wikiResult.extract, 460).replace(/(\r\n|\n|\r)/gm, "") : 'No articles found!' }
   }
 
   if (command === 'wiki' || command === 'wikipedia') {
