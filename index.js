@@ -11,6 +11,7 @@ const db = new Database()
 const humanizeDuration = require("humanize-duration")
 const dateFormat = require('dateformat')
 const isoConv = require('iso-language-converter')
+const wiki = require('wikipedia')
 const axios = require('axios').default
 const { ChatClient, AlternateMessageModifier, SlowModeRateLimiter } = require("dank-twitch-irc")
 let client = new ChatClient({
@@ -113,7 +114,7 @@ client.on("PRIVMSG", async (msg) => {
       client.me(channel, `${user} --> ${pingData}`)
     })
   }
-  
+
   if (!message.startsWith(prefix) || userlow === 'vyprbot') {
     return
   }
@@ -1122,7 +1123,7 @@ client.on("PRIVMSG", async (msg) => {
     definition = definition.data[index]
     let meaning = definition.shortdef[0] ? definition.shortdef[0] : "No definition available."
     let [word, offensive, literaryDevice] = [definition.meta.id.replace(/:\d+/g, ''), definition.meta.offensive, definition.fl]
-    if(checkPhrase(meaning)) { return { success: false, return: `cmonBruh yooooo????` } }
+    if (checkPhrase(meaning)) { return { success: false, return: `cmonBruh yooooo????` } }
     return { success: true, reply: `Word: ${word} | Literary Device: ${literaryDevice} | Offensive: ${offensive} | Meaning: ${truncate(meaning, 450)}` }
   }
 
@@ -1233,10 +1234,10 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   async function getFollowage(user, args) {
-    let [targetUser, targetChannel] = [args[0] ? args[0]: user, args[1] ? args[1]: channel]
+    let [targetUser, targetChannel] = [args[0] ? args[0] : user, args[1] ? args[1] : channel]
     let followDetails = await axios.get(`https://api.ivr.fi/twitch/subage/${targetUser}/${targetChannel}`)
     followDetails = followDetails.data
-    if(!followDetails.followedAt) { return { success: true, reply: `${followDetails.username} is not following ${followDetails.channel}.` } }
+    if (!followDetails.followedAt) { return { success: true, reply: `${followDetails.username} is not following ${followDetails.channel}.` } }
     let timeSinceFollow = humanizeDuration(timeDelta(followDetails.followedAt), { round: true, largest: 3 })
     return { success: true, reply: `@${followDetails.username} followed @${followDetails.channel} on ${dateFormat(followDetails.followedAt, "fullDate")} which was ${timeSinceFollow} ago.` }
   }
@@ -1542,8 +1543,8 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   async function wolfram(user, args) {
-    if(!args[0]) { return { success: false, reply: `Please provide a question to lookup on Wolfram|Alpha.` } }
-    
+    if (!args[0]) { return { success: false, reply: `Please provide a question to lookup on Wolfram|Alpha.` } }
+
   }
 
   if (command === 'query') {
@@ -1718,7 +1719,7 @@ client.on("PRIVMSG", async (msg) => {
       client.me(channel, `${user} --> ${quote.reply}`)
     })
   }
-  
+
   async function getTwitter(user, args) {
     var isUser
     var isSender
@@ -1824,7 +1825,7 @@ client.on("PRIVMSG", async (msg) => {
     if (urbanResult.length == 0) { return { success: false, reply: "Urban Dictionary does not have a definition for that word!" } }
     if (index > urbanResult.length - 1) { return { success: false, reply: `The definition index you specified is larger than the amount of results. Please use an index less than or equal to ${urbanResult.length - 1}.` } }
     let [cleanDef, cleanExample] = [urbanResult[index].definition.replace(/\[|\]/gim, '').replace(/n:/, '').replace(/\"\r\n\r\n/gim, ' ').replace(/\b\\b/gim, '').replace(/(\r\n|\n|\r)/gim, " "), urbanResult[index].example.replace(/\[|\]/gim, '').replace(/\"\r\n\r\n/gim, ' ').replace(/\b\\b/gim, '').replace(/(\r\n|\n|\r)/gim, " ")]
-    if(checkPhrase(cleanDef) || checkPhrase(cleanExample)) { return { success: false, reply: `cmonBruh yo???` } }
+    if (checkPhrase(cleanDef) || checkPhrase(cleanExample)) { return { success: false, reply: `cmonBruh yo???` } }
     return {
       success: true,
       reply: truncate(`(${urbanResult.length - index - 1} other definitions) (${urbanResult[index].thumbs_up} upvotes) - ${cleanDef} - Example: ${cleanExample}`, 475)
@@ -1921,8 +1922,8 @@ client.on("PRIVMSG", async (msg) => {
         return `It's snowing at a rate of ${snow['1h']} mm/hr. ☔ 🌧️`
       }
     }
-    if(isNaN(windGust)) { windGust = 'No wind gust data. 💨' }
-    if(!isNaN(windGust)) { windGust = `with wind gusts of up to ${windGust} km/h. 💨` }
+    if (isNaN(windGust)) { windGust = 'No wind gust data. 💨' }
+    if (!isNaN(windGust)) { windGust = `with wind gusts of up to ${windGust} km/h. 💨` }
     let conditionString = () => {
       switch (condition) {
         case 'Clear':
@@ -2001,9 +2002,7 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   async function emoteLookup(user, args) {
-    if (!args[0]) {
-      return { success: false, reply: 'Please provide an emote or emote code/id to look up.' }
-    }
+    if (!args[0]) { return { success: false, reply: 'Please provide an emote or emote code/id to look up.' } }
     const isEmoteID = isNumber(args[0]) || /emotesv2_[a-z0-9]{32}/.test(args[0])
     try {
       const emoteData = await axios.get(`https://api.ivr.fi/v2/twitch/emotes/${args[0]}?id=${String(isEmoteID)}`)
@@ -2026,8 +2025,20 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   if (command === 'weit' || command === 'whatemoteisit') {
-    emoteLookup(user, args).then(emoteData => {
+    emoteLookup(userlow, args).then(emoteData => {
       client.me(channel, `${user} --> ${emoteData.reply}`)
+    })
+  }
+
+  async function wikipedia(user, args) {
+    if (!args[0]) { return { success: false, reply: `Please provide a word or phrase to look up!` } }
+    let wikiResult = await wiki.summary(args.join(' '))
+    return { success: true, reply: wikiResult.extract ? truncate(wikiResult.content_urls.desktop.page + ' | ' + wikiResult.extract, 460) : 'No articles found!' }
+  }
+
+  if (command === 'wiki' || command === 'wikipedia') {
+    wikipedia(userlow, args).then(wikiData => {
+      client.me(channel, `${user} --> ${wikiData.reply}`)
     })
   }
 

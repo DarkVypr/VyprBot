@@ -13,7 +13,8 @@
     "humanize-duration": "^3.27.1",
     "iso-language-converter": "^1.1.0",
     "recent-tweets": "^0.9.0",
-    "systeminformation": "^5.10.0"
+    "systeminformation": "^5.10.0",
+    "wikipedia": "^1.1.7"
   },
   "devDependencies": {},
   "scripts": {
