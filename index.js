@@ -902,77 +902,27 @@ client.on("PRIVMSG", async (msg) => {
     client.me(channel, `${user} --> https://logs.apulxd.ga/?channel=${defaultname2}&username=${defaultname}`)
   }
 
-  async function getBirthdayDetails(name) {
-    let bday = await db.get(`${name}bday`)
-    if (bday === null) {
-      return null
-    }
-    else {
-      let d = new Date()
-      let day = d.getDate()
-      let month = d.getMonth() + 1
-      let year = d.getFullYear()
-      let today = `${month}` + '/' + `${day}` + '/' + `${year}`
-      let userBirthdayYear = bday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/, year)
-
-      let currentage = Math.floor((new Date(today).getTime() - new Date(`${bday}`).getTime()) / 31556952000)
-      let turningage = Math.floor(((new Date(today).getTime() - new Date(`${bday}`).getTime()) / 31556952000)) + 1
-
-      let differencebetweendays = new Date(userBirthdayYear) - new Date(today)
-      if (differencebetweendays < 0) {
-        let timeuntilbday = 31536000000 + differencebetweendays
-        let humanizedtime = humanizeDuration(timeuntilbday, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
-        let userBirthdayYear = bday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/g, year + 1)
-        return {
-          bday,
-          differencebetweendays,
-          currentage,
-          turningage,
-          userBirthdayYear,
-          humanizedtime
-        }
-      }
-      else {
-        let humanizedtime = humanizeDuration(differencebetweendays, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2 })
-        return {
-          bday,
-          differencebetweendays,
-          currentage,
-          turningage,
-          userBirthdayYear,
-          humanizedtime
-        }
-      }
-    }
-
+  async function birthday(user, args) {
+    let originalUser = user
+    if (args[0]) { user = args[0].toLowerCase().replace('@', '') }
+    if (user == 'vyprbot') { return { success: true, reply: `I was made on November 12, 2021 which was ${humanizeDuration(timeDelta('November 12 2021'), { delimiter: ' and ', round: true, largest: 2 })} ago.` } }
+    let bday = await db.get(`${user}bday`)
+    if (!bday) { return { success: false, reply: `Before using this command, you must set your birthday with the "${prefix}set birthday" command. It must be in M/D/YYYY or MM/DD/YYYY format. Examples: "${prefix}set birthday 8/14/2005", "${prefix}set birthday 10/16/2004" or "${prefix}set birthday 9/11/1973".` } }
+    let today = dateFormat(new Date(), 'paddedShortDate')
+    let bdayCurrentYear = bday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/, new Date().getFullYear())
+    let currentage = Math.floor((new Date() - new Date(bday)) / 31556952000)
+    let turningage = currentage + 1
+    let birthdayDelta = new Date(bdayCurrentYear) - new Date()
+    let userContext = { userAddress: originalUser == user ? userNoun = 'You were' : userNoun = '@' + user + ' was', pronoun: originalUser == user ? userNoun = 'you' : userNoun = 'they' }
+    let [yearCase, yearCaseBday] = [birthdayDelta < 0 ? 31536000000 : 0, birthdayDelta < 0 ? 1 : 0]
+    let nextBday = humanizeDuration(yearCase + birthdayDelta, { units: ["mo", "d", "h", "m", "s"], round: true, largest: 2, delimiter: ' and ' })
+    return { success: true, reply: `${userContext.userAddress} born on ${bday}, ${userContext.pronoun} are ${currentage} years old and are turning ${turningage} on ${bday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/, new Date().getFullYear() + yearCaseBday)} which is in ${nextBday}.` }
   }
 
   if (command === 'birthday' || command === 'bday') {
-    if (!args[0]) {
-      getBirthdayDetails(userlow).then(function(birthday) {
-        if (birthday === null) {
-          client.me(channel, `${user} --> Before using this command, you must set your birthday with the "${prefix}set birthday" command. It must be in M/D/YYYY or MM/DD/YYYY format. Examples: "${prefix}set birthday 8/14/2005", "${prefix}set birthday 10/16/2004" or "${prefix}set birthday 9/11/1973".`)
-        }
-        else {
-          client.me(channel, `${user} --> You were born on ${birthday.bday} and are ${birthday.currentage} years old. You will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
-        }
-      })
-    }
-    else {
-      let userLookup = `${args[0].toLowerCase().replace('@', '').replace(' ', '')}`
-      getBirthdayDetails(userLookup).then(function(value) {
-        let birthday = value
-        if (userLookup == 'vyprbot') {
-          client.me(channel, `${user} --> I was made on November 12, 2021 which was ${humanizeDuration(timeDelta('November 12 2021'), { delimiter: ' and ', round: true, largest: 2 })} ago.`)
-        }
-        else if (!birthday) {
-          client.me(channel, `${user} --> User ${args[0]} hasn't set their birthday! Get them to set it and retry this command! Hint: "${prefix}set birthday".`)
-        }
-        else {
-          client.me(channel, `${user} --> ${args[0]} was born on ${birthday.bday}, they're ${birthday.currentage} years old, and will be turning ${birthday.turningage} on ${birthday.userBirthdayYear} which is in ${birthday.humanizedtime}. PauseChamp ⌚`)
-        }
-      })
-    }
+    birthday(userlow, args).then(birthday => {
+      client.me(channel, `${user} --> ${birthday.reply}`)
+    })
   }
 
   if (command === 'bm') {
