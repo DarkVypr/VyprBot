@@ -425,6 +425,10 @@ client.on("PRIVMSG", async (msg) => {
     }
   }
 
+  // if (command === 'asd') {
+  //   client.me(channel, args[0] ?? 'asd')
+  // }
+  
   if (command === 'addnammers') {
     if (`${userlow}` === 'darkvypr') {
       db.get(`${args[0].toLowerCase()}nammers`).then(function(value) {
@@ -907,7 +911,7 @@ client.on("PRIVMSG", async (msg) => {
     if (args[0]) { user = args[0].toLowerCase().replace('@', '') }
     if (user == 'vyprbot') { return { success: true, reply: `I was made on November 12, 2021 which was ${humanizeDuration(timeDelta('November 12 2021'), { delimiter: ' and ', round: true, largest: 2 })} ago.` } }
     let bday = await db.get(`${user}bday`)
-    if (!bday) { return { success: false, reply: `Before using this command, you must set your birthday with the "${prefix}set birthday" command. It must be in M/D/YYYY or MM/DD/YYYY format. Examples: "${prefix}set birthday 8/14/2005", "${prefix}set birthday 10/16/2004" or "${prefix}set birthday 9/11/1973".` } }
+    if (!bday) { return { success: false, reply: originalUser == user ? `Before using this command, you must set your birthday with the "${prefix}set birthday" command. It must be in M/D/YYYY or MM/DD/YYYY format. Examples: "${prefix}set birthday 8/14/2005", "${prefix}set birthday 10/16/2004" or "${prefix}set birthday 9/11/1973".` : `That user hasen't set their location! Get them to use: "${prefix}set bday {mm/dd/yyyy}" and retry this command!` } }
     let today = dateFormat(new Date(), 'paddedShortDate')
     let bdayCurrentYear = bday.replace(/(160[0-9]|16[1-9][0-9]|1[7-9][0-9]{2}|[2-9][0-9]{3})/, new Date().getFullYear())
     let currentage = Math.floor((new Date() - new Date(bday)) / 31556952000)
@@ -1809,6 +1813,10 @@ client.on("PRIVMSG", async (msg) => {
       )
     })
   }
+
+  // if (command === 'asd') {
+  //   client.me(channel, args[0] ?? 'asd')
+  // }
 
   if (command === 'vyprcolour') {
     client.me(channel, `${user} --> #FF7FD3`);
