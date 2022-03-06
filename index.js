@@ -362,15 +362,14 @@ client.on("PRIVMSG", async (msg) => {
       if(!args[1]) { return { success: false, reply: `Please provide a key to get the value of. Example: "${prefix}data delete darkvyprCockSize" ({key})` } }
       let data = await db.get(args[1])
       if(!data) { return { success: true, reply: `There is no data with the name "${args[1]}".` } }
-      console.log(data)
+      console.log('-----------'); console.log(); console.log(data); console.log(); console.log('-----------')
       return { success: true, reply: public ? `"${args[1]}" holds "${data}"` : `There is a key named "${args[1]}". See console, or append chat:true to send the value in chat.` }
     }
     if(args[0] == 'list') {
       if (!args[1]) { let data = await db.list(); console.log(data); return { success: true, reply: `See console.`} }
       let data = await db.list(args[1])
-      var reply
       if(!data[0]) { return { success: true, reply: `There is no data with the prefix "${args[1]}".` } }
-      console.log(data)
+      console.log('-----------'); console.log(); console.log(data); console.log(); console.log('-----------')
       return { success: true, reply: public ? `Data starting with "${args[1]}": ${data.join(' - ')}` : `There are ${data.length} keys that start with "${args[1]}". See console, or append chat:true to list the keys in chat.` }
     }
     else {
