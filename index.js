@@ -870,6 +870,26 @@ client.on("PRIVMSG", async (msg) => {
     client.me(channel, `${user} --> https://logs.apulxd.ga/?channel=${defaultname2}&username=${defaultname}`)
   }
 
+  async function ban(user, args) {
+    if(msg.isMod || channel == user) {
+      if((await client.getMods(channel)).indexOf('vyprbot') == -1) { return { success: false, reply: `I am not a mod in this channel! Please mod me, and try again.` } }
+      if(!args[0]) { return { success: false, reply: `Please provide one or more users to ban. They must be space-separated.` } }
+      const timer = ms => new Promise(res => setTimeout(res, ms))
+      for (let i = 0; i < args.length; i++) {
+        client.ban(channel, args[i], 'Automated by VyprBot.')
+        await timer(500)
+      }
+      return { success: true, reply: `Successfully banned ${args.length} user(s)!` }
+    }
+    return { success: false, reply: `You must be a moderator or the owner of this channel to use this command!` }
+  }
+
+  if (command === 'ban') {
+    ban(userlow, args).then(banData => {
+      client.me(channel, `${user} --> ${banData.reply}`)
+    })
+  }
+  
   async function birthday(user, args) {
     let originalUser = user
     if (args[0]) { user = args[0].toLowerCase().replace('@', '') }
@@ -1733,6 +1753,26 @@ client.on("PRIVMSG", async (msg) => {
     })
   }
 
+  async function unban(user, args) {
+    if(msg.isMod || channel == user) {
+      if((await client.getMods(channel)).indexOf('vyprbot') == -1) { return { success: false, reply: `I am not a mod in this channel! Please mod me, and try again.` } }
+      if(!args[0]) { return { success: false, reply: `Please provide one or more users to unban. They must be space-separated.` } }
+      const timer = ms => new Promise(res => setTimeout(res, ms))
+      for (let i = 0; i < args.length; i++) {
+        client.privmsg(channel, '/unban ' + args[i])
+        await timer(500)
+      }
+      return { success: true, reply: `Successfully unbanned ${args.length} user(s)!` }
+    }
+    return { success: false, reply: `You must be a moderator or the owner of this channel to use this command!` }
+  }
+
+  if (command === 'unban') {
+    unban(userlow, args).then(unbanData => {
+      client.me(channel, `${user} --> ${unbanData.reply}`)
+    })
+  }
+  
   async function urbanDictionary(user, args) {
     if (!args[0]) { return { success: false, reply: "Please provide a phrase to look up!" } }
     const phraseCheck = args.join(' ').match(/index(:|=)(\d+)/i)
