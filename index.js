@@ -871,7 +871,7 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   async function ban(user, args) {
-    if(msg.isMod || channel == user) {
+    if(msg.isMod || channel == user || await isAdmin(user)) {
       if((await client.getMods(channel)).indexOf('vyprbot') == -1) { return { success: false, reply: `I am not a mod in this channel! Please mod me, and try again.` } }
       if(!args[0]) { return { success: false, reply: `Please provide one or more users to ban. They must be space-separated.` } }
       const timer = ms => new Promise(res => setTimeout(res, ms))
@@ -1754,7 +1754,7 @@ client.on("PRIVMSG", async (msg) => {
   }
 
   async function unban(user, args) {
-    if(msg.isMod || channel == user) {
+    if(msg.isMod || channel == user || await isAdmin(user)) {
       if((await client.getMods(channel)).indexOf('vyprbot') == -1) { return { success: false, reply: `I am not a mod in this channel! Please mod me, and try again.` } }
       if(!args[0]) { return { success: false, reply: `Please provide one or more users to unban. They must be space-separated.` } }
       const timer = ms => new Promise(res => setTimeout(res, ms))
