@@ -253,51 +253,29 @@ client.on("PRIVMSG", async (msg) => {
     }
   }
 
-  if (command === 'rename') {
-    checkAdmin(userlow).then(function(isAdmin) {
-      if (isAdmin) {
-        async function renameUser(oldName, newName) {
-          let bday = await db.get(`${oldName}bday`)
-          let location = await db.get(`${oldName}time`)
-          let twitter = await db.get(`${oldName}twitter`)
-          let nammers = await db.get(`${oldName}nammers`)
-          if (bday !== null) {
-            db.set(`${newName}bday`, bday)
-          }
-          if (location !== null) {
-            db.set(`${newName}time`, location)
-          }
-          if (twitter !== null) {
-            db.set(`${newName}twitter`, twitter)
-          }
-          if (nammers !== null) {
-            db.set(`${newName}nammers`, nammers)
-          }
-          if (nammers === null && twitter === null && location === null && bday === null) {
-            client.me(channel, `${user} --> That user dosen't have any data associated with their account!`)
-          }
-          else {
-            db.list(oldName).then(function(value) {
-              for (let i = 0; i < value.length; i++) {
-                db.delete(value[i])
-              }
-            })
-            client.me(channel, `${user} --> Succesfully transferred all of the data from "${oldName}" to "${newName}" EZ`)
-          }
-        }
-        if (!args[0] || !args[1]) {
-          client.me(channel, `${user} --> Provide an old and new account.`)
-        }
-        else {
-          renameUser(`${args[0].toLowerCase()}`, `${args[1].toLowerCase()}`)
-        }
-      }
-      else {
-        client.me(channel, `${user} --> You don't have the required permission to use that command! If you would like to have all of your data moved over to a new name, use "${prefix}suggest" and I will get to it. Required: Bot Developer`)
-      }
-    })
+  async function rename(user, args) {
+    if (!await checkAdmin(user)) { return { success: false, reply: `You don't have permission to use that command! Required: Admin` } }
+    if (!args[0] || !args[1]) { return { success: false, reply: `Invalid syntax! Usage: "${prefix}rename old:{user's old name} new:{user's new name}"` } }
+    const [oldCheck, newCheck] = [args.join(' ').match(/old(:|=)\w+/i), args.join(' ').match(/new(:|=)\w+/i)]
+    var oldName = oldCheck ? (oldCheck[0].replace(/old(:|=)/i, '')).toLowerCase() : null; if (oldCheck) { args.splice(args.indexOf(oldCheck[0]), 1) }
+    var newName = newCheck ? (newCheck[0].replace(/new(:|=)/i, '')).toLowerCase() : null; if (newCheck) { args.splice(args.indexOf(newCheck[0]), 1) }
+    let [oldData, oldBday, oldLocation, oldTwitter, oldNammers, oldprefix] = [await db.list(oldName), await db.get(`${oldName}bday`), await db.get(`${oldName}time`), await db.get(`${oldName}twitter`), await db.get(`${oldName}nammers`), await db.get(`${oldName}Prefix`)]
+    if (!oldData[0]) { return { success: false, reply: `There is no data associated with that account!` } }
+    if (oldBday) { db.set(`${newName}bday`, oldBday) }
+    if (oldLocation) { db.set(`${newName}time`, oldLocation) }
+    if (oldTwitter) { db.set(`${newName}twitter`, oldTwitter) }
+    if (oldNammers) { db.set(`${newName}nammers`, oldNammers) }
+    if (oldprefix) { db.set(`${newName}Prefix`, oldprefix) }
+    for (let i = 0; i < oldData.length; i++) { db.delete(oldData[i]) }
+    return { success: true, reply: `Succesfully transferred all of the data from "${oldName}" to "${newName}" EZ` }
   }
 
+  if (command === 'rename') {
+    rename(userlow, args).then(reply => {
+      client.me(channel, `${user} --> ${reply.reply}`)
+    })
+  }
+  
   async function joinChannel(args) {
     if (args.length == 0) {
       return { success: false, case: 'no_channel_given', channelJoined: null, reply: "Please provide a channel to join." }
@@ -361,58 +339,49 @@ client.on("PRIVMSG", async (msg) => {
     })
   }
 
-  if (command === 'datadelete') {
-    if (await checkAdmin(userlow)) {
-      db.get(`${args[0].toLowerCase()}`).then(function(value) {
-        let valueofkey = `${value}`
-        client.me(channel, (`${user} --> Succesfully deleted key: "${args[0]}" value: "${valueofkey}" MODS`))
-        db.delete(`${args[0]}`)
-      })
+  // Database Management
+
+  async function data(user, args) {
+    if(!await checkAdmin(user)) { return { success: false, reply: `You don't have permission to use that command! Required: Admin` } }
+    if(!args[0] || !/^set$|^delete$|^get$|^list$/.test(args[0])) { return { success: false, reply: `Invalid syntax! Usage: "${prefix}data {set|delete|get|list}} {data-name} {...}"` } }
+    const publicCheck = args.join(' ').match(/chat(:|=)(true|false)/i)
+    var public = publicCheck ? (Boolean(publicCheck[0].replace(/chat(:|=)/i, '').toLowerCase())) : false; if (publicCheck) { args.splice(args.indexOf(publicCheck[0]), 1) }
+    if(args[0] == 'set') {
+      if(!args[1] || !args[2]) { return { success: false, reply: `Please provide a key and value. Example: "${prefix}data set darkvyprCockSize 12inches" ({key} {value})` } }
+      db.set(args[1], args[2])
+      return { success: true, reply: `Successfully set "${args[1]}" to "${args[2]}"!` }
+    }
+    if(args[0] == 'delete') {
+      if(!args[1]) { return { success: false, reply: `Please provide a key to delete. Example: "${prefix}data delete darkvyprCockSize" ({key})` } }
+      let oldData = await db.get(args[1])
+      if(!oldData) { return { success: false, reply: `There is no data with the name "${args[1]}".` } }
+      db.delete(args[1])
+      return { success: true, reply: `Successfully deleted "${args[1]}" which held "${oldData}".` }
+    }
+    if(args[0] == 'get') {
+      if(!args[1]) { return { success: false, reply: `Please provide a key to get the value of. Example: "${prefix}data delete darkvyprCockSize" ({key})` } }
+      let data = await db.get(args[1])
+      if(!data) { return { success: true, reply: `There is no data with the name "${args[1]}".` } }
+      console.log(data)
+      return { success: true, reply: public ? `"${args[1]}" holds "${data}"` : `There is a key named "${args[1]}". See console, or append chat:true to send the value in chat.` }
+    }
+    if(args[0] == 'list') {
+      if (!args[1]) { let data = await db.list(); console.log(data); return { success: true, reply: `See console.`} }
+      let data = await db.list(args[1])
+      var reply
+      if(!data[0]) { return { success: true, reply: `There is no data with the prefix "${args[1]}".` } }
+      console.log(data)
+      return { success: true, reply: public ? `Data starting with "${args[1]}": ${data.join(' - ')}` : `There are ${data.length} keys that start with "${args[1]}". See console, or append chat:true to list the keys in chat.` }
     }
     else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
+      return { success: false, reply: `Unknown Error :P` }
     }
   }
 
-  if (command === 'datacreate') {
-    if (await checkAdmin(userlow)) {
-      db.set(`${args[0].toLowerCase()}`, `${args[1]}`);
-      client.me(channel, `${user} --> Succesfully added key: "${args[0]}"  value: "${args[1]}" NOTED`)
-    }
-    else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
-    }
-  }
-
-  if (command === 'datainspect') {
-    if (await checkAdmin(userlow)) {
-      db.get(`${args[0].toLowerCase()}`).then(function(value) {
-        client.me(channel, (`${user} --> Key: "${args[0]}" Value: "${value}". NOTED`))
-      })
-    }
-    else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
-    }
-  }
-
-  if (command === 'datalist') {
-    if (await checkAdmin(userlow)) {
-      if (!args[0]) {
-        db.list().then(keys => console.log(keys))
-      }
-      else if (`${args[1]}` === 'chat:true' || `${args[1]}` === 'public:true') {
-        db.list(`${args[0].toLowerCase()}`).then(function(keys) {
-          let keysClean = keys.join(', ').trim()
-          client.me(channel, `DarkVypr --> ${keysClean}`)
-        })
-      }
-      else {
-        db.list(`${args[0].toLowerCase()}`).then(keys => console.log(keys))
-      }
-    }
-    else {
-      client.me(channel, `Whoops! ${user} --> you don't have the required permission to use that command! Required: Bot Developer.`);
-    }
+  if (command === 'data') {
+    data(userlow, args).then(dataReply => {
+      client.me(channel, `${user} --> ${dataReply.reply}`)
+    })
   }
 
   if (command === 'setnammers') {
@@ -425,10 +394,6 @@ client.on("PRIVMSG", async (msg) => {
     }
   }
 
-  // if (command === 'asd') {
-  //   client.me(channel, args[0] ?? 'asd')
-  // }
-  
   if (command === 'addnammers') {
     if (`${userlow}` === 'darkvypr') {
       db.get(`${args[0].toLowerCase()}nammers`).then(function(value) {
@@ -1991,7 +1956,7 @@ client.on("PRIVMSG", async (msg) => {
   async function wikipedia(user, args) {
     if (!args[0]) { return { success: false, reply: `Please provide a word or phrase to look up!` } }
     let wikiResult = await wiki.summary(args.join(' '))
-    return { success: true, reply: wikiResult.extract ? truncate(wikiResult.content_urls.desktop.page + ' | ' + wikiResult.extract, 460).replace(/(\r\n|\n|\r)/gm, "") : 'No articles found!' }
+    return { success: true, reply: wikiResult.extract ? truncate(wikiResult.content_urls.desktop.page + ' | ' + wikiResult.extract, 460).replace(/(\r\n|\n|\r)/gm, " ") : 'No articles found!' }
   }
 
   if (command === 'wiki' || command === 'wikipedia') {
